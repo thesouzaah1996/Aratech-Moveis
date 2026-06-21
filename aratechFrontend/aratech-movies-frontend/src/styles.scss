@@ -1,0 +1,232 @@
+/* ─── Global Styles ─────────────────────────────────────────── */
+
+:root {
+  --brand-900: #7d0000;
+  --brand-700: #b60000;
+  --ink: #0b1020;
+  --muted: #5f6b7a;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Layout ─────────────────────────────────────────────────── */
+
+.app-main {
+  padding-top: 64px;
+  padding-bottom: 56px;
+}
+
+/* ─── Dashboard Cards ────────────────────────────────────────── */
+
+.card-menu {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 26px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: 0.2s;
+  display: block;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+  }
+}
+
+.icon-size {
+  font-size: 2.8rem;
+  color: var(--brand-700);
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* ─── Table Card ─────────────────────────────────────────────── */
+
+.card.shadow-sm {
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08) !important;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  border-bottom-width: 1px;
+}
+
+.table td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+}
+
+.badge-id {
+  background-color: #f8f9fa;
+  color: var(--brand-700);
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+}
+
+/* ─── Action Buttons ─────────────────────────────────────────── */
+
+.btn-action {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin: 0 2px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+
+  i { font-size: 1rem; }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: var(--brand-700);
+    border-color: var(--brand-700);
+    color: white !important;
+  }
+}
+
+.btn-action-edit { color: var(--brand-700); }
+.btn-action-delete { color: #6c757d; }
+
+/* ─── Pagination ─────────────────────────────────────────────── */
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+
+  @media (max-width: 576px) {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+}
+
+.pagination-info {
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.pagination { margin-bottom: 0; gap: 4px; }
+
+.page-link {
+  border-radius: 8px !important;
+  padding: 0.45rem 0.9rem;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--brand-700);
+    border-color: var(--brand-700);
+    color: white;
+  }
+}
+
+.page-item.active .page-link {
+  background-color: var(--brand-700);
+  border-color: var(--brand-700);
+  color: white;
+}
+
+.page-item.disabled .page-link {
+  color: #adb5bd;
+  pointer-events: none;
+  background-color: #f8f9fa;
+}
+
+/* ─── Modals ─────────────────────────────────────────────────── */
+
+.modal-content {
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header.bg-danger {
+  border-radius: 20px 20px 0 0;
+}
+
+.warning-icon {
+  font-size: 4rem;
+  color: #dc3545;
+  opacity: 0.85;
+}
+
+.delete-warning {
+  background-color: #fff5f5;
+  border-left: 4px solid #dc3545;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* ─── Alert Toast ────────────────────────────────────────────── */
+
+.alert-toast {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
+  min-width: 300px;
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ─── Buttons ────────────────────────────────────────────────── */
+
+.btn-danger {
+  background-color: var(--brand-700);
+  border-color: var(--brand-700);
+  border-radius: 40px;
+  padding: 0.45rem 1.4rem;
+
+  &:hover, &:focus {
+    background-color: var(--brand-900);
+    border-color: var(--brand-900);
+  }
+}
+
+.btn-outline-secondary { border-radius: 40px; padding: 0.45rem 1.2rem; }
+
+/* ─── Empty state ────────────────────────────────────────────── */
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+
+  i {
+    font-size: 3rem;
+    color: #ced4da;
+  }
+
+  p {
+    color: #adb5bd;
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+  }
+}

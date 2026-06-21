@@ -1,0 +1,32 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-5">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/carregamento/assistencia" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-tools icon-size"></i>
+            <h4 class="fw-bold mb-2">Assistência</h4>
+            <p class="text-muted text-center mb-0">Acompanhamento das cargas em assistência técnica</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/carregamento/aguardando-descarga" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-truck icon-size"></i>
+            <h4 class="fw-bold mb-2">Aguardando Descarga</h4>
+            <p class="text-muted text-center mb-0">Caminhões aguardando liberação para conferência e descarga</p>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<app-footer />

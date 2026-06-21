@@ -1,0 +1,80 @@
+<div class="top-progress" [class.active]="isLoading" aria-hidden="true"></div>
+
+<main class="page" role="main">
+  <section class="card"
+           [class.login-success]="loginState === 'success'"
+           [class.login-error]="loginState === 'error'"
+           aria-labelledby="loginTitle">
+
+    <header class="brand">
+      <img src="/img/aratech-logo-login-branco.png" alt="Aratech Móveis" class="login-logo" />
+    </header>
+
+    <form novalidate (ngSubmit)="onSubmit()">
+
+      <div class="field"
+           [class.login-success]="loginState === 'success'"
+           [class.login-error]="loginState === 'error'">
+        <label for="email">Usuário</label>
+        <input id="email" name="email" type="text"
+               inputmode="email" autocomplete="email"
+               autocapitalize="off" spellcheck="false"
+               required placeholder="usuario@exemplo"
+               [(ngModel)]="email"
+               [class.is-invalid]="!!emailError"
+               (input)="clearState()" />
+        @if (emailError) {
+          <small class="err">{{ emailError }}</small>
+        }
+      </div>
+
+      <div class="field"
+           [class.login-success]="loginState === 'success'"
+           [class.login-error]="loginState === 'error'">
+        <label for="password">Senha</label>
+        <div class="password-wrap">
+          <input id="password" name="password"
+                 [type]="showPassword ? 'text' : 'password'"
+                 autocomplete="current-password"
+                 required placeholder="••••••••"
+                 [(ngModel)]="password"
+                 [class.is-invalid]="!!passwordError"
+                 (input)="clearState()" />
+          <button class="eye" type="button"
+                  [attr.aria-pressed]="showPassword"
+                  aria-label="Mostrar ou ocultar senha"
+                  (click)="togglePassword()">
+            <i class="bi" [class.bi-eye]="showPassword" [class.bi-eye-slash]="!showPassword"></i>
+          </button>
+        </div>
+        @if (passwordError) {
+          <small class="err">{{ passwordError }}</small>
+        }
+      </div>
+
+      <div class="row between">
+        <a class="link" routerLink="/redefinir-senha">Redefinir senha</a>
+      </div>
+
+      <button class="btn btn-primary full" type="submit"
+              [disabled]="isLoading"
+              [class.loading]="isLoading">
+        <span class="btn-label">{{ loginState === 'success' ? 'Redirecionando...' : 'Entrar' }}</span>
+        <span class="spinner" aria-hidden="true"></span>
+      </button>
+
+      @if (loginState !== 'idle') {
+        <div class="form-msg" role="status" aria-live="polite"
+             [class.success]="loginState === 'success'"
+             [class.error]="loginState === 'error'">
+          {{ loginState === 'success' ? 'Login realizado com sucesso!' : 'Verifique suas credenciais e tente novamente.' }}
+        </div>
+      }
+
+    </form>
+  </section>
+</main>
+
+<footer class="app-footer" role="contentinfo">
+  <small>© 2026 Araplac Móveis</small>
+</footer>

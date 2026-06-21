@@ -1,0 +1,21 @@
+<div class="bc-wrapper">
+  <div class="container">
+    <ol class="bc-list" aria-label="breadcrumb">
+      @for (item of items; track item.label; let first = $first; let last = $last) {
+        <li class="bc-item" [class.bc-active]="last">
+          @if (!last) {
+            <a [routerLink]="item.route" class="bc-link">
+              @if (first) {
+                <i class="bi bi-house-door-fill"></i>
+              }
+              <span>{{ item.label }}</span>
+            </a>
+            <i class="bi bi-chevron-right bc-sep" aria-hidden="true"></i>
+          } @else {
+            <span class="bc-current">{{ item.label }}</span>
+          }
+        </li>
+      }
+    </ol>
+  </div>
+</div>

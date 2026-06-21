@@ -1,0 +1,195 @@
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #000000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 1000;
+}
+
+.header-row {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-profile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 200px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  background: transparent;
+  border-radius: 14px;
+  padding: 6px 14px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.brand {
+  height: 64px;
+  display: flex !important;
+  align-items: stretch !important;
+  padding: 4px 0 !important;
+  text-decoration: none;
+}
+
+.brand-logo {
+  height: 100%;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.btn-profile.dropdown-toggle::after {
+  border-top-width: 0.5em;
+  border-right-width: 0.4em;
+  border-left-width: 0.4em;
+  vertical-align: 0.1em;
+}
+
+.dropdown-menu {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #1a1a1a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  min-width: 200px;
+}
+
+.dropdown-item {
+  color: #e0e0e0;
+  padding: 10px 15px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
+  i {
+    width: 20px;
+    text-align: center;
+  }
+}
+
+.dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Modal */
+.modal-content {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.modal-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+
+  .bi-question-circle {
+    color: #ffc107;
+  }
+}
+
+.modal-title {
+  font-weight: 600;
+  color: #0b1020;
+}
+
+.modal-body {
+  padding: 0 1.5rem;
+  color: #5f6b7a;
+  font-size: 1.1rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem 1.5rem;
+  gap: 10px;
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+  }
+
+  .btn-outline-secondary {
+    border-color: #dee2e6;
+    color: #6c757d;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+  }
+
+  .btn-danger {
+    background-color: #b60000;
+    border-color: #b60000;
+
+    &:hover {
+      background-color: #7d0000;
+      border-color: #7d0000;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-info span {
+    display: none;
+  }
+
+  .btn-profile {
+    min-width: unset;
+    padding: 6px 10px;
+  }
+
+  .modal-footer .btn {
+    min-width: 100px;
+    padding: 8px 16px;
+  }
+}

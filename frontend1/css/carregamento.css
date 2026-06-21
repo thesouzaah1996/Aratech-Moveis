@@ -1,0 +1,39 @@
+/* Container principal */
+main {
+    min-height: calc(100vh - 120px); /* ocupa a tela descontando header/footer */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Wrapper dos cards */
+main {
+    display: flex;
+    gap: 30px; /* espaço entre os cards */
+}
+
+/* Ajuste dos cards */
+.card-menu {
+    width: 280px;
+    height: 220px;
+    border-radius: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* Centralização interna */
+.card-menu .d-flex {
+    padding: 20px;
+}
+
+/* Hover bonito padrão sistema */
+.card-menu:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Ícone */
+.icon-size {
+    font-size: 2.5rem;
+    color: #dc3545;
+}

@@ -1,0 +1,255 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold mb-0">Controle de Acesso</h3>
+      <button class="btn btn-danger px-4" (click)="abrirHistorico()">
+        <i class="bi bi-clock-history me-2"></i>Histórico de Entregas
+      </button>
+    </div>
+
+    <!-- Formulário de Registro -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h6 class="card-title fw-bold mb-3">
+          <i class="bi bi-plus-circle text-danger me-2"></i>Registrar Chegada
+        </h6>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Nota Fiscal</label>
+            <input type="text" class="form-control" [(ngModel)]="form.notaFiscal" placeholder="Número da NF">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Empresa</label>
+            <input type="text" class="form-control" [(ngModel)]="form.empresa" placeholder="Nome da empresa">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fw-semibold">Motorista</label>
+            <input type="text" class="form-control" [(ngModel)]="form.motorista" placeholder="Nome do motorista">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fw-semibold">Placa</label>
+            <input type="text" class="form-control" [(ngModel)]="form.placa" placeholder="Ex: ABC-1234">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fw-semibold">Setor Responsável</label>
+            <select class="form-select" [(ngModel)]="form.setor">
+              <option value="" disabled>Selecione</option>
+              <option value="Almoxarifado">Almoxarifado</option>
+              <option value="Carregamento">Carregamento</option>
+            </select>
+          </div>
+          <div class="col-12 d-flex justify-content-end">
+            <button class="btn btn-danger px-4" (click)="registrarChegada()">
+              <i class="bi bi-check-circle me-2"></i>Registrar Chegada
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fila de Espera -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title fw-bold mb-3">
+          <i class="bi bi-hourglass-split text-warning me-2"></i>Fila de Espera
+        </h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>NF</th>
+                <th>Empresa</th>
+                <th>Motorista</th>
+                <th>Placa</th>
+                <th>Setor</th>
+                <th>Tempo em Espera</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (fila.length === 0) {
+                <tr>
+                  <td colspan="8">
+                    <div class="empty-state">
+                      <i class="bi bi-truck"></i>
+                      <p>Nenhum caminhão na fila de espera.</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (item of fila; track item.id) {
+                  <tr>
+                    <td class="fw-semibold"><code>{{ item.notaFiscal }}</code></td>
+                    <td>{{ item.empresa }}</td>
+                    <td>{{ item.motorista }}</td>
+                    <td>{{ item.placa }}</td>
+                    <td>{{ item.setor }}</td>
+                    <td>{{ formatWaitTime(item.dataEntrada) }}</td>
+                    <td>
+                      <span class="badge {{ badgeClass(item.status) }}">{{ item.status }}</span>
+                    </td>
+                    <td class="text-end action-buttons">
+                      <button class="btn-action btn-action-edit"
+                              title="Confirmar entrada"
+                              [class.disabled]="item.status !== 'AUTORIZADO'"
+                              (click)="item.status === 'AUTORIZADO' && abrirConfirmacaoEntrada(item.id)">
+                        <i class="bi bi-check-circle"></i>
+                      </button>
+                      <button class="btn-action btn-action-delete"
+                              title="Remover da fila"
+                              (click)="abrirRemocao(item.id)">
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer />
+
+<!-- Modal: Histórico de Entregas -->
+<div class="modal fade" #historicoModal tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-clock-history me-2"></i>Histórico de Entregas
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3 mb-4">
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Buscar por Nota Fiscal</label>
+            <input type="text" class="form-control" [(ngModel)]="filtroNF" placeholder="Digite a NF">
+          </div>
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Filtrar por Data</label>
+            <input type="date" class="form-control" [(ngModel)]="filtroData">
+          </div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-outline-secondary w-100" (click)="limparFiltros()">
+              <i class="bi bi-eraser me-1"></i>Limpar
+            </button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>NF</th>
+                <th>Empresa</th>
+                <th>Motorista</th>
+                <th>Placa</th>
+                <th>Setor</th>
+                <th>Data/Hora Entrada</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (historicoFiltrado.length === 0) {
+                <tr>
+                  <td colspan="7">
+                    <div class="empty-state">
+                      <i class="bi bi-inbox"></i>
+                      <p>Nenhum registro encontrado.</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (item of historicoFiltrado; track item.id) {
+                  <tr>
+                    <td><code>{{ item.notaFiscal }}</code></td>
+                    <td class="fw-semibold">{{ item.empresa }}</td>
+                    <td>{{ item.motorista }}</td>
+                    <td>{{ item.placa }}</td>
+                    <td>{{ item.setor }}</td>
+                    <td>{{ item.dataEntrada }}</td>
+                    <td>
+                      <span class="badge {{ badgeClass(item.status) }}">{{ item.status }}</span>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button class="btn btn-danger px-4" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i>Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirmar Remoção -->
+<div class="modal fade" #removeModal tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Remoção
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+        <h5 class="mt-3">Deseja remover este caminhão da fila?</h5>
+        <div class="delete-warning mt-3">
+          <i class="bi bi-info-circle-fill text-danger me-2"></i>
+          <span>Esta ação não poderá ser desfeita.</span>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i>Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmarRemocao()">
+          <i class="bi bi-trash me-1"></i>Remover Permanentemente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirmar Entrada -->
+<div class="modal fade" #confirmEntradaModal tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-check-circle me-2"></i>Confirmar Entrada
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+        <h5 class="mt-3">Deseja confirmar a entrada deste caminhão?</h5>
+        <p class="text-muted mb-0">O registro será movido para o histórico de entregas.</p>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i>Cancelar
+        </button>
+        <button type="button" class="btn btn-success px-4" (click)="confirmarEntrada()">
+          <i class="bi bi-check-circle me-1"></i>Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

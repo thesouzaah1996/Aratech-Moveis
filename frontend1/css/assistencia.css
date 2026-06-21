@@ -1,0 +1,44 @@
+.card-header {
+    font-size: 1rem;
+    background-color: #f8f9fa;
+}
+
+.badge-status {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+}
+
+.status-criado {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.status-separacao {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.status-separado {
+    background-color: #0dcaf0;
+    color: #000;
+}
+
+.status-embalagem {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+.status-embalado {
+    background-color: #198754;
+    color: #fff;
+}
+
+.status-carregamento {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+}

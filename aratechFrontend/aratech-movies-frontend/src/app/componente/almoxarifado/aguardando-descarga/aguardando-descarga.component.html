@@ -1,0 +1,134 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold mb-0">Aguardando Descarga</h3>
+      <button class="btn btn-danger px-4" (click)="abrirHistorico()">
+        <i class="bi bi-clock-history me-2"></i>Histórico de Itens Recebidos
+      </button>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Empresa</th>
+                <th>Produto</th>
+                <th>Chegada</th>
+                <th>Motorista</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (fila.length === 0) {
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <i class="bi bi-truck"></i>
+                      <p>Nenhum veículo aguardando descarga.</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (item of fila; track item.id) {
+                  <tr>
+                    <td class="fw-semibold">{{ item.empresa }}</td>
+                    <td>{{ item.produto }}</td>
+                    <td>{{ item.chegada }}</td>
+                    <td>{{ item.motorista }}</td>
+                    <td>
+                      <span class="badge {{ badgeClass(item.status) }}">{{ item.status }}</span>
+                    </td>
+                    <td class="text-end action-buttons">
+                      @if (item.status === 'Aguardando') {
+                        <button class="btn-action btn-action-edit" title="Liberar para conferência"
+                                (click)="liberar(item)">
+                          <i class="bi bi-unlock"></i>
+                        </button>
+                      }
+                      @if (item.status === 'Em conferência') {
+                        <button class="btn-action btn-action-edit" title="Finalizar descarga"
+                                (click)="finalizar(item)">
+                          <i class="bi bi-check-circle"></i>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer />
+
+<!-- Modal: Histórico -->
+<div class="modal fade" #historicoModal tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-clock-history me-2"></i>Histórico de Itens Recebidos
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th class="ps-3">Empresa</th>
+                <th>Produto</th>
+                <th>Motorista</th>
+                <th>Data Finalização</th>
+                <th>Status</th>
+                <th>Observações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (historico.length === 0) {
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <i class="bi bi-inbox"></i>
+                      <p>Nenhum item finalizado ainda.</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (item of historico; track item.id) {
+                  <tr>
+                    <td class="ps-3 fw-semibold">{{ item.empresa }}</td>
+                    <td>{{ item.produto }}</td>
+                    <td>{{ item.motorista }}</td>
+                    <td>{{ item.chegada }}</td>
+                    <td>
+                      <span class="badge {{ badgeClass(item.status) }}">{{ item.status }}</span>
+                    </td>
+                    <td>{{ item.observacoes ?? '—' }}</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button class="btn btn-danger px-4" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i>Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

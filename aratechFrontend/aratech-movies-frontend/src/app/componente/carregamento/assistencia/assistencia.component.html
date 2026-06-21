@@ -1,0 +1,133 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold mb-0">Carregamento • Assistência</h3>
+      <button class="btn btn-danger px-4" (click)="abrirHistorico()">
+        <i class="bi bi-clock-history me-2"></i>Histórico de Concluídos
+      </button>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Produto</th>
+                <th>Descrição</th>
+                <th>Responsável</th>
+                <th>Entrada</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (itens.length === 0) {
+                <tr>
+                  <td colspan="8">
+                    <div class="empty-state">
+                      <i class="bi bi-tools"></i>
+                      <p>Nenhuma carga em assistência no momento.</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (item of itens; track item.id) {
+                  <tr>
+                    <td><span class="badge-id">#{{ item.id }}</span></td>
+                    <td class="fw-semibold">{{ item.cliente }}</td>
+                    <td>{{ item.produto }}</td>
+                    <td>{{ item.descricao }}</td>
+                    <td>{{ item.responsavel }}</td>
+                    <td>{{ item.dataEntrada }}</td>
+                    <td>
+                      <span class="badge {{ badgeClass(item.status) }}">{{ item.status }}</span>
+                    </td>
+                    <td class="text-end action-buttons">
+                      @if (item.status !== 'Concluído') {
+                        <button class="btn-action btn-action-edit"
+                                title="Avançar status"
+                                (click)="avancarStatus(item)">
+                          <i class="bi bi-arrow-right-circle"></i>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer />
+
+<!-- Modal: Histórico de Concluídos -->
+<div class="modal fade" #historicoModal tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-clock-history me-2"></i>Histórico de Concluídos
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th class="ps-3">Cliente</th>
+                <th>Produto</th>
+                <th>Responsável</th>
+                <th>Entrada</th>
+                <th>Status</th>
+                <th>Observações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (historico.length === 0) {
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <i class="bi bi-inbox"></i>
+                      <p>Nenhum item concluído ainda.</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (item of historico; track item.id) {
+                  <tr>
+                    <td class="ps-3 fw-semibold">{{ item.cliente }}</td>
+                    <td>{{ item.produto }}</td>
+                    <td>{{ item.responsavel }}</td>
+                    <td>{{ item.dataEntrada }}</td>
+                    <td>
+                      <span class="badge {{ badgeClass(item.status) }}">{{ item.status }}</span>
+                    </td>
+                    <td>{{ item.observacoes ?? '—' }}</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button class="btn btn-danger px-4" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i>Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
