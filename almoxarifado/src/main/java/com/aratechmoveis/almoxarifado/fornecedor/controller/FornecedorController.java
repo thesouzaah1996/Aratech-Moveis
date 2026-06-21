@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("almoxarifado/fornecedor")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class FornecedorController {
 
     private final FornecedorService fornecedorService;
@@ -30,13 +31,18 @@ public class FornecedorController {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.getFornecedores());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Response> getFornecedorById(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.getFornecedorById(id));
-    }
-
     @PostMapping("/disable/{id}")
     public ResponseEntity<Response> disableFornecedor(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.disableFornecedor(id));
+    }
+
+    @PostMapping("/enable/{id}")
+    public ResponseEntity<Response> enableFornecedor(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.enableFornecedor(id));
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Response> updateFornecedor(@PathVariable @Min(1) Long id, @RequestBody FornecedorDTO fornecedorDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.updateFornecedor(id, fornecedorDTO));
     }
 }

@@ -119,12 +119,11 @@
 <app-footer />
 
 <!-- Modal: Produto -->
-<div class="modal fade" #productModal tabindex="-1">
+<div class="modal fade" #productModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title fw-bold">{{ isEditing ? 'Editar Produto' : 'Novo Produto' }}</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-4">
         <div class="row g-3">
@@ -155,7 +154,7 @@
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-danger" (click)="save()">Salvar</button>
       </div>
     </div>
@@ -163,14 +162,13 @@
 </div>
 
 <!-- Modal: Confirmar Exclusão -->
-<div class="modal fade" #deleteModal tabindex="-1">
+<div class="modal fade" #deleteModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title fw-bold">
           <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Exclusão
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body text-center p-4">
         <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
@@ -184,7 +182,7 @@
         }
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-danger" (click)="confirmDelete()">
           <i class="bi bi-trash me-1"></i>Excluir
         </button>

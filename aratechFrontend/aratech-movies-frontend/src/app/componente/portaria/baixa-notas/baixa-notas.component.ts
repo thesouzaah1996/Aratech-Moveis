@@ -43,7 +43,7 @@ export class BaixaNotasComponent implements OnInit, AfterViewInit {
   form: Omit<NotaFiscal, 'id'> = this.emptyForm();
 
   page = 1;
-  readonly pageSize = 10;
+  readonly pageSize = 8;
 
   searchQuery = '';
 

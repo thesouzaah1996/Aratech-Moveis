@@ -18,9 +18,26 @@
       </div>
     }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3 class="fw-bold mb-0">Gerenciar Fornecedores</h3>
-      <button class="btn btn-danger" (click)="openAdd()">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+      <h3 class="fw-bold mb-0 flex-shrink-0">Gerenciar Fornecedores</h3>
+
+      <div class="input-group" style="max-width: 340px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+          placeholder="Buscar por nome ou ID…"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch()">
+      </div>
+
+      <div class="filtro-status flex-shrink-0">
+        <button type="button" [class.ativo]="filtroStatus === 'todos'" (click)="setFiltroStatus('todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ativos'" (click)="setFiltroStatus('ativos')">Ativos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'inativos'" (click)="setFiltroStatus('inativos')">Inativos</button>
+      </div>
+
+      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
         <i class="bi bi-plus-circle me-2"></i>Novo Fornecedor
       </button>
     </div>
@@ -52,7 +69,7 @@
                     <td colspan="7">
                       <div class="empty-state">
                         <i class="bi bi-building"></i>
-                        <p>Nenhum fornecedor cadastrado.</p>
+                        <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum fornecedor cadastrado.' }}</p>
                       </div>
                     </td>
                   </tr>
@@ -65,15 +82,19 @@
                       <td>{{ f.telefone }}</td>
                       <td>{{ f.representante?.nomeRepresentante ?? '—' }}</td>
                       <td>
-                        @if (f.ativo) {
-                          <span class="badge bg-success">Ativo</span>
-                        } @else {
-                          <span class="badge bg-secondary">Inativo</span>
-                        }
+                        <div class="form-check form-switch mb-0">
+                          <input class="form-check-input" type="checkbox" role="switch"
+                            [checked]="f.ativo"
+                            [title]="f.ativo ? 'Clique para desativar' : 'Clique para ativar'"
+                            (click)="onSwitchClick($event, f)">
+                        </div>
                       </td>
                       <td class="text-end action-buttons">
-                        <button class="btn-action btn-action-delete" title="Desativar" (click)="openDesativar(f)">
-                          <i class="bi bi-slash-circle"></i>
+                        <button class="btn-action btn-action-edit" title="Visualizar" (click)="openView(f)">
+                          <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn-action btn-action-edit ms-1" title="Editar" (click)="openEditModal(f)">
+                          <i class="bi bi-pencil"></i>
                         </button>
                       </td>
                     </tr>
@@ -85,17 +106,39 @@
 
           @if (totalPages > 1) {
             <div class="pagination-container">
-              <span class="pagination-info">{{ fornecedores.length }} fornecedor(es)</span>
+              <span class="pagination-info">
+                Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} fornecedor(es)
+              </span>
               <nav>
                 <ul class="pagination">
                   <li class="page-item" [class.disabled]="page === 1">
                     <a class="page-link" (click)="setPage(page - 1)">‹</a>
                   </li>
-                  @for (p of pages; track p) {
+
+                  @if (visiblePages[0] > 1) {
+                    <li class="page-item">
+                      <a class="page-link" (click)="setPage(1)">1</a>
+                    </li>
+                    @if (visiblePages[0] > 2) {
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                  }
+
+                  @for (p of visiblePages; track p) {
                     <li class="page-item" [class.active]="p === page">
                       <a class="page-link" (click)="setPage(p)">{{ p }}</a>
                     </li>
                   }
+
+                  @if (visiblePages[visiblePages.length - 1] < totalPages) {
+                    @if (visiblePages[visiblePages.length - 1] < totalPages - 1) {
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                    <li class="page-item">
+                      <a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a>
+                    </li>
+                  }
+
                   <li class="page-item" [class.disabled]="page === totalPages">
                     <a class="page-link" (click)="setPage(page + 1)">›</a>
                   </li>
@@ -112,66 +155,72 @@
 
 <app-footer />
 
-<!-- Modal: Novo Fornecedor -->
-<div class="modal fade" #supplierModal tabindex="-1">
+<!-- ── Modal: Novo Fornecedor ───────────────────────────────── -->
+<div class="modal fade" #supplierModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title fw-bold">Novo Fornecedor</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-4">
-
         <h6 class="text-danger fw-bold mb-3">Dados do Fornecedor</h6>
-
         <div class="row g-3 mb-3">
           <div class="col-12">
             <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.nome"
-              placeholder="Nome da empresa" required>
+            <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome da empresa"
+              [class.is-invalid]="submitted && !form.nome.trim()">
+            <div class="invalid-feedback">Nome é obrigatório.</div>
           </div>
         </div>
         <div class="row g-3 mb-4">
           <div class="col-md-7">
             <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
-            <input type="email" class="form-control" [(ngModel)]="form.email"
-              placeholder="email@fornecedor.com" required>
+            <input type="email" class="form-control" [(ngModel)]="form.email" placeholder="email@fornecedor.com"
+              [class.is-invalid]="submitted && (!form.email.trim() || !isValidEmail(form.email))">
+            <div class="invalid-feedback">
+              {{ !form.email.trim() ? 'E-mail é obrigatório.' : 'Formato de e-mail inválido.' }}
+            </div>
           </div>
           <div class="col-md-5">
             <label class="form-label fw-semibold">Telefone Fixo <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [value]="form.telefone"
-              (input)="applyPhoneMask($event, 10)" placeholder="(XX) XXXX-XXXX" required>
+              (input)="applyPhoneMask($event, 10)" placeholder="(XX) XXXX-XXXX"
+              [class.is-invalid]="submitted && !form.telefone.trim()">
+            <div class="invalid-feedback">Telefone é obrigatório.</div>
           </div>
         </div>
-
         <hr class="my-3">
         <h6 class="text-danger fw-bold mb-3">Representante</h6>
-
         <div class="row g-3 mb-3">
           <div class="col-12">
             <label class="form-label fw-semibold">Nome do Representante <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="form.representante.nomeRepresentante"
-              placeholder="Nome completo" required>
+              placeholder="Nome completo"
+              [class.is-invalid]="submitted && !form.representante.nomeRepresentante.trim()">
+            <div class="invalid-feedback">Nome do representante é obrigatório.</div>
           </div>
         </div>
         <div class="row g-3">
           <div class="col-md-5">
             <label class="form-label fw-semibold">Telefone do Representante <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [value]="form.representante.telefoneRepresentante"
-              (input)="applyPhoneMask($event, 11)" placeholder="(XX) XXXXX-XXXX" required>
+              (input)="applyPhoneMask($event, 11)" placeholder="(XX) XXXXX-XXXX"
+              [class.is-invalid]="submitted && !form.representante.telefoneRepresentante.trim()">
+            <div class="invalid-feedback">Telefone do representante é obrigatório.</div>
           </div>
           <div class="col-md-7">
             <label class="form-label fw-semibold">E-mail do Representante <span class="text-danger">*</span></label>
             <input type="email" class="form-control" [(ngModel)]="form.representante.emailRepresentante"
-              placeholder="email@representante.com" required>
+              placeholder="email@representante.com"
+              [class.is-invalid]="submitted && (!form.representante.emailRepresentante.trim() || !isValidEmail(form.representante.emailRepresentante))">
+            <div class="invalid-feedback">
+              {{ !form.representante.emailRepresentante.trim() ? 'E-mail é obrigatório.' : 'Formato de e-mail inválido.' }}
+            </div>
           </div>
         </div>
-
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-          <i class="bi bi-x me-1"></i>Cancelar
-        </button>
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-danger" (click)="save()">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
@@ -180,15 +229,150 @@
   </div>
 </div>
 
-<!-- Modal: Confirmar Desativação -->
-<div class="modal fade" #deleteModal tabindex="-1">
+<!-- ── Modal: Visualizar Fornecedor ────────────────────────── -->
+<div class="modal fade" #viewModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Dados do Fornecedor</h5>
+      </div>
+      @if (fornecedorEmVisualizacao) {
+        <div class="modal-body p-4">
+          <h6 class="text-danger fw-bold mb-3">Fornecedor</h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-1">
+              <p class="text-muted small mb-1">ID</p>
+              <p class="fw-semibold mb-0">#{{ fornecedorEmVisualizacao.id }}</p>
+            </div>
+            <div class="col-md-5">
+              <p class="text-muted small mb-1">Nome</p>
+              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.nome }}</p>
+            </div>
+            <div class="col-md-3">
+              <p class="text-muted small mb-1">Status</p>
+              @if (fornecedorEmVisualizacao.ativo) {
+                <span class="badge bg-success">Ativo</span>
+              } @else {
+                <span class="badge bg-secondary">Inativo</span>
+              }
+            </div>
+            <div class="col-md-7">
+              <p class="text-muted small mb-1">E-mail</p>
+              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.email }}</p>
+            </div>
+            <div class="col-md-5">
+              <p class="text-muted small mb-1">Telefone</p>
+              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.telefone }}</p>
+            </div>
+          </div>
+          <hr class="my-3">
+          <h6 class="text-danger fw-bold mb-3">Representante</h6>
+          <div class="row g-3">
+            <div class="col-12">
+              <p class="text-muted small mb-1">Nome</p>
+              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.representante?.nomeRepresentante || '—' }}</p>
+            </div>
+            <div class="col-md-5">
+              <p class="text-muted small mb-1">Telefone</p>
+              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.representante?.telefoneRepresentante || '—' }}</p>
+            </div>
+            <div class="col-md-7">
+              <p class="text-muted small mb-1">E-mail</p>
+              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.representante?.emailRepresentante || '—' }}</p>
+            </div>
+          </div>
+        </div>
+      }
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Editar Fornecedor ─────────────────────────────── -->
+<div class="modal fade" #editModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Editar Fornecedor</h5>
+      </div>
+      <div class="modal-body p-4">
+        <h6 class="text-danger fw-bold mb-3">Dados do Fornecedor</h6>
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="formEdit.nome" placeholder="Nome da empresa"
+              [class.is-invalid]="submittedEdit && !formEdit.nome.trim()">
+            <div class="invalid-feedback">Nome é obrigatório.</div>
+          </div>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-7">
+            <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" [(ngModel)]="formEdit.email" placeholder="email@fornecedor.com"
+              [class.is-invalid]="submittedEdit && (!formEdit.email.trim() || !isValidEmail(formEdit.email))">
+            <div class="invalid-feedback">
+              {{ !formEdit.email.trim() ? 'E-mail é obrigatório.' : 'Formato de e-mail inválido.' }}
+            </div>
+          </div>
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Telefone Fixo <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [value]="formEdit.telefone"
+              (input)="applyPhoneMask($event, 10, true)" placeholder="(XX) XXXX-XXXX"
+              [class.is-invalid]="submittedEdit && !formEdit.telefone.trim()">
+            <div class="invalid-feedback">Telefone é obrigatório.</div>
+          </div>
+        </div>
+        <hr class="my-3">
+        <h6 class="text-danger fw-bold mb-3">Representante</h6>
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            <label class="form-label fw-semibold">Nome do Representante <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="formEdit.representante.nomeRepresentante"
+              placeholder="Nome completo"
+              [class.is-invalid]="submittedEdit && !formEdit.representante.nomeRepresentante.trim()">
+            <div class="invalid-feedback">Nome do representante é obrigatório.</div>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Telefone do Representante <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [value]="formEdit.representante.telefoneRepresentante"
+              (input)="applyPhoneMask($event, 11, true)" placeholder="(XX) XXXXX-XXXX"
+              [class.is-invalid]="submittedEdit && !formEdit.representante.telefoneRepresentante.trim()">
+            <div class="invalid-feedback">Telefone do representante é obrigatório.</div>
+          </div>
+          <div class="col-md-7">
+            <label class="form-label fw-semibold">E-mail do Representante <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" [(ngModel)]="formEdit.representante.emailRepresentante"
+              placeholder="email@representante.com"
+              [class.is-invalid]="submittedEdit && (!formEdit.representante.emailRepresentante.trim() || !isValidEmail(formEdit.representante.emailRepresentante))">
+            <div class="invalid-feedback">
+              {{ !formEdit.representante.emailRepresentante.trim() ? 'E-mail é obrigatório.' : 'Formato de e-mail inválido.' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="saveEdit()">
+          <i class="bi bi-check-circle me-1"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Confirmar Desativação ────────────────────────── -->
+<div class="modal fade" #deleteModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title fw-bold">
           <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Desativação
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body text-center p-4">
         <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
@@ -205,9 +389,7 @@
         }
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-          <i class="bi bi-x me-1"></i>Cancelar
-        </button>
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-danger" (click)="confirmDesativar()">
           <i class="bi bi-slash-circle me-1"></i>Desativar Fornecedor
         </button>

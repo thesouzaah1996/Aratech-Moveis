@@ -12,7 +12,7 @@ interface ApiResponse {
 
 @Injectable({ providedIn: 'root' })
 export class FornecedorService {
-  private readonly api = 'http://localhost:8091/almoxarifado/fornecedor';
+  private readonly api = 'http://localhost:8081/almoxarifado/fornecedor';
 
   constructor(private http: HttpClient) {}
 
@@ -26,6 +26,17 @@ export class FornecedorService {
     return this.http
       .post<ApiResponse>(`${this.api}/add`, form)
       .pipe(map(res => res.fornecedorDTO!));
+  }
+
+  update(id: number, form: FornecedorForm): Observable<Fornecedor> {
+    return this.http
+      .put<ApiResponse>(`${this.api}/update/${id}`, form)
+      .pipe(map(res => res.fornecedorDTO!));
+  }
+
+  enable(id: number): Observable<void> {
+    return this.http
+      .post<void>(`${this.api}/enable/${id}`, {});
   }
 
   disable(id: number): Observable<void> {

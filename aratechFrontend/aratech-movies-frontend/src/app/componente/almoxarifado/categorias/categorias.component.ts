@@ -31,7 +31,7 @@ export class CategoriasComponent implements OnInit {
   categorias: Categoria[] = [];
   isEditing = false;
   page = 1;
-  pageSize = 10;
+  pageSize = 8;
 
   form: Partial<Categoria> = { nome: '' };
   categoriaParaExcluir: Categoria | null = null;

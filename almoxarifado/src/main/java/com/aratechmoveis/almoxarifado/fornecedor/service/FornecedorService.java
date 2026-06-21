@@ -7,6 +7,6 @@ public interface FornecedorService {
     Response addFornecedor(FornecedorDTO fornecedorDTO);
     Response updateFornecedor(Long id, FornecedorDTO fornecedorDTO);
     Response getFornecedores();
-    Response getFornecedorById(Long id);
     Response disableFornecedor(Long id);
+    Response enableFornecedor(Long id);
 }

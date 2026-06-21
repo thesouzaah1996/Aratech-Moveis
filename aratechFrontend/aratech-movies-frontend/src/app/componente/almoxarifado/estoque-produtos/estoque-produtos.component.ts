@@ -38,7 +38,7 @@ export class EstoqueProdutosComponent implements OnInit {
   searchQuery = '';
   isEditing = false;
   page = 1;
-  pageSize = 10;
+  pageSize = 8;
 
   form: Partial<Produto> = this.emptyForm();
   produtoParaExcluir: Produto | null = null;

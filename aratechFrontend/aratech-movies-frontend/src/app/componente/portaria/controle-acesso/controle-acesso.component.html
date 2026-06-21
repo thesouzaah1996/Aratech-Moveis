@@ -121,14 +121,13 @@
 <app-footer />
 
 <!-- Modal: Histórico de Entregas -->
-<div class="modal fade" #historicoModal tabindex="-1">
+<div class="modal fade" #historicoModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title fw-bold">
           <i class="bi bi-clock-history me-2"></i>Histórico de Entregas
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="row g-3 mb-4">
@@ -189,23 +188,20 @@
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button class="btn btn-danger px-4" data-bs-dismiss="modal">
-          <i class="bi bi-x me-1"></i>Fechar
-        </button>
+        <button class="btn btn-cancelar" data-bs-dismiss="modal">Fechar</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Modal: Confirmar Remoção -->
-<div class="modal fade" #removeModal tabindex="-1">
+<div class="modal fade" #removeModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title fw-bold">
           <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Remoção
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body text-center p-4">
         <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
@@ -216,9 +212,7 @@
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-          <i class="bi bi-x me-1"></i>Cancelar
-        </button>
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-danger" (click)="confirmarRemocao()">
           <i class="bi bi-trash me-1"></i>Remover Permanentemente
         </button>
@@ -228,14 +222,13 @@
 </div>
 
 <!-- Modal: Confirmar Entrada -->
-<div class="modal fade" #confirmEntradaModal tabindex="-1">
+<div class="modal fade" #confirmEntradaModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title fw-bold">
           <i class="bi bi-check-circle me-2"></i>Confirmar Entrada
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body text-center p-4">
         <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
@@ -243,9 +236,7 @@
         <p class="text-muted mb-0">O registro será movido para o histórico de entregas.</p>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-          <i class="bi bi-x me-1"></i>Cancelar
-        </button>
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-success px-4" (click)="confirmarEntrada()">
           <i class="bi bi-check-circle me-1"></i>Confirmar
         </button>

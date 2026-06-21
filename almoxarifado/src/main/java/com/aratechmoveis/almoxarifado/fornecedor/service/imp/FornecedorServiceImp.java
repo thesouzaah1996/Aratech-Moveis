@@ -5,6 +5,7 @@ import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;
 import com.aratechmoveis.almoxarifado.fornecedor.model.Fornecedor;
+import com.aratechmoveis.almoxarifado.fornecedor.model.Representante;
 import com.aratechmoveis.almoxarifado.fornecedor.repository.FornecedorRepository;
 import com.aratechmoveis.almoxarifado.fornecedor.service.FornecedorService;
 import lombok.RequiredArgsConstructor;
@@ -48,10 +49,42 @@ public class FornecedorServiceImp implements FornecedorService {
                 .build();
     }
 
-    //Não foi implementado
     @Override
     public Response updateFornecedor(Long id, FornecedorDTO fornecedorDTO) {
-        return null;
+        Fornecedor fornecedorExistente = fornecedorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Fornecedor não encontrado. Se você quer prosseguir editando o fornecedor, verifique o id informado."));
+
+        if (fornecedorDTO.getNome() != null) {
+            fornecedorExistente.setNome(fornecedorDTO.getNome());
+        }
+
+        if (fornecedorDTO.getEmail() != null) {
+            fornecedorExistente.setEmail(fornecedorDTO.getEmail());
+        }
+
+        if (fornecedorDTO.getTelefone() != null) {
+            fornecedorExistente.setTelefone(fornecedorDTO.getTelefone());
+        }
+
+        if (fornecedorDTO.getRepresentante() != null) {
+            fornecedorExistente.setRepresentante(new Representante(
+                    fornecedorDTO.getRepresentante().nomeRepresentante(),
+                    fornecedorDTO.getRepresentante().telefoneRepresentante(),
+                    fornecedorDTO.getRepresentante().emailRepresentante()
+            ));
+
+        }
+
+        fornecedorRepository.save(fornecedorExistente);
+
+        FornecedorDTO fornecedorEditado = modelMapper.map(fornecedorExistente, FornecedorDTO.class);
+
+        return Response.builder()
+                .status(200)
+                .message("Fornecedor atualizado com sucesso")
+                .fornecedorDTO(fornecedorEditado)
+                .build();
+
     }
 
     @Override
@@ -67,20 +100,6 @@ public class FornecedorServiceImp implements FornecedorService {
                 .fornecedores(fornecedoresDTO)
                 .build();
     }
-    
-    @Override
-    public Response getFornecedorById(Long id) {
-        Fornecedor fornecedor = fornecedorRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Fornecedor não encontrado. Por favor, para seguir com a busca, confira o id informado"));
-
-        FornecedorDTO fornecedorDTO = modelMapper.map(fornecedor, FornecedorDTO.class);
-
-        return Response.builder()
-                .status(200)
-                .message("Fornecedor encontrado com sucesso.")
-                .fornecedorDTO(fornecedorDTO)
-                .build();
-    }
 
     @Override
     public Response disableFornecedor(Long id) {
@@ -94,6 +113,21 @@ public class FornecedorServiceImp implements FornecedorService {
         return Response.builder()
                 .status(200)
                 .message("Fornecedor desabilitado com sucesso")
+                .build();
+    }
+
+    @Override
+    public Response enableFornecedor(Long id) {
+        Fornecedor fornecedorInativo = fornecedorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Fornecedor inativo não encontrado. Por favor, para seguir, verifique o id informado"));
+
+        fornecedorInativo.setAtivo(true);
+
+        fornecedorRepository.save(fornecedorInativo);
+
+        return Response.builder()
+                .status(200)
+                .message("Fornecedor ativado com sucesso.")
                 .build();
     }
 }

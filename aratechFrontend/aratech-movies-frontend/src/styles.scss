@@ -67,6 +67,27 @@ body {
   vertical-align: middle;
 }
 
+.table tbody tr {
+  cursor: pointer;
+}
+
+/* ─── Cursor pointer global ──────────────────────────────────── */
+
+.page-link { cursor: pointer; }
+.page-item.disabled .page-link { cursor: not-allowed; }
+
+.form-check-input { cursor: pointer; }
+.form-check-input:disabled { cursor: not-allowed; }
+
+.btn-action { cursor: pointer; }
+.btn-cancelar { cursor: pointer; }
+.btn-danger { cursor: pointer; }
+
+.dropdown-item { cursor: pointer; }
+.dropdown-toggle { cursor: pointer; }
+
+[role="button"] { cursor: pointer; }
+
 .badge-id {
   background-color: #f8f9fa;
   color: var(--brand-700);
@@ -143,6 +164,12 @@ body {
   }
 }
 
+.page-link,
+.page-link:hover,
+.page-link:focus {
+  z-index: auto !important;
+}
+
 .page-item.active .page-link {
   background-color: var(--brand-700);
   border-color: var(--brand-700);
@@ -211,7 +238,21 @@ body {
   }
 }
 
-.btn-outline-secondary { border-radius: 40px; padding: 0.45rem 1.2rem; }
+.btn-cancelar {
+  background: #6c757d;
+  border: none;
+  color: #fff;
+  padding: 0.45rem 1.4rem;
+  border-radius: 40px;
+  font-weight: 500;
+  transition: background 0.2s;
+
+  &:hover, &:focus {
+    background: #5a6268;
+    color: #fff;
+    box-shadow: none;
+  }
+}
 
 /* ─── Empty state ────────────────────────────────────────────── */
 
