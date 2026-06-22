@@ -1,0 +1,204 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+      <h3 class="fw-bold mb-0 flex-shrink-0">Solicitações</h3>
+
+      <div class="input-group" style="max-width: 300px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+          placeholder="Buscar por nome, matrícula ou ID…"
+          [(ngModel)]="searchTerm" (ngModelChange)="page = 1">
+      </div>
+
+      <div class="filtro-status flex-shrink-0">
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'"      (click)="setFiltro('Todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Pendente'"   (click)="setFiltro('Pendente')">Pendentes</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Em Análise'" (click)="setFiltro('Em Análise')">Em Análise</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Aprovada'"   (click)="setFiltro('Aprovada')">Aprovadas</button>
+      </div>
+
+      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+        <i class="bi bi-plus-circle me-2"></i>Nova Solicitação
+      </button>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Funcionário</th>
+                <th>Tipo</th>
+                <th>Data</th>
+                <th class="text-center">Status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (paged.length === 0) {
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <i class="bi bi-file-earmark-text"></i>
+                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhuma solicitação registrada.' }}</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (s of paged; track s.id) {
+                  <tr>
+                    <td><span class="badge-id">#{{ s.id }}</span></td>
+                    <td class="fw-semibold">{{ s.funcionario }}<br><span class="text-muted small">{{ s.matricula }}</span></td>
+                    <td>{{ s.tipo }}</td>
+                    <td class="text-muted small">{{ s.data }}</td>
+                    <td class="text-center"><span class="badge" [class]="statusBadge(s.status)">{{ s.status }}</span></td>
+                    <td class="text-end action-buttons">
+                      <button class="btn-action btn-action-edit" title="Visualizar" (click)="openView(s)">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="pagination-container">
+            <span class="pagination-info">Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtradas.length }} solicitação(ões)</span>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" [class.disabled]="page === 1"><a class="page-link" (click)="setPage(page - 1)">‹</a></li>
+                @for (p of visiblePages; track p) {
+                  <li class="page-item" [class.active]="p === page"><a class="page-link" (click)="setPage(p)">{{ p }}</a></li>
+                }
+                <li class="page-item" [class.disabled]="page === totalPages"><a class="page-link" (click)="setPage(page + 1)">›</a></li>
+              </ul>
+            </nav>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer />
+
+<!-- Modal: Nova Solicitação -->
+<div class="modal fade" #solicitacaoModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Nova Solicitação</h5>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Matrícula <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.matricula" placeholder="Ex: 00123"
+              [class.is-invalid]="submitted && !form.matricula?.trim()">
+            <div class="invalid-feedback">Matrícula é obrigatória.</div>
+          </div>
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Nome do Funcionário <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.funcionario" placeholder="Nome completo"
+              [class.is-invalid]="submitted && !form.funcionario?.trim()">
+            <div class="invalid-feedback">Nome é obrigatório.</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Tipo de Solicitação <span class="text-danger">*</span></label>
+            <select class="form-select" [(ngModel)]="form.tipo"
+              [class.is-invalid]="submitted && !form.tipo">
+              <option value="">Selecione o tipo...</option>
+              <option value="Declaração de Vínculo">Declaração de Vínculo</option>
+              <option value="Atestado de Trabalho">Atestado de Trabalho</option>
+              <option value="Holerite">Holerite</option>
+              <option value="Informe de Rendimentos">Informe de Rendimentos</option>
+              <option value="Alteração de Dados Cadastrais">Alteração de Dados Cadastrais</option>
+              <option value="Outros">Outros</option>
+            </select>
+            <div class="invalid-feedback">Tipo é obrigatório.</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Descrição / Observações</label>
+            <textarea class="form-control" [(ngModel)]="form.descricao" rows="3"
+              placeholder="Informações adicionais sobre a solicitação..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="save()">
+          <i class="bi bi-check-circle me-1"></i>Registrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Visualizar Solicitação -->
+<div class="modal fade" #viewModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Detalhes da Solicitação</h5>
+      </div>
+      @if (solicitacaoEmVisualizacao) {
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-4">
+              <p class="text-muted small mb-1">ID</p>
+              <p class="fw-semibold mb-0">#{{ solicitacaoEmVisualizacao.id }}</p>
+            </div>
+            <div class="col-8">
+              <p class="text-muted small mb-1">Status</p>
+              <span class="badge" [class]="statusBadge(solicitacaoEmVisualizacao.status)">{{ solicitacaoEmVisualizacao.status }}</span>
+            </div>
+            <div class="col-4">
+              <p class="text-muted small mb-1">Matrícula</p>
+              <p class="fw-semibold mb-0">{{ solicitacaoEmVisualizacao.matricula }}</p>
+            </div>
+            <div class="col-8">
+              <p class="text-muted small mb-1">Funcionário</p>
+              <p class="fw-semibold mb-0">{{ solicitacaoEmVisualizacao.funcionario }}</p>
+            </div>
+            <div class="col-12">
+              <p class="text-muted small mb-1">Tipo</p>
+              <p class="fw-semibold mb-0">{{ solicitacaoEmVisualizacao.tipo }}</p>
+            </div>
+            <div class="col-6">
+              <p class="text-muted small mb-1">Data</p>
+              <p class="fw-semibold mb-0">{{ solicitacaoEmVisualizacao.data }}</p>
+            </div>
+            @if (solicitacaoEmVisualizacao.descricao) {
+              <div class="col-12">
+                <p class="text-muted small mb-1">Observações</p>
+                <p class="mb-0">{{ solicitacaoEmVisualizacao.descricao }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Fornecedor, FornecedorForm } from '../models/fornecedor.model';
+import { environment } from '../../../environments/environment';
 
 interface ApiResponse {
   status: number;
@@ -12,7 +13,7 @@ interface ApiResponse {
 
 @Injectable({ providedIn: 'root' })
 export class FornecedorService {
-  private readonly api = 'http://localhost:8081/almoxarifado/fornecedor';
+  private readonly api = `${environment.apiUrl}/almoxarifado/fornecedor`;
 
   constructor(private http: HttpClient) {}
 

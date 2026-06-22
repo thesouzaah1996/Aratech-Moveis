@@ -1,0 +1,180 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+
+        <div class="mb-4">
+          <h3 class="fw-bold mb-1">Solicitar Peça</h3>
+          <p class="text-muted mb-0 small">Preencha os dados abaixo para requisitar uma peça ou componente</p>
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+
+            <h6 class="text-danger fw-bold mb-3">Identificação da Peça</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Nome da Peça / Componente <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.nomePeca"
+                  placeholder="Ex: Rolamento 6205, Correia dentada B54, Válvula de pressão..."
+                  [class.is-invalid]="submitted && !form.nomePeca.trim()">
+                <div class="invalid-feedback">Nome da peça é obrigatório.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Código / Referência</label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.codigo"
+                  placeholder="Ex: SKF-6205 (opcional)">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Quantidade <span class="text-danger">*</span></label>
+                <input type="number" class="form-control form-control-lg" [(ngModel)]="form.quantidade"
+                  placeholder="0" min="1"
+                  [class.is-invalid]="submitted && (!form.quantidade || form.quantidade <= 0)">
+                <div class="invalid-feedback">Informe uma quantidade válida.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Unidade <span class="text-danger">*</span></label>
+                <select class="form-select form-select-lg" [(ngModel)]="form.unidade"
+                  [class.is-invalid]="submitted && !form.unidade">
+                  <option value="">Selecione...</option>
+                  <option value="un">un (unidade)</option>
+                  <option value="kg">kg</option>
+                  <option value="L">L (litro)</option>
+                  <option value="m">m (metro)</option>
+                  <option value="cx">cx (caixa)</option>
+                  <option value="par">par</option>
+                </select>
+                <div class="invalid-feedback">Unidade é obrigatória.</div>
+              </div>
+            </div>
+
+            <hr class="my-3">
+            <h6 class="text-danger fw-bold mb-3">Destino e Finalidade</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Equipamento Destino <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.equipamento"
+                  placeholder="Ex: Prensa Hidráulica 01, Empilhadeira 03..."
+                  [class.is-invalid]="submitted && !form.equipamento.trim()">
+                <div class="invalid-feedback">Equipamento é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Finalidade <span class="text-danger">*</span></label>
+                <select class="form-select form-select-lg" [(ngModel)]="form.finalidade"
+                  [class.is-invalid]="submitted && !form.finalidade">
+                  <option value="">Selecione a finalidade...</option>
+                  <option value="Corretiva">Corretiva — reparo de falha</option>
+                  <option value="Preventiva">Preventiva — troca programada</option>
+                  <option value="Melhoria">Melhoria — upgrade do equipamento</option>
+                  <option value="Estoque">Reposição de estoque</option>
+                </select>
+                <div class="invalid-feedback">Finalidade é obrigatória.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Prioridade <span class="text-danger">*</span></label>
+                <select class="form-select form-select-lg" [(ngModel)]="form.prioridade"
+                  [class.is-invalid]="submitted && !form.prioridade">
+                  <option value="">Selecione a prioridade...</option>
+                  <option value="Baixa">Baixa — pode aguardar</option>
+                  <option value="Média">Média — atender em breve</option>
+                  <option value="Alta">Alta — urgente</option>
+                </select>
+                <div class="invalid-feedback">Prioridade é obrigatória.</div>
+              </div>
+            </div>
+
+            <hr class="my-3">
+            <h6 class="text-danger fw-bold mb-3">Dados do Solicitante</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nome do Solicitante <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.solicitante"
+                  placeholder="Seu nome completo"
+                  [class.is-invalid]="submitted && !form.solicitante.trim()">
+                <div class="invalid-feedback">Nome do solicitante é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Setor / Departamento <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.setor"
+                  placeholder="Ex: Produção, Logística, Utilidades..."
+                  [class.is-invalid]="submitted && !form.setor.trim()">
+                <div class="invalid-feedback">Setor é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Telefone para Contato</label>
+                <input type="text" class="form-control form-control-lg"
+                  [value]="form.telefone"
+                  (input)="applyPhoneMask($event)"
+                  placeholder="(XX) XXXXX-XXXX">
+              </div>
+            </div>
+
+            <hr class="my-3">
+            <h6 class="text-danger fw-bold mb-3">Observações</h6>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Justificativa / Observações <span class="text-danger">*</span></label>
+                <textarea class="form-control" [(ngModel)]="form.observacoes" rows="5"
+                  placeholder="Descreva a necessidade da peça, onde será aplicada, sintomas do problema, informações adicionais para o almoxarifado, etc."
+                  [class.is-invalid]="submitted && !form.observacoes.trim()"></textarea>
+                <div class="invalid-feedback">Justificativa é obrigatória.</div>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-footer border-0 bg-light px-4 py-3">
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-cancelar" (click)="resetForm()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Limpar
+              </button>
+              <button type="button" class="btn btn-danger btn-lg px-4" (click)="submit()">
+                <i class="bi bi-send me-2"></i>Enviar Solicitação
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer />
+
+<!-- Modal: Resultado da Solicitação -->
+<div class="modal fade" #resultModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header text-white" [class.bg-danger]="!resultadoSucesso" [class.bg-success]="resultadoSucesso">
+        <h5 class="modal-title fw-bold">
+          <i class="me-2" [class.bi-check-circle-fill]="resultadoSucesso" [class.bi-exclamation-triangle-fill]="!resultadoSucesso"></i>
+          {{ resultadoSucesso ? 'Solicitação Enviada' : 'Erro ao Enviar' }}
+        </h5>
+      </div>
+      <div class="modal-body text-center p-4">
+        @if (resultadoSucesso) {
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+          <h5 class="mt-3 fw-bold">Requisição registrada com sucesso!</h5>
+          <p class="text-muted mb-3">Sua solicitação foi recebida pelo almoxarifado e será processada em breve.</p>
+          <div class="delete-warning">
+            <p class="mb-1 small text-muted">Número da requisição</p>
+            <p class="fw-bold fs-4 mb-0 text-danger">#---</p>
+            <p class="small text-muted mt-1">O número será gerado pelo sistema ao ser processado.</p>
+          </div>
+        } @else {
+          <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
+          <h5 class="mt-3 fw-bold">Não foi possível enviar</h5>
+          <p class="text-muted mb-0">Tente novamente ou entre em contato com o suporte técnico.</p>
+        }
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-danger" (click)="fecharResultado()">
+          {{ resultadoSucesso ? 'Nova Solicitação' : 'Fechar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

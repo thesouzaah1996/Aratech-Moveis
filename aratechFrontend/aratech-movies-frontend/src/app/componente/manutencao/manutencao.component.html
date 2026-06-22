@@ -1,0 +1,62 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-5">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/manutencao/solicitar-manutencao" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-headset icon-size"></i>
+            <h4 class="fw-bold mb-2">Solicitar Manutenção</h4>
+            <p class="text-muted text-center mb-0">Abertura e registro de ordens de manutenção</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/manutencao/solicitar-peca" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-wrench-adjustable icon-size"></i>
+            <h4 class="fw-bold mb-2">Solicitar Peça</h4>
+            <p class="text-muted text-center mb-0">Requisição de peças e componentes para manutenção</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/manutencao/estoque" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-archive icon-size"></i>
+            <h4 class="fw-bold mb-2">Estoque</h4>
+            <p class="text-muted text-center mb-0">Saldos e controle de peças em estoque</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/manutencao/acompanhamento" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-clipboard-check icon-size"></i>
+            <h4 class="fw-bold mb-2">Acompanhamento</h4>
+            <p class="text-muted text-center mb-0">Status e histórico das ordens de manutenção</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/manutencao/fila-chamados" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-list-task icon-size"></i>
+            <h4 class="fw-bold mb-2">Fila de Chamados</h4>
+            <p class="text-muted text-center mb-0">Recebimento e direcionamento de chamados aos mecânicos</p>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<app-footer />

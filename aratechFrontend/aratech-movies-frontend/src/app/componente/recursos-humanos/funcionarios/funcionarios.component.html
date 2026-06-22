@@ -1,0 +1,290 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+      <h3 class="fw-bold mb-0 flex-shrink-0">Funcionários</h3>
+
+      <div class="input-group" style="max-width: 320px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+          placeholder="Buscar por nome, matrícula ou setor…"
+          [(ngModel)]="searchTerm" (ngModelChange)="onSearch()">
+      </div>
+
+      <div class="filtro-status flex-shrink-0">
+        <button type="button" [class.ativo]="filtroStatus === 'todos'"   (click)="setFiltroStatus('todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ativos'"  (click)="setFiltroStatus('ativos')">Ativos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'inativos'" (click)="setFiltroStatus('inativos')">Inativos</button>
+      </div>
+
+      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+        <i class="bi bi-plus-circle me-2"></i>Novo Funcionário
+      </button>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Matrícula</th>
+                <th>Nome</th>
+                <th>Cargo</th>
+                <th>Setor</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (paged.length === 0) {
+                <tr>
+                  <td colspan="6">
+                    <div class="empty-state">
+                      <i class="bi bi-people"></i>
+                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum funcionário cadastrado.' }}</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (f of paged; track f.id) {
+                  <tr>
+                    <td><span class="badge-id">{{ f.matricula }}</span></td>
+                    <td class="fw-semibold">{{ f.nome }}</td>
+                    <td class="text-muted">{{ f.cargo }}</td>
+                    <td>{{ f.setor }}</td>
+                    <td>
+                      <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                          [checked]="f.ativo" (click)="toggleAtivo(f)"
+                          [title]="f.ativo ? 'Clique para desativar' : 'Clique para ativar'">
+                      </div>
+                    </td>
+                    <td class="text-end action-buttons">
+                      <button class="btn-action btn-action-edit" title="Visualizar" (click)="openView(f)">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                      <button class="btn-action btn-action-edit ms-1" title="Editar" (click)="openEdit(f)">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="pagination-container">
+            <span class="pagination-info">
+              Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} funcionário(s)
+            </span>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" [class.disabled]="page === 1">
+                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                </li>
+                @if (visiblePages[0] > 1) {
+                  <li class="page-item"><a class="page-link" (click)="setPage(1)">1</a></li>
+                  @if (visiblePages[0] > 2) { <li class="page-item disabled"><span class="page-link">…</span></li> }
+                }
+                @for (p of visiblePages; track p) {
+                  <li class="page-item" [class.active]="p === page">
+                    <a class="page-link" (click)="setPage(p)">{{ p }}</a>
+                  </li>
+                }
+                @if (visiblePages[visiblePages.length - 1] < totalPages) {
+                  @if (visiblePages[visiblePages.length - 1] < totalPages - 1) { <li class="page-item disabled"><span class="page-link">…</span></li> }
+                  <li class="page-item"><a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a></li>
+                }
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <a class="page-link" (click)="setPage(page + 1)">›</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer />
+
+<!-- Modal: Novo Funcionário -->
+<div class="modal fade" #funcionarioModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Novo Funcionário</h5>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Matrícula <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.matricula" placeholder="Ex: 00123"
+              [class.is-invalid]="submitted && !form.matricula?.trim()">
+            <div class="invalid-feedback">Matrícula é obrigatória.</div>
+          </div>
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome do funcionário"
+              [class.is-invalid]="submitted && !form.nome?.trim()">
+            <div class="invalid-feedback">Nome é obrigatório.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Cargo <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.cargo" placeholder="Ex: Operador de Produção"
+              [class.is-invalid]="submitted && !form.cargo?.trim()">
+            <div class="invalid-feedback">Cargo é obrigatório.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Setor <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.setor" placeholder="Ex: Produção"
+              [class.is-invalid]="submitted && !form.setor?.trim()">
+            <div class="invalid-feedback">Setor é obrigatório.</div>
+          </div>
+          <div class="col-md-7">
+            <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" [(ngModel)]="form.email" placeholder="email@empresa.com"
+              [class.is-invalid]="submitted && (!form.email?.trim() || !isValidEmail(form.email!))">
+            <div class="invalid-feedback">Informe um e-mail válido.</div>
+          </div>
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Telefone</label>
+            <input type="text" class="form-control" [value]="form.telefone"
+              (input)="applyPhoneMask($event)" placeholder="(XX) XXXXX-XXXX">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="save()">
+          <i class="bi bi-check-circle me-1"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Visualizar -->
+<div class="modal fade" #viewModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Dados do Funcionário</h5>
+      </div>
+      @if (funcionarioEmVisualizacao) {
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <p class="text-muted small mb-1">Matrícula</p>
+              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.matricula }}</p>
+            </div>
+            <div class="col-md-9">
+              <p class="text-muted small mb-1">Nome</p>
+              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.nome }}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">Cargo</p>
+              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.cargo }}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">Setor</p>
+              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.setor }}</p>
+            </div>
+            <div class="col-md-7">
+              <p class="text-muted small mb-1">E-mail</p>
+              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.email }}</p>
+            </div>
+            <div class="col-md-5">
+              <p class="text-muted small mb-1">Telefone</p>
+              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.telefone || '—' }}</p>
+            </div>
+            <div class="col-md-3">
+              <p class="text-muted small mb-1">Status</p>
+              @if (funcionarioEmVisualizacao.ativo) {
+                <span class="badge bg-success">Ativo</span>
+              } @else {
+                <span class="badge bg-secondary">Inativo</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar -->
+<div class="modal fade" #editModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Editar Funcionário</h5>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Matrícula <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="formEdit.matricula"
+              [class.is-invalid]="submittedEdit && !formEdit.matricula.trim()">
+            <div class="invalid-feedback">Matrícula é obrigatória.</div>
+          </div>
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="formEdit.nome"
+              [class.is-invalid]="submittedEdit && !formEdit.nome.trim()">
+            <div class="invalid-feedback">Nome é obrigatório.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Cargo <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="formEdit.cargo"
+              [class.is-invalid]="submittedEdit && !formEdit.cargo.trim()">
+            <div class="invalid-feedback">Cargo é obrigatório.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Setor <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="formEdit.setor"
+              [class.is-invalid]="submittedEdit && !formEdit.setor.trim()">
+            <div class="invalid-feedback">Setor é obrigatório.</div>
+          </div>
+          <div class="col-md-7">
+            <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
+            <input type="email" class="form-control" [(ngModel)]="formEdit.email"
+              [class.is-invalid]="submittedEdit && (!formEdit.email.trim() || !isValidEmail(formEdit.email))">
+            <div class="invalid-feedback">Informe um e-mail válido.</div>
+          </div>
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Telefone</label>
+            <input type="text" class="form-control" [value]="formEdit.telefone"
+              (input)="applyPhoneMask($event, true)" placeholder="(XX) XXXXX-XXXX">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="saveEdit()">
+          <i class="bi bi-check-circle me-1"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

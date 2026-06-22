@@ -1,0 +1,175 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <!-- Cabeçalho com navegação de data -->
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+      <div>
+        <h3 class="fw-bold mb-1">Controle de Ponto</h3>
+        <div class="integracao-badge">
+          <i class="bi bi-phone me-1"></i>
+          Dados recebidos via integração com o app de ponto
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <div class="navegacao-data">
+          <button type="button" class="btn-nav" (click)="diaAnterior()" title="Dia anterior">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <input type="date" class="form-control form-control-sm data-input"
+            [(ngModel)]="dataSelecionada"
+            (change)="onDataChange()">
+          <button type="button" class="btn-nav" (click)="proximoDia()" [disabled]="isHoje" title="Próximo dia">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+
+        <button type="button" class="btn btn-danger" (click)="sincronizar()" [disabled]="sincronizando">
+          @if (sincronizando) {
+            <span class="spinner-border spinner-border-sm me-2"></span>Sincronizando...
+          } @else {
+            <i class="bi bi-arrow-repeat me-2"></i>Sincronizar
+          }
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros e busca -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+      <div class="input-group" style="max-width: 320px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+          placeholder="Buscar por nome, matrícula ou setor…"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="page = 1">
+      </div>
+
+      <div class="filtro-status flex-shrink-0">
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'"      (click)="setFiltro('Todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Presente'"   (click)="setFiltro('Presente')">Presentes</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Incompleto'" (click)="setFiltro('Incompleto')">Incompletos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Ausente'"    (click)="setFiltro('Ausente')">Ausentes</button>
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Matrícula</th>
+                <th>Funcionário</th>
+                <th>Cargo</th>
+                <th>Setor</th>
+                <th class="text-center">Entrada</th>
+                <th class="text-center">Saída</th>
+                <th class="text-center">Total</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (paged.length === 0) {
+                <tr>
+                  <td colspan="8">
+                    <div class="empty-state">
+                      <i class="bi bi-clock-history"></i>
+                      <p>
+                        @if (searchTerm || filtroStatus !== 'Todos') {
+                          Nenhum resultado para o filtro selecionado.
+                        } @else {
+                          Nenhum registro de ponto para {{ dataFormatada || 'esta data' }}.
+                        }
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (r of paged; track r.matricula) {
+                  <tr>
+                    <td><span class="badge-id">{{ r.matricula }}</span></td>
+                    <td class="fw-semibold">{{ r.funcionario }}</td>
+                    <td class="text-muted">{{ r.cargo }}</td>
+                    <td>{{ r.setor }}</td>
+                    <td class="text-center">
+                      @if (r.entrada) {
+                        <span class="hora">{{ r.entrada }}</span>
+                      } @else {
+                        <span class="text-muted">—</span>
+                      }
+                    </td>
+                    <td class="text-center">
+                      @if (r.saida) {
+                        <span class="hora">{{ r.saida }}</span>
+                      } @else {
+                        <span class="text-muted">—</span>
+                      }
+                    </td>
+                    <td class="text-center">
+                      @if (r.totalHoras) {
+                        <span class="total-horas">{{ r.totalHoras }}</span>
+                      } @else {
+                        <span class="text-muted">—</span>
+                      }
+                    </td>
+                    <td class="text-center">
+                      <span class="badge" [class]="statusBadge(r.status)">{{ r.status }}</span>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="pagination-container">
+            <span class="pagination-info">
+              Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} registro(s)
+            </span>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" [class.disabled]="page === 1">
+                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                </li>
+
+                @if (visiblePages[0] > 1) {
+                  <li class="page-item"><a class="page-link" (click)="setPage(1)">1</a></li>
+                  @if (visiblePages[0] > 2) {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                  }
+                }
+
+                @for (p of visiblePages; track p) {
+                  <li class="page-item" [class.active]="p === page">
+                    <a class="page-link" (click)="setPage(p)">{{ p }}</a>
+                  </li>
+                }
+
+                @if (visiblePages[visiblePages.length - 1] < totalPages) {
+                  @if (visiblePages[visiblePages.length - 1] < totalPages - 1) {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                  }
+                  <li class="page-item"><a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a></li>
+                }
+
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <a class="page-link" (click)="setPage(page + 1)">›</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer />

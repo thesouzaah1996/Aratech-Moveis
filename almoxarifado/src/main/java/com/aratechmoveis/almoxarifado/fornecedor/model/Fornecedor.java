@@ -13,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Table(name = "fornecedor")
+@Table(name = "fornecedores")
 public class Fornecedor {
 
     @Id

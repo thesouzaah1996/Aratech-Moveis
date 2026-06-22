@@ -1,0 +1,52 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-5">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/recursos-humanos/ponto" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-clock-history icon-size"></i>
+            <h4 class="fw-bold mb-2">Controle de Ponto</h4>
+            <p class="text-muted text-center mb-0">Registros de entrada e saída dos funcionários</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/recursos-humanos/funcionarios" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-people icon-size"></i>
+            <h4 class="fw-bold mb-2">Funcionários</h4>
+            <p class="text-muted text-center mb-0">Cadastro e gestão do quadro de colaboradores</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/recursos-humanos/ferias" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-calendar-check icon-size"></i>
+            <h4 class="fw-bold mb-2">Férias e Afastamentos</h4>
+            <p class="text-muted text-center mb-0">Gestão de períodos de férias, licenças e afastamentos</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/recursos-humanos/solicitacoes" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-file-earmark-text icon-size"></i>
+            <h4 class="fw-bold mb-2">Solicitações</h4>
+            <p class="text-muted text-center mb-0">Declarações, atestados e pedidos dos colaboradores</p>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<app-footer />

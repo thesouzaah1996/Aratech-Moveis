@@ -1,0 +1,257 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    <!-- Filtros e busca -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+      <h3 class="fw-bold mb-0 flex-shrink-0">Fila de Chamados</h3>
+
+      <div class="input-group" style="max-width: 320px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+          placeholder="Buscar por equipamento, solicitante ou ID…"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="page = 1">
+      </div>
+
+      <div class="filtro-status flex-shrink-0">
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'"         (click)="setFiltro('Todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Aguardando'"    (click)="setFiltro('Aguardando')">Aguardando</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Em Manutenção'" (click)="setFiltro('Em Manutenção')">Em Manutenção</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Concluída'"     (click)="setFiltro('Concluída')">Concluídos</button>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Equipamento</th>
+                <th>Tipo</th>
+                <th>Prioridade</th>
+                <th>Solicitante</th>
+                <th>Mecânico</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (paged.length === 0) {
+                <tr>
+                  <td colspan="8">
+                    <div class="empty-state">
+                      <i class="bi bi-list-task"></i>
+                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum chamado na fila.' }}</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (chamado of paged; track chamado.id) {
+                  <tr [class.row-aguardando]="chamado.status === 'Aguardando'">
+                    <td><span class="badge-id">#{{ chamado.id }}</span></td>
+                    <td class="fw-semibold">{{ chamado.equipamento }}</td>
+                    <td class="text-muted">{{ chamado.tipo }}</td>
+                    <td><span [class]="prioridadeClass(chamado.prioridade)">{{ chamado.prioridade }}</span></td>
+                    <td>
+                      <span class="fw-semibold">{{ chamado.solicitante }}</span>
+                      <br><span class="text-muted small">{{ chamado.setor }}</span>
+                    </td>
+                    <td>
+                      @if (chamado.mecanico) {
+                        <span class="fw-semibold">{{ chamado.mecanico }}</span>
+                      } @else {
+                        <span class="text-muted fst-italic">Não atribuído</span>
+                      }
+                    </td>
+                    <td><span class="badge" [class]="statusBadge(chamado.status)">{{ chamado.status }}</span></td>
+                    <td class="text-end action-buttons">
+                      <button class="btn-action btn-action-edit" title="Ver detalhes" (click)="openDetalhes(chamado)">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                      @if (chamado.status === 'Aguardando' || chamado.status === 'Em Manutenção') {
+                        <button class="btn-action btn-action-edit ms-1" title="Atribuir mecânico" (click)="openAtribuir(chamado)">
+                          <i class="bi bi-person-check"></i>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="pagination-container">
+            <span class="pagination-info">
+              Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} chamado(s)
+            </span>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" [class.disabled]="page === 1">
+                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                </li>
+
+                @if (visiblePages[0] > 1) {
+                  <li class="page-item"><a class="page-link" (click)="setPage(1)">1</a></li>
+                  @if (visiblePages[0] > 2) {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                  }
+                }
+
+                @for (p of visiblePages; track p) {
+                  <li class="page-item" [class.active]="p === page">
+                    <a class="page-link" (click)="setPage(p)">{{ p }}</a>
+                  </li>
+                }
+
+                @if (visiblePages[visiblePages.length - 1] < totalPages) {
+                  @if (visiblePages[visiblePages.length - 1] < totalPages - 1) {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                  }
+                  <li class="page-item"><a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a></li>
+                }
+
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <a class="page-link" (click)="setPage(page + 1)">›</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer />
+
+<!-- Modal: Atribuir Mecânico -->
+<div class="modal fade" #atribuirModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-person-check me-2"></i>Atribuir Mecânico
+        </h5>
+      </div>
+      <div class="modal-body p-4">
+        @if (chamadoSelecionado) {
+          <div class="delete-warning mb-4">
+            <p class="mb-1"><strong>Chamado:</strong> #{{ chamadoSelecionado.id }}</p>
+            <p class="mb-1"><strong>Equipamento:</strong> {{ chamadoSelecionado.equipamento }}</p>
+            <p class="mb-0"><strong>Prioridade:</strong> {{ chamadoSelecionado.prioridade }}</p>
+          </div>
+        }
+        <div>
+          <label class="form-label fw-semibold">Mecânico Responsável <span class="text-danger">*</span></label>
+          <input type="text" class="form-control form-control-lg" [(ngModel)]="mecanico"
+            placeholder="Nome do mecânico"
+            [class.is-invalid]="submitted && !mecanico.trim()">
+          <div class="invalid-feedback">Informe o nome do mecânico.</div>
+          <p class="text-muted small mt-2 mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            O status do chamado será alterado para <strong>Em Manutenção</strong>.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmarAtribuicao()">
+          <i class="bi bi-check-circle me-1"></i>Confirmar Atribuição
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Detalhes do Chamado -->
+<div class="modal fade" #detalhesModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Detalhes do Chamado</h5>
+      </div>
+      @if (chamadoSelecionado) {
+        <div class="modal-body p-4">
+          <h6 class="text-danger fw-bold mb-3">Equipamento</h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-1">
+              <p class="text-muted small mb-1">ID</p>
+              <p class="fw-semibold mb-0">#{{ chamadoSelecionado.id }}</p>
+            </div>
+            <div class="col-md-5">
+              <p class="text-muted small mb-1">Equipamento</p>
+              <p class="fw-semibold mb-0">{{ chamadoSelecionado.equipamento }}</p>
+            </div>
+            <div class="col-md-3">
+              <p class="text-muted small mb-1">Tipo</p>
+              <p class="fw-semibold mb-0">{{ chamadoSelecionado.tipo }}</p>
+            </div>
+            <div class="col-md-3">
+              <p class="text-muted small mb-1">Prioridade</p>
+              <span [class]="prioridadeClass(chamadoSelecionado.prioridade)">{{ chamadoSelecionado.prioridade }}</span>
+            </div>
+          </div>
+
+          <hr class="my-3">
+          <h6 class="text-danger fw-bold mb-3">Solicitante</h6>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">Nome</p>
+              <p class="fw-semibold mb-0">{{ chamadoSelecionado.solicitante }}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">Setor</p>
+              <p class="fw-semibold mb-0">{{ chamadoSelecionado.setor }}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">Data da Solicitação</p>
+              <p class="fw-semibold mb-0">{{ chamadoSelecionado.data }}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="text-muted small mb-1">Status</p>
+              <span class="badge" [class]="statusBadge(chamadoSelecionado.status)">{{ chamadoSelecionado.status }}</span>
+            </div>
+          </div>
+
+          <hr class="my-3">
+          <h6 class="text-danger fw-bold mb-3">Descrição do Problema</h6>
+          <p class="mb-4">{{ chamadoSelecionado.descricao }}</p>
+
+          <hr class="my-3">
+          <h6 class="text-danger fw-bold mb-3">Atribuição</h6>
+          <div class="row g-3">
+            <div class="col-12">
+              <p class="text-muted small mb-1">Mecânico Responsável</p>
+              <p class="fw-semibold mb-0">{{ chamadoSelecionado.mecanico || '—' }}</p>
+            </div>
+          </div>
+        </div>
+      }
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Fechar</button>
+        @if (chamadoSelecionado && (chamadoSelecionado.status === 'Aguardando' || chamadoSelecionado.status === 'Em Manutenção')) {
+          <button type="button" class="btn btn-danger" (click)="abrirAtribuirDoDetalhes(chamadoSelecionado!)">
+            <i class="bi bi-person-check me-1"></i>Atribuir Mecânico
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

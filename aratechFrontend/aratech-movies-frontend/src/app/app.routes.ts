@@ -12,6 +12,18 @@ import { ControleAcessoComponent } from './componente/portaria/controle-acesso/c
 import { CarregamentoComponent } from './componente/carregamento/carregamento.component';
 import { CarregamentoAssistenciaComponent } from './componente/carregamento/assistencia/assistencia.component';
 import { CarregamentoAguardandoDescargaComponent } from './componente/carregamento/aguardando-descarga/aguardando-descarga.component';
+import { ManutencaoComponent } from './componente/manutencao/manutencao.component';
+import { SolicitarManutencaoComponent } from './componente/manutencao/solicitar-manutencao/solicitar-manutencao.component';
+import { EstoqueManutencaoComponent } from './componente/manutencao/estoque/estoque.component';
+import { AcompanhamentoComponent } from './componente/manutencao/acompanhamento/acompanhamento.component';
+import { FilaChamadosComponent } from './componente/manutencao/fila-chamados/fila-chamados.component';
+import { SolicitarPecaComponent } from './componente/manutencao/solicitar-peca/solicitar-peca.component';
+import { AssistenciaTecnicaComponent } from './componente/assistencia/assistencia.component';
+import { RecursosHumanosComponent } from './componente/recursos-humanos/recursos-humanos.component';
+import { PontoComponent } from './componente/recursos-humanos/ponto/ponto.component';
+import { FuncionariosComponent } from './componente/recursos-humanos/funcionarios/funcionarios.component';
+import { FeriasComponent } from './componente/recursos-humanos/ferias/ferias.component';
+import { SolicitacoesRhComponent } from './componente/recursos-humanos/solicitacoes/solicitacoes.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -31,4 +43,19 @@ export const routes: Routes = [
   { path: 'carregamento',                           component: CarregamentoComponent },
   { path: 'carregamento/assistencia',               component: CarregamentoAssistenciaComponent },
   { path: 'carregamento/aguardando-descarga',       component: CarregamentoAguardandoDescargaComponent },
+
+  { path: 'manutencao',                             component: ManutencaoComponent },
+  { path: 'manutencao/solicitar-manutencao',        component: SolicitarManutencaoComponent },
+  { path: 'manutencao/solicitar-peca',              component: SolicitarPecaComponent },
+  { path: 'manutencao/estoque',                     component: EstoqueManutencaoComponent },
+  { path: 'manutencao/acompanhamento',              component: AcompanhamentoComponent },
+  { path: 'manutencao/fila-chamados',               component: FilaChamadosComponent },
+
+  { path: 'assistencia',                             component: AssistenciaTecnicaComponent },
+
+  { path: 'recursos-humanos',                        component: RecursosHumanosComponent },
+  { path: 'recursos-humanos/ponto',                  component: PontoComponent },
+  { path: 'recursos-humanos/funcionarios',           component: FuncionariosComponent },
+  { path: 'recursos-humanos/ferias',                 component: FeriasComponent },
+  { path: 'recursos-humanos/solicitacoes',           component: SolicitacoesRhComponent },
 ];

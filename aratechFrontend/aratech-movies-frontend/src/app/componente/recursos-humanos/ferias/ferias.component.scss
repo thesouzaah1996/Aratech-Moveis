@@ -1,0 +1,28 @@
+.filtro-status {
+  display: inline-flex;
+  background: #f1f3f5;
+  border-radius: 40px;
+  padding: 4px;
+  gap: 2px;
+
+  button {
+    border: none;
+    background: transparent;
+    border-radius: 36px;
+    padding: 0.35rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6c757d;
+    cursor: pointer;
+    transition: background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
+    white-space: nowrap;
+
+    &.ativo {
+      background: var(--brand-700);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(182, 0, 0, 0.28);
+    }
+
+    &:not(.ativo):hover { background: #e2e6ea; color: #343a40; }
+  }
+}

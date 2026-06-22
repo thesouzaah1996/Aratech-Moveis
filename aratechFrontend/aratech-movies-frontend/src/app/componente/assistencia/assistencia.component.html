@@ -1,0 +1,32 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-5">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/assistencia/lotes" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-collection icon-size"></i>
+            <h4 class="fw-bold mb-2">Lotes</h4>
+            <p class="text-muted text-center mb-0">Gestão e rastreamento de lotes de produtos</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/assistencia/estoque-pecas" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-puzzle icon-size"></i>
+            <h4 class="fw-bold mb-2">Estoque de Peças</h4>
+            <p class="text-muted text-center mb-0">Controle de peças e componentes para assistência</p>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<app-footer />

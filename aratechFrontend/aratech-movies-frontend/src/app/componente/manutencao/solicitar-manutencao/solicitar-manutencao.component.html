@@ -1,0 +1,140 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+
+        <div class="mb-4">
+          <h3 class="fw-bold mb-1">Solicitar Manutenção</h3>
+          <p class="text-muted mb-0 small">Preencha os dados abaixo para abrir uma ordem de serviço</p>
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+
+            <h6 class="text-danger fw-bold mb-3">Identificação do Equipamento</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Equipamento / Máquina <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.equipamento"
+                  placeholder="Ex: Prensa Hidráulica 01, Esteira Transportadora B..."
+                  [class.is-invalid]="submitted && !form.equipamento.trim()">
+                <div class="invalid-feedback">Equipamento é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tipo de Manutenção <span class="text-danger">*</span></label>
+                <select class="form-select form-select-lg" [(ngModel)]="form.tipo"
+                  [class.is-invalid]="submitted && !form.tipo">
+                  <option value="">Selecione o tipo...</option>
+                  <option value="Corretiva">Corretiva — equipamento com falha</option>
+                  <option value="Preventiva">Preventiva — revisão programada</option>
+                </select>
+                <div class="invalid-feedback">Tipo é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Prioridade <span class="text-danger">*</span></label>
+                <select class="form-select form-select-lg" [(ngModel)]="form.prioridade"
+                  [class.is-invalid]="submitted && !form.prioridade">
+                  <option value="">Selecione a prioridade...</option>
+                  <option value="Baixa">Baixa — pode aguardar</option>
+                  <option value="Média">Média — atender em breve</option>
+                  <option value="Alta">Alta — urgente</option>
+                </select>
+                <div class="invalid-feedback">Prioridade é obrigatória.</div>
+              </div>
+            </div>
+
+            <hr class="my-3">
+            <h6 class="text-danger fw-bold mb-3">Dados do Solicitante</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nome do Solicitante <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.solicitante"
+                  placeholder="Seu nome completo"
+                  [class.is-invalid]="submitted && !form.solicitante.trim()">
+                <div class="invalid-feedback">Nome do solicitante é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Setor / Departamento <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.setor"
+                  placeholder="Ex: Produção, Logística, Utilidades..."
+                  [class.is-invalid]="submitted && !form.setor.trim()">
+                <div class="invalid-feedback">Setor é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Telefone para Contato</label>
+                <input type="text" class="form-control form-control-lg"
+                  [value]="form.telefone"
+                  (input)="applyPhoneMask($event)"
+                  placeholder="(XX) XXXXX-XXXX">
+              </div>
+            </div>
+
+            <hr class="my-3">
+            <h6 class="text-danger fw-bold mb-3">Descrição do Problema</h6>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Descreva o problema ou serviço <span class="text-danger">*</span></label>
+                <textarea class="form-control" [(ngModel)]="form.descricao" rows="6"
+                  placeholder="Descreva detalhadamente o problema encontrado, sintomas, quando começou, se parou a produção, etc."
+                  [class.is-invalid]="submitted && !form.descricao.trim()"></textarea>
+                <div class="invalid-feedback">Descrição é obrigatória.</div>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-footer border-0 bg-light px-4 py-3">
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-cancelar" (click)="resetForm()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Limpar
+              </button>
+              <button type="button" class="btn btn-danger btn-lg px-4" (click)="submit()">
+                <i class="bi bi-send me-2"></i>Enviar Solicitação
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer />
+
+<!-- Modal: Resultado da Solicitação -->
+<div class="modal fade" #resultModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header text-white" [class.bg-danger]="!resultadoSucesso" [class.bg-success]="resultadoSucesso">
+        <h5 class="modal-title fw-bold">
+          <i class="me-2" [class.bi-check-circle-fill]="resultadoSucesso" [class.bi-exclamation-triangle-fill]="!resultadoSucesso"></i>
+          {{ resultadoSucesso ? 'Solicitação Enviada' : 'Erro ao Enviar' }}
+        </h5>
+      </div>
+      <div class="modal-body text-center p-4">
+        @if (resultadoSucesso) {
+          <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+          <h5 class="mt-3 fw-bold">Chamado registrado com sucesso!</h5>
+          <p class="text-muted mb-3">Sua solicitação foi recebida pela equipe de manutenção e será atendida em breve.</p>
+          <div class="delete-warning">
+            <p class="mb-1 small text-muted">Número do chamado</p>
+            <p class="fw-bold fs-4 mb-0 text-danger">#---</p>
+            <p class="small text-muted mt-1">O número será gerado pelo sistema ao ser processado.</p>
+          </div>
+        } @else {
+          <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
+          <h5 class="mt-3 fw-bold">Não foi possível enviar</h5>
+          <p class="text-muted mb-0">Tente novamente ou entre em contato com o suporte técnico.</p>
+        }
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-danger" (click)="fecharResultado()">
+          {{ resultadoSucesso ? 'Nova Solicitação' : 'Fechar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

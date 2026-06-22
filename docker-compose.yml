@@ -1,0 +1,51 @@
+version: '3.9'
+
+networks:
+  aratech-network:
+    driver: bridge
+
+volumes:
+  almoxarifado-db-data:
+
+services:
+
+  almoxarifado-db:
+    image: postgres:17.4
+    container_name: almoxarifado-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: almoxarifado
+    ports:
+      - "5555:5432"
+    volumes:
+      - almoxarifado-db-data:/var/lib/postgresql/data
+    networks:
+      - aratech-network
+
+  almoxarifado:
+    build: ./almoxarifado
+    image: aratech/almoxarifado:latest
+    container_name: almoxarifado
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://almoxarifado-db:5432/almoxarifado
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      - almoxarifado-db
+    networks:
+      - aratech-network
+
+  aratech-frontend:
+    build: ./aratechFrontend/aratech-movies-frontend
+    image: aratech/frontend:latest
+    container_name: aratech-frontend
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - aratech-network
