@@ -6,6 +6,7 @@ networks:
 
 volumes:
   almoxarifado-db-data:
+  login-db-data:
 
 services:
 
@@ -24,6 +25,21 @@ services:
     networks:
       - aratech-network
 
+  login-db:
+    image: postgres:17.4
+    container_name: login-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: login
+    ports:
+      - "5556:5432"
+    volumes:
+      - login-db-data:/var/lib/postgresql/data
+    networks:
+      - aratech-network
+
   almoxarifado:
     build: ./almoxarifado
     image: aratech/almoxarifado:latest
@@ -37,6 +53,22 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
       - almoxarifado-db
+    networks:
+      - aratech-network
+
+  login:
+    build: ./login
+    image: aratech/login:latest
+    container_name: login
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5432/login
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      - login-db
     networks:
       - aratech-network
 

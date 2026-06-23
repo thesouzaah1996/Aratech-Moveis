@@ -50,7 +50,6 @@ export class SolicitarPecaComponent implements AfterViewInit {
     this.submitted = true;
     if (!this.isFormValid()) return;
 
-    // TODO: chamar serviço quando backend estiver pronto
     this.resultadoSucesso = true;
     this.resultModal.show();
   }

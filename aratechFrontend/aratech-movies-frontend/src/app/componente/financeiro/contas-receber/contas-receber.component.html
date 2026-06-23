@@ -1,0 +1,190 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4 flex-wrap">
+      <div>
+        <h3 class="fw-bold mb-0">Contas a Receber</h3>
+        <small class="text-muted">Total a receber: <strong class="text-danger">{{ totalPendente | currency:'BRL':'symbol':'1.2-2' }}</strong></small>
+      </div>
+
+      <div class="input-group" style="max-width: 280px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+               placeholder="Buscar por descrição ou cliente…"
+               [(ngModel)]="searchTerm" (ngModelChange)="page = 1">
+      </div>
+
+      <div class="filtro-status flex-shrink-0">
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'" (click)="setFiltro('Todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Pendente'" (click)="setFiltro('Pendente')">Pendente</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Vencida'" (click)="setFiltro('Vencida')">Vencida</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Recebida'" (click)="setFiltro('Recebida')">Recebida</button>
+      </div>
+
+      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+        <i class="bi bi-plus-circle me-2"></i>Novo Título
+      </button>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Descrição</th>
+                <th>Cliente</th>
+                <th>Valor</th>
+                <th>Vencimento</th>
+                <th>Recebimento</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of paged; track c.id) {
+                <tr>
+                  <td class="fw-semibold">{{ c.descricao }}</td>
+                  <td>{{ c.cliente }}</td>
+                  <td>{{ c.valor | currency:'BRL':'symbol':'1.2-2' }}</td>
+                  <td>{{ c.vencimento }}</td>
+                  <td>{{ c.recebimento ?? '—' }}</td>
+                  <td><span class="badge {{ badgeClass(c.status) }}">{{ c.status }}</span></td>
+                  <td class="text-end">
+                    @if (c.status === 'Pendente' || c.status === 'Vencida') {
+                      <button class="btn-action btn-action-edit" title="Registrar recebimento" (click)="openReceber(c)">
+                        <i class="bi bi-check2-circle"></i>
+                      </button>
+                    } @else {
+                      <span class="text-muted small">—</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7">
+                    <div class="empty-state">
+                      <i class="bi bi-graph-up-arrow"></i>
+                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhuma conta a receber cadastrada.' }}</p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="pagination-container">
+            <span class="pagination-info">Exibindo {{ paginationStart }}–{{ paginationEnd }} de {{ filtradas.length }} título(s)</span>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" [class.disabled]="page === 1">
+                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                </li>
+                @for (pg of visiblePages; track pg) {
+                  <li class="page-item" [class.active]="pg === page">
+                    <a class="page-link" (click)="setPage(pg)">{{ pg }}</a>
+                  </li>
+                }
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <a class="page-link" (click)="setPage(page + 1)">›</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal Novo Título -->
+<div class="modal fade" #contaModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Novo Título a Receber</h5>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Descrição <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="form.descricao"
+                 [class.is-invalid]="submitted && !form.descricao?.trim()">
+          <div class="invalid-feedback">Obrigatório.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Cliente <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="form.cliente"
+                 [class.is-invalid]="submitted && !form.cliente?.trim()">
+          <div class="invalid-feedback">Obrigatório.</div>
+        </div>
+        <div class="row g-3">
+          <div class="col">
+            <label class="form-label fw-semibold">Valor <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" [(ngModel)]="form.valor" min="0.01" step="0.01"
+                   [class.is-invalid]="submitted && (!form.valor || form.valor <= 0)">
+            <div class="invalid-feedback">Valor deve ser positivo.</div>
+          </div>
+          <div class="col">
+            <label class="form-label fw-semibold">Vencimento <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [(ngModel)]="form.vencimento"
+                   [class.is-invalid]="submitted && !form.vencimento">
+            <div class="invalid-feedback">Obrigatório.</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="save()">
+          <i class="bi bi-check-circle me-1"></i>Registrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmar Recebimento -->
+<div class="modal fade" #receberModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-check2-circle me-2"></i>Registrar Recebimento
+        </h5>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="bi bi-check2-circle warning-icon" style="color: #28a745; opacity: 1;"></i>
+        <h5 class="mt-3">Confirmar recebimento?</h5>
+        @if (contaSelecionada) {
+          <p class="text-danger fw-bold mt-1">{{ contaSelecionada.descricao }}</p>
+          <p class="text-muted">Valor: <strong>{{ contaSelecionada.valor | currency:'BRL':'symbol':'1.2-2' }}</strong></p>
+        }
+        <div class="mb-3 text-start">
+          <label class="form-label fw-semibold">Data do Recebimento</label>
+          <input type="date" class="form-control" [(ngModel)]="dataRecebimento">
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmarRecebimento()">
+          <i class="bi bi-check-circle me-1"></i>Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer />

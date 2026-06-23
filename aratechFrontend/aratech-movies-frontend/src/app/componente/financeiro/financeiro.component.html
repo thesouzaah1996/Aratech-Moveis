@@ -1,0 +1,42 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-5">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/financeiro/contas-pagar" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-arrow-up-circle icon-size"></i>
+            <h4 class="fw-bold mb-2">Contas a Pagar</h4>
+            <p class="text-muted text-center mb-0">Títulos e vencimentos de pagamentos a fornecedores</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/financeiro/contas-receber" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-arrow-down-circle icon-size"></i>
+            <h4 class="fw-bold mb-2">Contas a Receber</h4>
+            <p class="text-muted text-center mb-0">Títulos e prazos de recebimentos de clientes</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/financeiro/fluxo-caixa" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-graph-up-arrow icon-size"></i>
+            <h4 class="fw-bold mb-2">Fluxo de Caixa</h4>
+            <p class="text-muted text-center mb-0">Projeção de entradas e saídas financeiras</p>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<app-footer />

@@ -38,7 +38,6 @@ export class FeriasComponent implements AfterViewInit {
     { label: 'Férias e Afastamentos' }
   ];
 
-  // TODO: carregar via serviço quando backend estiver pronto
   periodos: PeriodoFerias[] = [];
 
   searchTerm = '';
@@ -123,7 +122,6 @@ export class FeriasComponent implements AfterViewInit {
   save(): void {
     this.submitted = true;
     if (!this.isFormValid()) return;
-    // TODO: chamar serviço quando backend estiver pronto
     const newId = this.periodos.length ? Math.max(...this.periodos.map(p => p.id)) + 1 : 1;
     const inicio = new Date(this.form.dataInicio! + 'T00:00:00');
     const fim    = new Date(this.form.dataFim! + 'T00:00:00');

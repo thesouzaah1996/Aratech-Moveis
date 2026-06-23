@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
+import { CategoriaService } from '../../../core/services/categoria.service';
 
 declare const bootstrap: any;
 
@@ -39,13 +40,19 @@ export class CategoriasComponent implements OnInit {
   private categoryModal?: any;
   private deleteModal?: any;
 
+  constructor(private categoriaService: CategoriaService) {}
+
   ngOnInit(): void {
-    // TODO: injetar CategoriaService e chamar this.categoriaService.listar()
+    this.carregar();
   }
 
   ngAfterViewInit(): void {
     this.categoryModal = new bootstrap.Modal(this.categoryModalEl.nativeElement);
     this.deleteModal   = new bootstrap.Modal(this.deleteModalEl.nativeElement);
+  }
+
+  private carregar(): void {
+    this.categoriaService.getAll().subscribe(data => this.categorias = data);
   }
 
   get paged(): Categoria[] {
@@ -80,23 +87,25 @@ export class CategoriasComponent implements OnInit {
 
   save(): void {
     if (this.isEditing) {
-      // TODO: categoriaService.atualizar(this.form)
-      const idx = this.categorias.findIndex(c => c.id === this.form.id);
-      if (idx > -1) this.categorias[idx] = { ...this.form } as Categoria;
+      this.categoriaService.update(this.form.id!, this.form.nome!).subscribe(() => {
+        this.carregar();
+        this.categoryModal.hide();
+      });
     } else {
-      // TODO: categoriaService.criar(this.form)
-      const newId = this.categorias.length ? Math.max(...this.categorias.map(c => c.id)) + 1 : 1;
-      this.categorias.push({ ...this.form, id: newId } as Categoria);
+      this.categoriaService.add(this.form.nome!).subscribe(() => {
+        this.carregar();
+        this.categoryModal.hide();
+      });
     }
-    this.categoryModal.hide();
   }
 
   confirmDelete(): void {
     if (!this.categoriaParaExcluir) return;
-    // TODO: categoriaService.excluir(this.categoriaParaExcluir.id)
-    this.categorias = this.categorias.filter(c => c.id !== this.categoriaParaExcluir!.id);
-    this.categoriaParaExcluir = null;
-    this.deleteModal.hide();
+    this.categoriaService.delete(this.categoriaParaExcluir.id).subscribe(() => {
+      this.carregar();
+      this.categoriaParaExcluir = null;
+      this.deleteModal.hide();
+    });
   }
 
   setPage(p: number): void { this.page = p; }

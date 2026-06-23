@@ -54,7 +54,6 @@ export class FilaChamadosComponent implements AfterViewInit {
   private atribuirModal?: any;
   private detalhesModal?: any;
 
-  // TODO: carregar via serviço quando backend estiver pronto
   chamados: ChamadoFila[] = [];
 
   ngAfterViewInit(): void {
@@ -137,7 +136,6 @@ export class FilaChamadosComponent implements AfterViewInit {
     this.submitted = true;
     if (!this.mecanico.trim() || !this.chamadoSelecionado) return;
 
-    // TODO: chamar serviço quando backend estiver pronto
     const idx = this.chamados.findIndex(c => c.id === this.chamadoSelecionado!.id);
     if (idx > -1) {
       this.chamados[idx].mecanico = this.mecanico.trim();

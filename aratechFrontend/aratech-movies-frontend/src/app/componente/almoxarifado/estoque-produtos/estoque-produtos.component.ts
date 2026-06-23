@@ -4,18 +4,12 @@ import { RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
+import { CategoriaService } from '../../../core/services/categoria.service';
+import { ProdutoService } from '../../../core/services/produto.service';
+import { Produto, ProdutoForm } from '../../../core/models/produto.model';
+import { LookupItem } from '../../../core/models/lookup.model';
 
 declare const bootstrap: any;
-
-export interface Produto {
-  id: number;
-  nome: string;
-  sku: string;
-  estoque: number;
-  categoria: string;
-  fornecedor: string;
-  descricao: string;
-}
 
 @Component({
   selector: 'app-estoque-produtos',
@@ -35,24 +29,36 @@ export class EstoqueProdutosComponent implements OnInit {
   ];
 
   produtos: Produto[] = [];
+  categorias: LookupItem[] = [];
+
   searchQuery = '';
   isEditing = false;
   page = 1;
   pageSize = 8;
 
-  form: Partial<Produto> = this.emptyForm();
+  form: ProdutoForm = this.emptyForm();
   produtoParaExcluir: Produto | null = null;
 
   private productModal?: any;
   private deleteModal?: any;
 
+  constructor(
+    private categoriaService: CategoriaService,
+    private produtoService: ProdutoService
+  ) {}
+
   ngOnInit(): void {
-    // TODO: injetar ProdutoService e chamar this.produtoService.listar()
+    this.categoriaService.lookup().subscribe(cats => this.categorias = cats);
+    this.produtoService.getAll().subscribe(produtos => this.produtos = produtos);
   }
 
   ngAfterViewInit(): void {
     this.productModal = new bootstrap.Modal(this.productModalEl.nativeElement);
     this.deleteModal  = new bootstrap.Modal(this.deleteModalEl.nativeElement);
+  }
+
+  categoriaNome(id: number | null): string {
+    return this.categorias.find(c => c.id === id)?.nome ?? '—';
   }
 
   get filtered(): Produto[] {
@@ -61,7 +67,7 @@ export class EstoqueProdutosComponent implements OnInit {
     return this.produtos.filter(p =>
       p.nome.toLowerCase().includes(q) ||
       p.sku.toLowerCase().includes(q) ||
-      p.descricao.toLowerCase().includes(q)
+      (p.descricao ?? '').toLowerCase().includes(q)
     );
   }
 
@@ -86,7 +92,15 @@ export class EstoqueProdutosComponent implements OnInit {
 
   openEdit(produto: Produto): void {
     this.isEditing = true;
-    this.form = { ...produto };
+    this.form = {
+      id: produto.id,
+      categoriaID: produto.categoriaID,
+      nome: produto.nome,
+      sku: produto.sku,
+      quantidade: produto.quantidade,
+      descricao: produto.descricao ?? '',
+      vencimentoProduto: produto.vencimentoProduto ?? null
+    };
     this.productModal.show();
   }
 
@@ -96,24 +110,27 @@ export class EstoqueProdutosComponent implements OnInit {
   }
 
   save(): void {
-    if (this.isEditing) {
-      // TODO: produtoService.atualizar(this.form)
-      const idx = this.produtos.findIndex(p => p.id === this.form.id);
-      if (idx > -1) this.produtos[idx] = { ...this.form } as Produto;
+    if (this.isEditing && this.form.id) {
+      this.produtoService.update(this.form.id, this.form).subscribe(updated => {
+        const idx = this.produtos.findIndex(p => p.id === updated.id);
+        if (idx > -1) this.produtos[idx] = updated;
+        this.productModal.hide();
+      });
     } else {
-      // TODO: produtoService.criar(this.form)
-      const newId = this.produtos.length ? Math.max(...this.produtos.map(p => p.id)) + 1 : 1;
-      this.produtos.push({ ...this.form, id: newId } as Produto);
+      this.produtoService.add(this.form).subscribe(novo => {
+        this.produtos.unshift(novo);
+        this.productModal.hide();
+      });
     }
-    this.productModal.hide();
   }
 
   confirmDelete(): void {
     if (!this.produtoParaExcluir) return;
-    // TODO: produtoService.excluir(this.produtoParaExcluir.id)
-    this.produtos = this.produtos.filter(p => p.id !== this.produtoParaExcluir!.id);
-    this.produtoParaExcluir = null;
-    this.deleteModal.hide();
+    this.produtoService.delete(this.produtoParaExcluir.id).subscribe(() => {
+      this.produtos = this.produtos.filter(p => p.id !== this.produtoParaExcluir!.id);
+      this.produtoParaExcluir = null;
+      this.deleteModal.hide();
+    });
   }
 
   clearSearch(): void {
@@ -125,7 +142,7 @@ export class EstoqueProdutosComponent implements OnInit {
     this.page = p;
   }
 
-  private emptyForm(): Partial<Produto> {
-    return { nome: '', sku: '', estoque: 0, categoria: '', fornecedor: '', descricao: '' };
+  private emptyForm(): ProdutoForm {
+    return { categoriaID: null, nome: '', sku: '', quantidade: 0, descricao: '', vencimentoProduto: null };
   }
 }

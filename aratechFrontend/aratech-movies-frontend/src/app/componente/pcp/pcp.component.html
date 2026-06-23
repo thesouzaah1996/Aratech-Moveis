@@ -1,0 +1,52 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-5">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/pcp/ordens" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-clipboard2-data icon-size"></i>
+            <h4 class="fw-bold mb-2">Ordens de Produção</h4>
+            <p class="text-muted text-center mb-0">Criação e gestão das ordens de fabricação de móveis</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/pcp/programacao" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-calendar3 icon-size"></i>
+            <h4 class="fw-bold mb-2">Programação de Produção</h4>
+            <p class="text-muted text-center mb-0">Calendário de ordens, prazos e sequenciamento de produção</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/pcp/capacidade" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-speedometer2 icon-size"></i>
+            <h4 class="fw-bold mb-2">Capacidade Produtiva</h4>
+            <p class="text-muted text-center mb-0">Análise de carga, gargalos e disponibilidade das linhas</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/pcp/kpis" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-pie-chart icon-size"></i>
+            <h4 class="fw-bold mb-2">KPIs de Produção</h4>
+            <p class="text-muted text-center mb-0">OEE, eficiência, rejeições e indicadores de desempenho</p>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<app-footer />

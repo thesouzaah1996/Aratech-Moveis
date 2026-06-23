@@ -9,4 +9,5 @@ public interface FornecedorService {
     Response getFornecedores();
     Response disableFornecedor(Long id);
     Response enableFornecedor(Long id);
+    Response lookupFornecedor();
 }

@@ -1,0 +1,72 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    <h3 class="fw-bold mb-4">Parâmetros do Sistema</h3>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Chave</th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of parametros; track p.chave) {
+                <tr>
+                  <td><code class="small badge-id">{{ p.chave }}</code></td>
+                  <td>{{ p.descricao }}</td>
+                  <td>
+                    @if (p.editando) {
+                      @if (p.tipo === 'booleano') {
+                        <select class="form-select form-select-sm w-auto" [(ngModel)]="p.valor">
+                          <option value="true">true</option>
+                          <option value="false">false</option>
+                        </select>
+                      } @else {
+                        <input [type]="p.tipo === 'numero' ? 'number' : 'text'"
+                               class="form-control form-control-sm w-auto" [(ngModel)]="p.valor">
+                      }
+                    } @else {
+                      <span class="font-monospace">{{ p.valor }}</span>
+                    }
+                  </td>
+                  <td class="text-end">
+                    @if (p.editando) {
+                      <button class="btn-action btn-action-edit" title="Salvar" (click)="salvar(p)">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                      <button class="btn-action btn-action-delete ms-1" title="Cancelar" (click)="p.editando = false">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    } @else {
+                      <button class="btn-action btn-action-edit" title="Editar" (click)="editar(p)">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer />

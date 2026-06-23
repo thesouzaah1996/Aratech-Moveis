@@ -40,7 +40,6 @@ export class AcompanhamentoComponent {
   page = 1;
   pageSize = 8;
 
-  // TODO: carregar via serviço quando backend estiver pronto
   ordens: OrdemAcompanhamento[] = [];
 
   get filtradas(): OrdemAcompanhamento[] {

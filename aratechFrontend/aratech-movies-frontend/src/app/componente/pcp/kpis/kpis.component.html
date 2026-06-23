@@ -1,0 +1,51 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <h3 class="fw-bold mb-4">KPIs de Produção</h3>
+
+    <div class="row g-4">
+      @for (kpi of kpis; track kpi.titulo) {
+        <div class="col-md-6 col-lg-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted small mb-1">{{ kpi.titulo }}</p>
+                  <div class="d-flex align-items-end gap-1">
+                    <span class="fs-2 fw-bold {{ kpi.cor }}">{{ kpi.valor }}</span>
+                    <span class="text-muted mb-1">{{ kpi.unidade }}</span>
+                  </div>
+                </div>
+                <i class="bi fs-4 {{ tendenciaIcon(kpi.tendencia) }}"></i>
+              </div>
+              <p class="card-text text-muted small mt-2 mb-0">{{ kpi.descricao }}</p>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (kpis.length === 0) {
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div class="empty-state">
+                <i class="bi bi-bar-chart-steps"></i>
+                <p>Nenhum KPI disponível para o período.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="mt-4 text-muted small">
+      <i class="bi bi-info-circle me-1"></i>
+      KPIs calculados com base nas Ordens de Produção do mês corrente.
+    </div>
+  </div>
+</main>
+
+<app-footer />

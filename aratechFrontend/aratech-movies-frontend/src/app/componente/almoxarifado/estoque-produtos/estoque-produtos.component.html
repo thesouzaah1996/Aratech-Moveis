@@ -47,16 +47,15 @@
                 <th>ID</th>
                 <th>Nome</th>
                 <th>SKU</th>
-                <th>Estoque</th>
+                <th>Quantidade</th>
                 <th>Categoria</th>
-                <th>Fornecedor</th>
-                <th class="text-end">Ações</th>
+                <th class="text-end" style="width: 1%">Ações</th>
               </tr>
             </thead>
             <tbody>
               @if (paged.length === 0) {
                 <tr>
-                  <td colspan="7">
+                  <td colspan="6">
                     <div class="empty-state">
                       <i class="bi bi-box-seam"></i>
                       <p>Nenhum produto cadastrado.</p>
@@ -69,9 +68,8 @@
                     <td><span class="badge-id">#{{ produto.id }}</span></td>
                     <td class="fw-semibold">{{ produto.nome }}</td>
                     <td><code>{{ produto.sku }}</code></td>
-                    <td>{{ produto.estoque }}</td>
-                    <td>{{ produto.categoria }}</td>
-                    <td>{{ produto.fornecedor }}</td>
+                    <td>{{ produto.quantidade }}</td>
+                    <td>{{ categoriaNome(produto.categoriaID) }}</td>
                     <td class="text-end action-buttons">
                       <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(produto)">
                         <i class="bi bi-pencil"></i>
@@ -135,17 +133,22 @@
             <label class="form-label fw-semibold">SKU</label>
             <input type="text" class="form-control" [(ngModel)]="form.sku" placeholder="Ex: PRD-0001">
           </div>
-          <div class="col-md-4">
-            <label class="form-label fw-semibold">Quantidade em Estoque</label>
-            <input type="number" class="form-control" [(ngModel)]="form.estoque" min="0">
-          </div>
-          <div class="col-md-4">
+          <div class="col-md-6">
             <label class="form-label fw-semibold">Categoria</label>
-            <input type="text" class="form-control" [(ngModel)]="form.categoria" placeholder="Ex: Madeiras">
+            <select class="form-select" [(ngModel)]="form.categoriaID">
+              <option [ngValue]="null" disabled>Selecione uma categoria</option>
+              @for (cat of categorias; track cat.id) {
+                <option [ngValue]="cat.id">{{ cat.nome }}</option>
+              }
+            </select>
           </div>
-          <div class="col-md-4">
-            <label class="form-label fw-semibold">Fornecedor</label>
-            <input type="text" class="form-control" [(ngModel)]="form.fornecedor" placeholder="Nome do fornecedor">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Quantidade em Estoque</label>
+            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="0">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Data de Vencimento</label>
+            <input type="datetime-local" class="form-control" [(ngModel)]="form.vencimentoProduto">
           </div>
           <div class="col-12">
             <label class="form-label fw-semibold">Descrição</label>

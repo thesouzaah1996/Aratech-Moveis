@@ -1,0 +1,129 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <h3 class="fw-bold mb-4">Relatórios Gerenciais</h3>
+
+    <div class="row g-4">
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="card-title fw-bold">
+              <i class="bi bi-box-seam me-2" style="color: var(--brand-700);"></i>Almoxarifado
+            </h6>
+            <p class="card-text text-muted small">Estoque atual, movimentações e saldo por categoria.</p>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-cancelar btn-sm" (click)="exportar('Estoque — CSV')">
+                <i class="bi bi-filetype-csv me-1"></i>CSV
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="exportar('Estoque — PDF')">
+                <i class="bi bi-file-pdf me-1"></i>PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="card-title fw-bold">
+              <i class="bi bi-gear me-2" style="color: var(--brand-700);"></i>Manutenção
+            </h6>
+            <p class="card-text text-muted small">Ordens abertas, tempo de reparo e histórico de chamados.</p>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-cancelar btn-sm" (click)="exportar('Manutenção — CSV')">
+                <i class="bi bi-filetype-csv me-1"></i>CSV
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="exportar('Manutenção — PDF')">
+                <i class="bi bi-file-pdf me-1"></i>PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="card-title fw-bold">
+              <i class="bi bi-people me-2" style="color: var(--brand-700);"></i>Recursos Humanos
+            </h6>
+            <p class="card-text text-muted small">Quadro de funcionários, ponto e afastamentos.</p>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-cancelar btn-sm" (click)="exportar('RH — CSV')">
+                <i class="bi bi-filetype-csv me-1"></i>CSV
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="exportar('RH — PDF')">
+                <i class="bi bi-file-pdf me-1"></i>PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="card-title fw-bold">
+              <i class="bi bi-cart-check me-2" style="color: var(--brand-700);"></i>Compras
+            </h6>
+            <p class="card-text text-muted small">Pedidos emitidos, valores e fornecedores por período.</p>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-cancelar btn-sm" (click)="exportar('Compras — CSV')">
+                <i class="bi bi-filetype-csv me-1"></i>CSV
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="exportar('Compras — PDF')">
+                <i class="bi bi-file-pdf me-1"></i>PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="card-title fw-bold">
+              <i class="bi bi-currency-dollar me-2" style="color: var(--brand-700);"></i>Financeiro
+            </h6>
+            <p class="card-text text-muted small">Contas a pagar e receber, fluxo de caixa projetado.</p>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-cancelar btn-sm" (click)="exportar('Financeiro — CSV')">
+                <i class="bi bi-filetype-csv me-1"></i>CSV
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="exportar('Financeiro — PDF')">
+                <i class="bi bi-file-pdf me-1"></i>PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="card-title fw-bold">
+              <i class="bi bi-pie-chart me-2" style="color: var(--brand-700);"></i>PCP
+            </h6>
+            <p class="card-text text-muted small">Ordens de produção, lotes gerados e OEE da linha.</p>
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-cancelar btn-sm" (click)="exportar('PCP — CSV')">
+                <i class="bi bi-filetype-csv me-1"></i>CSV
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="exportar('PCP — PDF')">
+                <i class="bi bi-file-pdf me-1"></i>PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<app-footer />

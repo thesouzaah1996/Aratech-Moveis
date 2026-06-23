@@ -1,0 +1,90 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+      <h3 class="fw-bold mb-0">Fluxo de Caixa</h3>
+      <div>
+        <label class="form-label mb-1 small fw-semibold">Período</label>
+        <input type="month" class="form-control form-control-sm" [(ngModel)]="mesSelecionado">
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card shadow-sm text-center">
+          <div class="card-body py-4">
+            <p class="text-muted small mb-1">Total de Entradas</p>
+            <div class="fs-4 fw-bold text-success">{{ totalEntradas | currency:'BRL':'symbol':'1.2-2' }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card shadow-sm text-center">
+          <div class="card-body py-4">
+            <p class="text-muted small mb-1">Total de Saídas</p>
+            <div class="fs-4 fw-bold text-danger">{{ totalSaidas | currency:'BRL':'symbol':'1.2-2' }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card shadow-sm text-center">
+          <div class="card-body py-4">
+            <p class="text-muted small mb-1">Saldo do Período</p>
+            <div class="fs-4 fw-bold {{ saldoClass(saldoFinal) }}">{{ saldoFinal | currency:'BRL':'symbol':'1.2-2' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle table-sm">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Tipo</th>
+                <th class="text-end">Valor</th>
+                <th class="text-end">Saldo Acumulado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (linha of linhas; track linha.data) {
+                <tr>
+                  <td>{{ linha.data }}</td>
+                  <td>{{ linha.descricao }}</td>
+                  <td>
+                    <span class="badge" [class.bg-success]="linha.tipo === 'Entrada'" [class.bg-danger]="linha.tipo === 'Saída'">
+                      {{ linha.tipo }}
+                    </span>
+                  </td>
+                  <td class="text-end {{ tipoClass(linha.tipo) }}">
+                    {{ linha.tipo === 'Entrada' ? '+' : '-' }}{{ linha.valor | currency:'BRL':'symbol':'1.2-2' }}
+                  </td>
+                  <td class="text-end {{ saldoClass(linha.saldoAcumulado) }}">{{ linha.saldoAcumulado | currency:'BRL':'symbol':'1.2-2' }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5">
+                    <div class="empty-state">
+                      <i class="bi bi-bar-chart-line"></i>
+                      <p>Nenhum lançamento para este período.<br>
+                        <small>O fluxo de caixa é alimentado automaticamente pelas Contas a Pagar e Receber.</small>
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer />

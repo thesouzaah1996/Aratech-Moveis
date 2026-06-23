@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Fornecedor, FornecedorForm } from '../models/fornecedor.model';
+import { LookupItem } from '../models/lookup.model';
 import { environment } from '../../../environments/environment';
 
 interface ApiResponse {
@@ -9,6 +10,7 @@ interface ApiResponse {
   message: string;
   fornecedores?: Fornecedor[];
   fornecedorDTO?: Fornecedor;
+  fornecedorLookup?: LookupItem[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +23,12 @@ export class FornecedorService {
     return this.http
       .get<ApiResponse>(`${this.api}/all`)
       .pipe(map(res => res.fornecedores ?? []));
+  }
+
+  lookup(): Observable<LookupItem[]> {
+    return this.http
+      .get<ApiResponse>(`${this.api}/lookup-fornecedor`)
+      .pipe(map(res => res.fornecedorLookup ?? []));
   }
 
   add(form: FornecedorForm): Observable<Fornecedor> {

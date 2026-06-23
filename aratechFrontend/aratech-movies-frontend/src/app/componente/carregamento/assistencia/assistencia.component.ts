@@ -40,8 +40,6 @@ export class CarregamentoAssistenciaComponent implements OnInit, AfterViewInit {
   private historicoModal?: any;
 
   ngOnInit(): void {
-    // TODO: inject AssistenciaCarregamentoService and call listarAtivos()
-    // TODO: inject AssistenciaCarregamentoService and call listarHistorico()
   }
 
   ngAfterViewInit(): void {
@@ -56,7 +54,6 @@ export class CarregamentoAssistenciaComponent implements OnInit, AfterViewInit {
     const fluxo: StatusAssistencia[] = ['Em análise', 'Em reparo', 'Aguardando peças', 'Concluído'];
     const idx = fluxo.indexOf(item.status);
     if (idx < fluxo.length - 1) {
-      // TODO: assistenciaService.atualizarStatus(item.id, fluxo[idx + 1])
       item.status = fluxo[idx + 1];
     }
     if (item.status === 'Concluído') {

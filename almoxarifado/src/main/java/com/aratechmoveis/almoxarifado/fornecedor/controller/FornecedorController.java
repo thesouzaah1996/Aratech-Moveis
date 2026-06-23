@@ -45,4 +45,9 @@ public class FornecedorController {
     public ResponseEntity<Response> updateFornecedor(@PathVariable @Min(1) Long id, @RequestBody FornecedorDTO fornecedorDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.updateFornecedor(id, fornecedorDTO));
     }
+
+    @GetMapping("/lookup-fornecedor")
+    public ResponseEntity<Response> lookupFornecedores() {
+        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.lookupFornecedor());
+    }
 }

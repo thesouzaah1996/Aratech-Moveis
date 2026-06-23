@@ -57,10 +57,6 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      // TODO: inject HttpClient e chamar POST http://localhost:8090/api/auth/login
-      // const res = await this.http.post<any>('/api/auth/login', { email: this.email, password: this.password }).toPromise();
-      // localStorage.setItem('auth_token', res.data.token);
-
       this.loginState = 'success';
       setTimeout(() => this.router.navigate(['/dashboard']), 1500);
 

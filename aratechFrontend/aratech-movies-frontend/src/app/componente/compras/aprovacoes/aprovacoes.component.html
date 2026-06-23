@@ -1,0 +1,98 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    <h3 class="fw-bold mb-4">Aprovações de Compra</h3>
+
+    @if (pendentes.length > 0) {
+      <h6 class="text-danger fw-bold mb-3">Pendentes de Aprovação ({{ pendentes.length }})</h6>
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Nº Pedido</th>
+                  <th>Fornecedor</th>
+                  <th>Item</th>
+                  <th>Valor</th>
+                  <th>Solicitante</th>
+                  <th>Data</th>
+                  <th class="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of pendentes; track p.id) {
+                  <tr>
+                    <td><span class="badge-id">{{ p.numero }}</span></td>
+                    <td>{{ p.fornecedor }}</td>
+                    <td>{{ p.item }}</td>
+                    <td class="fw-semibold">{{ p.valor | currency:'BRL':'symbol':'1.2-2' }}</td>
+                    <td>{{ p.solicitante }}</td>
+                    <td>{{ p.dataSolicitacao }}</td>
+                    <td class="text-end">
+                      <button class="btn-action btn-action-edit" title="Aprovar" (click)="aprovar(p)">
+                        <i class="bi bi-check-lg"></i>
+                      </button>
+                      <button class="btn-action btn-action-delete ms-1" title="Reprovar" (click)="reprovar(p)">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>Nenhum pedido aguardando aprovação.</span>
+      </div>
+    }
+
+    @if (historico.length > 0) {
+      <h6 class="fw-bold mb-3 text-muted">Histórico</h6>
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr>
+                  <th>Nº Pedido</th>
+                  <th>Fornecedor</th>
+                  <th>Item</th>
+                  <th>Valor</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of historico; track p.id) {
+                  <tr>
+                    <td><span class="badge-id">{{ p.numero }}</span></td>
+                    <td>{{ p.fornecedor }}</td>
+                    <td>{{ p.item }}</td>
+                    <td>{{ p.valor | currency:'BRL':'symbol':'1.2-2' }}</td>
+                    <td><span class="badge {{ badgeClass(p.status) }}">{{ p.status }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</main>
+
+<app-footer />

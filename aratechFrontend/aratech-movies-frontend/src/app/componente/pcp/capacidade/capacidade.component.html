@@ -1,0 +1,75 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <h3 class="fw-bold mb-4">Capacidade Produtiva</h3>
+
+    <div class="row g-4">
+      @for (linha of linhas; track linha.nome) {
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="card-title fw-bold mb-0">{{ linha.nome }}</h6>
+                <span class="badge bg-secondary">{{ linha.turno }}</span>
+              </div>
+
+              <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  <span>Capacidade utilizada</span>
+                  <strong [class.text-danger]="percentual(linha) >= 90" [class.text-warning]="percentual(linha) >= 70 && percentual(linha) < 90">
+                    {{ percentual(linha) }}%
+                  </strong>
+                </div>
+                <div class="progress" style="height: 10px; border-radius: 40px;">
+                  <div class="progress-bar {{ barClass(percentual(linha)) }}"
+                       role="progressbar"
+                       [style.width.%]="percentual(linha)">
+                  </div>
+                </div>
+              </div>
+
+              <div class="row text-center g-2">
+                <div class="col-4">
+                  <div class="border rounded-3 p-2">
+                    <div class="fs-5 fw-bold text-danger">{{ linha.capacidadeUsada }}</div>
+                    <div class="text-muted small">Usada</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border rounded-3 p-2">
+                    <div class="fs-5 fw-bold text-success">{{ linha.capacidadeTotal - linha.capacidadeUsada }}</div>
+                    <div class="text-muted small">Disponível</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="border rounded-3 p-2">
+                    <div class="fs-5 fw-bold">{{ linha.operadores }}</div>
+                    <div class="text-muted small">Operadores</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (linhas.length === 0) {
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div class="empty-state">
+                <i class="bi bi-speedometer2"></i>
+                <p>Nenhuma linha de produção configurada.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</main>
+
+<app-footer />

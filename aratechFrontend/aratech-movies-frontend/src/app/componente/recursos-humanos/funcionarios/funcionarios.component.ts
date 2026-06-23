@@ -44,7 +44,6 @@ export class FuncionariosComponent implements AfterViewInit {
     { label: 'Funcionários' }
   ];
 
-  // TODO: carregar via serviço quando backend estiver pronto
   funcionarios: Funcionario[] = [];
 
   searchTerm = '';
@@ -133,7 +132,6 @@ export class FuncionariosComponent implements AfterViewInit {
   save(): void {
     this.submitted = true;
     if (!this.isFormValid(this.form)) return;
-    // TODO: chamar serviço quando backend estiver pronto
     const newId = this.funcionarios.length ? Math.max(...this.funcionarios.map(f => f.id)) + 1 : 1;
     this.funcionarios.push({ ...this.form, id: newId, ativo: true });
     this.funcionarioModal.hide();
@@ -155,7 +153,6 @@ export class FuncionariosComponent implements AfterViewInit {
   saveEdit(): void {
     this.submittedEdit = true;
     if (!this.isFormValid(this.formEdit) || !this.funcionarioEditandoId) return;
-    // TODO: chamar serviço quando backend estiver pronto
     const idx = this.funcionarios.findIndex(f => f.id === this.funcionarioEditandoId);
     if (idx > -1) Object.assign(this.funcionarios[idx], this.formEdit);
     this.editModal.hide();
@@ -163,7 +160,6 @@ export class FuncionariosComponent implements AfterViewInit {
   }
 
   toggleAtivo(f: Funcionario): void {
-    // TODO: chamar serviço quando backend estiver pronto
     f.ativo = !f.ativo;
     this.showSuccess(`Funcionário ${f.ativo ? 'ativado' : 'desativado'} com sucesso!`);
   }

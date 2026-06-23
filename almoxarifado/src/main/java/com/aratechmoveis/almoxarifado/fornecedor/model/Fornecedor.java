@@ -38,5 +38,6 @@ public class Fornecedor {
 
     private Representante representante;
 
-    private Boolean ativo;
+    @Builder.Default
+    private Boolean ativo = true;
 }

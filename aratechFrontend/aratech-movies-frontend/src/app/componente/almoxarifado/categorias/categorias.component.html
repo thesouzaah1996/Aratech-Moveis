@@ -17,15 +17,14 @@
           <table class="table table-hover align-middle">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Nome</th>
-                <th class="text-end">Ações</th>
+                <th class="text-end" style="width: 1%">Ações</th>
               </tr>
             </thead>
             <tbody>
               @if (paged.length === 0) {
                 <tr>
-                  <td colspan="3">
+                  <td colspan="2">
                     <div class="empty-state">
                       <i class="bi bi-grid"></i>
                       <p>Nenhuma categoria cadastrada.</p>
@@ -35,7 +34,6 @@
               } @else {
                 @for (cat of paged; track cat.id) {
                   <tr>
-                    <td><span class="badge-id">#{{ cat.id }}</span></td>
                     <td class="fw-semibold">{{ cat.nome }}</td>
                     <td class="text-end action-buttons">
                       <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(cat)">

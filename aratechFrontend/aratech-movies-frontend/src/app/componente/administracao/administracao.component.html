@@ -1,0 +1,62 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-5">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/administracao/usuarios" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-person-gear icon-size"></i>
+            <h4 class="fw-bold mb-2">Usuários e Permissões</h4>
+            <p class="text-muted text-center mb-0">Gerenciamento de contas, perfis e acessos ao sistema</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/administracao/relatorios" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-bar-chart-line icon-size"></i>
+            <h4 class="fw-bold mb-2">Relatórios Gerenciais</h4>
+            <p class="text-muted text-center mb-0">Indicadores consolidados e exportações por módulo</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/administracao/auditoria" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-journal-text icon-size"></i>
+            <h4 class="fw-bold mb-2">Log de Auditoria</h4>
+            <p class="text-muted text-center mb-0">Histórico de todas as ações realizadas no sistema</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/administracao/parametros" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-sliders icon-size"></i>
+            <h4 class="fw-bold mb-2">Parâmetros do Sistema</h4>
+            <p class="text-muted text-center mb-0">Configurações gerais, limites e regras de negócio</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <a routerLink="/administracao/lotes" class="card card-menu h-100">
+          <div class="d-flex flex-column align-items-center justify-content-center h-100">
+            <i class="bi bi-boxes icon-size"></i>
+            <h4 class="fw-bold mb-2">Lotes</h4>
+            <p class="text-muted text-center mb-0">Despacho de lotes para Assistência Técnica ou Almoxarifado</p>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<app-footer />

@@ -1,0 +1,94 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4 flex-wrap">
+      <h3 class="fw-bold mb-0">Log de Auditoria</h3>
+
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="input-group" style="max-width: 260px;">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input type="text" class="form-control border-start-0 ps-0"
+                 placeholder="Usuário, ação ou detalhe…"
+                 [(ngModel)]="searchTerm" (ngModelChange)="page = 1">
+        </div>
+        <select class="form-select" style="max-width: 200px;" [(ngModel)]="filtroModulo" (ngModelChange)="page = 1">
+          <option value="">Todos os módulos</option>
+          @for (m of modulos; track m) {
+            <option [value]="m">{{ m }}</option>
+          }
+        </select>
+        <input type="date" class="form-control" style="max-width: 160px;" [(ngModel)]="filtroDataInicio" (ngModelChange)="page = 1">
+        <input type="date" class="form-control" style="max-width: 160px;" [(ngModel)]="filtroDataFim" (ngModelChange)="page = 1">
+        <button class="btn btn-cancelar" (click)="limparFiltros()" title="Limpar filtros">
+          <i class="bi bi-x-circle me-1"></i>Limpar
+        </button>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle table-sm">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Usuário</th>
+                <th>Módulo</th>
+                <th>Ação</th>
+                <th>Detalhe</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (log of paged; track log.id) {
+                <tr>
+                  <td><small class="font-monospace">{{ log.dataHora }}</small></td>
+                  <td>{{ log.usuario }}</td>
+                  <td><span class="badge bg-secondary">{{ log.modulo }}</span></td>
+                  <td>{{ log.acao }}</td>
+                  <td><small class="text-muted">{{ log.detalhe }}</small></td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5">
+                    <div class="empty-state">
+                      <i class="bi bi-journal-text"></i>
+                      <p>Nenhum registro encontrado.</p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="pagination-container">
+            <span class="pagination-info">Exibindo {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} registro(s)</span>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" [class.disabled]="page === 1">
+                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                </li>
+                @for (p of visiblePages; track p) {
+                  <li class="page-item" [class.active]="p === page">
+                    <a class="page-link" (click)="setPage(p)">{{ p }}</a>
+                  </li>
+                }
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <a class="page-link" (click)="setPage(page + 1)">›</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer />

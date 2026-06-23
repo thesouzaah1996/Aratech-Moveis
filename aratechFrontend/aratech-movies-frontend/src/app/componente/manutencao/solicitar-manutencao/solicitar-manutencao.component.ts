@@ -46,7 +46,6 @@ export class SolicitarManutencaoComponent implements AfterViewInit {
     this.submitted = true;
     if (!this.isFormValid()) return;
 
-    // TODO: chamar serviço de manutenção quando backend estiver pronto
     this.resultadoSucesso = true;
     this.resultModal.show();
   }

@@ -59,8 +59,6 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
   private confirmEntradaModal?: any;
 
   ngOnInit(): void {
-    // TODO: inject PortariaService and call portariaService.listarFila()
-    // TODO: inject PortariaService and call portariaService.listarHistorico()
   }
 
   ngAfterViewInit(): void {
@@ -79,7 +77,6 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
 
   registrarChegada(): void {
     if (!this.form.notaFiscal || !this.form.empresa || !this.form.motorista || !this.form.placa || !this.form.setor) return;
-    // TODO: portariaService.registrar(this.form).subscribe(() => { this.resetForm(); this.carregarFila(); })
     this.resetForm();
   }
 
@@ -93,7 +90,6 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
   }
 
   confirmarRemocao(): void {
-    // TODO: portariaService.remover(this.idParaRemover).subscribe(...)
     this.fila = this.fila.filter(i => i.id !== this.idParaRemover);
     this.idParaRemover = null;
     this.removeModal.hide();
@@ -105,7 +101,6 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
   }
 
   confirmarEntrada(): void {
-    // TODO: portariaService.confirmarEntrada(this.idParaConfirmar).subscribe(...)
     const item = this.fila.find(i => i.id === this.idParaConfirmar);
     if (item) {
       item.status = 'FINALIZADO';

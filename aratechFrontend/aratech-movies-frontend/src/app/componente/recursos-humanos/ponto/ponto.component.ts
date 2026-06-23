@@ -38,7 +38,6 @@ export class PontoComponent implements OnInit {
   pageSize = 8;
   sincronizando = false;
 
-  // TODO: carregar via serviço de integração com a API externa de ponto
   registros: RegistroPonto[] = [];
 
   ngOnInit(): void {
@@ -99,12 +98,10 @@ export class PontoComponent implements OnInit {
 
   onDataChange(): void {
     this.page = 1;
-    // TODO: chamar serviço com this.dataSelecionada para buscar registros da API externa
   }
 
   sincronizar(): void {
     this.sincronizando = true;
-    // TODO: chamar serviço de sincronização com a API externa de ponto
     setTimeout(() => (this.sincronizando = false), 1500);
   }
 

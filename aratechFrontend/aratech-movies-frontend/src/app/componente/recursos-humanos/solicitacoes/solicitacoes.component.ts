@@ -42,7 +42,6 @@ export class SolicitacoesRhComponent implements AfterViewInit {
     { label: 'Solicitações' }
   ];
 
-  // TODO: carregar via serviço quando backend estiver pronto
   solicitacoes: Solicitacao[] = [];
 
   searchTerm = '';
@@ -127,7 +126,6 @@ export class SolicitacoesRhComponent implements AfterViewInit {
   save(): void {
     this.submitted = true;
     if (!this.isFormValid()) return;
-    // TODO: chamar serviço quando backend estiver pronto
     const newId = this.solicitacoes.length ? Math.max(...this.solicitacoes.map(s => s.id)) + 1 : 1;
     this.solicitacoes.push({
       ...this.form,

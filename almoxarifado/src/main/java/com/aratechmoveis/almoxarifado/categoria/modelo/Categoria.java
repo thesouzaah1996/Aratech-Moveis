@@ -1,4 +1,4 @@
-package com.aratechmoveis.almoxarifado.categorias.modelo;
+package com.aratechmoveis.almoxarifado.categoria.modelo;
 
 import com.aratechmoveis.almoxarifado.produto.modelo.Produto;
 import jakarta.persistence.*;

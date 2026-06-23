@@ -51,7 +51,6 @@ export class BaixaNotasComponent implements OnInit, AfterViewInit {
   private deleteModal?: any;
 
   ngOnInit(): void {
-    // TODO: inject BaixaNotasService and call baixaNotasService.listar()
   }
 
   ngAfterViewInit(): void {
@@ -109,21 +108,14 @@ export class BaixaNotasComponent implements OnInit, AfterViewInit {
   }
 
   save(): void {
-    if (this.isEditing) {
-      // TODO: baixaNotasService.atualizar(this.form)
-    } else {
-      // TODO: baixaNotasService.criar(this.form)
-    }
     this.notaModal.hide();
   }
 
   baixarNota(nota: NotaFiscal): void {
-    // TODO: baixaNotasService.baixar(nota.id)
     nota.status = 'Baixada';
   }
 
   confirmDelete(): void {
-    // TODO: baixaNotasService.excluir(this.notaParaExcluir.id)
     this.notas = this.notas.filter(n => n.id !== this.notaParaExcluir?.id);
     this.notaParaExcluir = null;
     this.deleteModal.hide();

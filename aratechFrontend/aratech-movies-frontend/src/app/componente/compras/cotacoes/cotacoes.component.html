@@ -1,0 +1,204 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4 flex-wrap">
+      <h3 class="fw-bold mb-0 flex-shrink-0">Cotações</h3>
+
+      <div class="input-group" style="max-width: 300px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+               placeholder="Buscar por número ou item…"
+               [(ngModel)]="searchTerm" (ngModelChange)="page = 1">
+      </div>
+
+      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+        <i class="bi bi-plus-circle me-2"></i>Nova Cotação
+      </button>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Nº Cotação</th>
+                <th>Item</th>
+                <th>Qtd</th>
+                <th>Fornecedor 1</th>
+                <th>Fornecedor 2</th>
+                <th>Fornecedor 3</th>
+                <th>Status</th>
+                <th>Escolhido</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of paged; track c.id) {
+                <tr>
+                  <td><span class="badge-id">{{ c.numero }}</span></td>
+                  <td>{{ c.item }}</td>
+                  <td>{{ c.quantidade }}</td>
+                  <td>
+                    <small>{{ c.fornecedor1 }}</small><br>
+                    @if (c.valor1 > 0) {
+                      <span [class.fw-bold]="menorPreco(c) === c.fornecedor1" [class.text-danger]="menorPreco(c) === c.fornecedor1">
+                        {{ c.valor1 | currency:'BRL':'symbol':'1.2-2' }}
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    <small>{{ c.fornecedor2 }}</small><br>
+                    @if (c.valor2 > 0) {
+                      <span [class.fw-bold]="menorPreco(c) === c.fornecedor2" [class.text-danger]="menorPreco(c) === c.fornecedor2">
+                        {{ c.valor2 | currency:'BRL':'symbol':'1.2-2' }}
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    <small>{{ c.fornecedor3 }}</small><br>
+                    @if (c.valor3 > 0) {
+                      <span [class.fw-bold]="menorPreco(c) === c.fornecedor3" [class.text-danger]="menorPreco(c) === c.fornecedor3">
+                        {{ c.valor3 | currency:'BRL':'symbol':'1.2-2' }}
+                      </span>
+                    }
+                  </td>
+                  <td><span class="badge {{ badgeClass(c.status) }}">{{ c.status }}</span></td>
+                  <td>{{ c.fornecedorEscolhido ?? '—' }}</td>
+                  <td class="text-end">
+                    @if (c.status !== 'Finalizada' && c.status !== 'Cancelada') {
+                      <div class="dropdown">
+                        <button class="btn-action btn-action-edit dropdown-toggle" type="button" data-bs-toggle="dropdown" title="Escolher fornecedor">
+                          <i class="bi bi-check2-square"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          @if (c.fornecedor1) {
+                            <li><button class="dropdown-item" (click)="escolher(c, c.fornecedor1)">{{ c.fornecedor1 }}</button></li>
+                          }
+                          @if (c.fornecedor2) {
+                            <li><button class="dropdown-item" (click)="escolher(c, c.fornecedor2)">{{ c.fornecedor2 }}</button></li>
+                          }
+                          @if (c.fornecedor3) {
+                            <li><button class="dropdown-item" (click)="escolher(c, c.fornecedor3)">{{ c.fornecedor3 }}</button></li>
+                          }
+                        </ul>
+                      </div>
+                    } @else {
+                      <span class="text-muted small">—</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="9">
+                    <div class="empty-state">
+                      <i class="bi bi-clipboard-check"></i>
+                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhuma cotação cadastrada.' }}</p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="pagination-container">
+            <span class="pagination-info">Exibindo {{ paginationStart }}–{{ paginationEnd }} de {{ filtradas.length }} cotação(ões)</span>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" [class.disabled]="page === 1">
+                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                </li>
+                @for (pg of visiblePages; track pg) {
+                  <li class="page-item" [class.active]="pg === page">
+                    <a class="page-link" (click)="setPage(pg)">{{ pg }}</a>
+                  </li>
+                }
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <a class="page-link" (click)="setPage(page + 1)">›</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal Nova Cotação -->
+<div class="modal fade" #cotacaoModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Nova Cotação</h5>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3 mb-3">
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Item / Descrição <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.item"
+                   [class.is-invalid]="submitted && !form.item?.trim()">
+            <div class="invalid-feedback">Obrigatório.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Quantidade <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="1">
+          </div>
+        </div>
+        <h6 class="text-danger fw-bold mb-3">Fornecedores</h6>
+        <div class="row g-3 mb-2">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Fornecedor 1</label>
+            <input type="text" class="form-control" [(ngModel)]="form.fornecedor1">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Valor 1 (R$)</label>
+            <input type="number" class="form-control" [(ngModel)]="form.valor1" min="0" step="0.01">
+          </div>
+        </div>
+        <div class="row g-3 mb-2">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Fornecedor 2</label>
+            <input type="text" class="form-control" [(ngModel)]="form.fornecedor2">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Valor 2 (R$)</label>
+            <input type="number" class="form-control" [(ngModel)]="form.valor2" min="0" step="0.01">
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Fornecedor 3</label>
+            <input type="text" class="form-control" [(ngModel)]="form.fornecedor3">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Valor 3 (R$)</label>
+            <input type="number" class="form-control" [(ngModel)]="form.valor3" min="0" step="0.01">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="save()">
+          <i class="bi bi-check-circle me-1"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer />

@@ -1,0 +1,210 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4 flex-wrap">
+      <h3 class="fw-bold mb-0 flex-shrink-0">Pedidos de Compra</h3>
+
+      <div class="input-group" style="max-width: 300px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+               placeholder="Buscar por número, fornecedor ou item…"
+               [(ngModel)]="searchTerm" (ngModelChange)="page = 1">
+      </div>
+
+      <div class="filtro-status flex-shrink-0">
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'" (click)="setFiltro('Todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Rascunho'" (click)="setFiltro('Rascunho')">Rascunho</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Aguardando Aprovação'" (click)="setFiltro('Aguardando Aprovação')">Ag. Aprovação</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Aprovado'" (click)="setFiltro('Aprovado')">Aprovado</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Recebido'" (click)="setFiltro('Recebido')">Recebido</button>
+      </div>
+
+      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+        <i class="bi bi-plus-circle me-2"></i>Novo Pedido
+      </button>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Nº Pedido</th>
+                <th>Fornecedor</th>
+                <th>Item</th>
+                <th>Qtd</th>
+                <th>Valor Unit.</th>
+                <th>Total</th>
+                <th>Entrega</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of paged; track p.id) {
+                <tr>
+                  <td><span class="badge-id">{{ p.numero }}</span></td>
+                  <td>{{ p.fornecedor }}</td>
+                  <td>{{ p.item }}</td>
+                  <td>{{ p.quantidade }}</td>
+                  <td>{{ p.valorUnitario | currency:'BRL':'symbol':'1.2-2' }}</td>
+                  <td>{{ p.quantidade * p.valorUnitario | currency:'BRL':'symbol':'1.2-2' }}</td>
+                  <td>{{ p.dataEntrega }}</td>
+                  <td><span class="badge {{ badgeClass(p.status) }}">{{ p.status }}</span></td>
+                  <td class="text-end">
+                    @if (p.status === 'Rascunho') {
+                      <button class="btn-action btn-action-edit" title="Enviar para aprovação" (click)="enviarAprovacao(p)">
+                        <i class="bi bi-send"></i>
+                      </button>
+                      <button class="btn-action btn-action-edit ms-1" title="Editar" (click)="openEdit(p)">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button class="btn-action btn-action-delete ms-1" title="Excluir" (click)="openDelete(p)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    } @else {
+                      <span class="text-muted small">—</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="9">
+                    <div class="empty-state">
+                      <i class="bi bi-cart3"></i>
+                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum pedido de compra cadastrado.' }}</p>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="pagination-container">
+            <span class="pagination-info">Exibindo {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} pedido(s)</span>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" [class.disabled]="page === 1">
+                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                </li>
+                @for (pg of visiblePages; track pg) {
+                  <li class="page-item" [class.active]="pg === page">
+                    <a class="page-link" (click)="setPage(pg)">{{ pg }}</a>
+                  </li>
+                }
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <a class="page-link" (click)="setPage(page + 1)">›</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal Pedido -->
+<div class="modal fade" #pedidoModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">{{ isEditing ? 'Editar Pedido' : 'Novo Pedido de Compra' }}</h5>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Fornecedor <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="form.fornecedor"
+                 [class.is-invalid]="submitted && !form.fornecedor?.trim()">
+          <div class="invalid-feedback">Obrigatório.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Item / Descrição <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="form.item"
+                 [class.is-invalid]="submitted && !form.item?.trim()">
+          <div class="invalid-feedback">Obrigatório.</div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col">
+            <label class="form-label fw-semibold">Quantidade <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="1"
+                   [class.is-invalid]="submitted && (!form.quantidade || form.quantidade < 1)">
+            <div class="invalid-feedback">Deve ser maior que 0.</div>
+          </div>
+          <div class="col">
+            <label class="form-label fw-semibold">Valor Unitário <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" [(ngModel)]="form.valorUnitario" min="0.01" step="0.01"
+                   [class.is-invalid]="submitted && (!form.valorUnitario || form.valorUnitario <= 0)">
+            <div class="invalid-feedback">Valor deve ser positivo.</div>
+          </div>
+        </div>
+        <div class="mb-3 text-end text-muted small">
+          Total: <strong class="text-danger">{{ valorTotal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        </div>
+        <div class="row g-3">
+          <div class="col">
+            <label class="form-label fw-semibold">Data do Pedido <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [(ngModel)]="form.dataPedido"
+                   [class.is-invalid]="submitted && !form.dataPedido">
+            <div class="invalid-feedback">Obrigatório.</div>
+          </div>
+          <div class="col">
+            <label class="form-label fw-semibold">Data de Entrega <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [(ngModel)]="form.dataEntrega"
+                   [class.is-invalid]="submitted && !form.dataEntrega">
+            <div class="invalid-feedback">Obrigatório.</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="save()">
+          <i class="bi bi-check-circle me-1"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Excluir -->
+<div class="modal fade" #deleteModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Remover Pedido
+        </h5>
+      </div>
+      <div class="modal-body text-center p-4">
+        <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+        <h5 class="mt-3">Deseja remover este pedido?</h5>
+        @if (pedidoParaExcluir) {
+          <p class="text-danger fw-bold mt-2">{{ pedidoParaExcluir.numero }}</p>
+        }
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+          <i class="bi bi-trash me-1"></i>Remover
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer />

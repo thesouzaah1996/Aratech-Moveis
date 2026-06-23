@@ -39,8 +39,6 @@ export class CarregamentoAguardandoDescargaComponent implements OnInit, AfterVie
   private historicoModal?: any;
 
   ngOnInit(): void {
-    // TODO: inject CarregamentoDescargaService and call listarFila()
-    // TODO: inject CarregamentoDescargaService and call listarHistorico()
   }
 
   ngAfterViewInit(): void {
@@ -52,12 +50,10 @@ export class CarregamentoAguardandoDescargaComponent implements OnInit, AfterVie
   }
 
   liberar(item: ItemFilaCarregamento): void {
-    // TODO: carregamentoDescargaService.liberar(item.id)
     item.status = 'Em conferência';
   }
 
   finalizar(item: ItemFilaCarregamento): void {
-    // TODO: carregamentoDescargaService.finalizar(item.id)
     item.status = 'Finalizado';
     this.historico.unshift({ ...item });
     this.fila = this.fila.filter(i => i.id !== item.id);

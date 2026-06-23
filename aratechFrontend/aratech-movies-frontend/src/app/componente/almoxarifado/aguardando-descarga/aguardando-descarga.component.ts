@@ -39,8 +39,6 @@ export class AguardandoDescargaComponent implements OnInit {
   private historicoModal?: any;
 
   ngOnInit(): void {
-    // TODO: injetar DescargaService e chamar this.descargaService.listarFila()
-    // TODO: injetar DescargaService e chamar this.descargaService.listarHistorico()
   }
 
   ngAfterViewInit(): void {
@@ -52,12 +50,10 @@ export class AguardandoDescargaComponent implements OnInit {
   }
 
   liberar(item: ItemFila): void {
-    // TODO: descargaService.liberar(item.id)
     item.status = 'Em conferência';
   }
 
   finalizar(item: ItemFila): void {
-    // TODO: descargaService.finalizar(item.id)
     item.status = 'Finalizado';
     this.historico.unshift({ ...item });
     this.fila = this.fila.filter(i => i.id !== item.id);
