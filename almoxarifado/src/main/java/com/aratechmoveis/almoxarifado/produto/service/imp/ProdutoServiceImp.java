@@ -3,6 +3,8 @@ package com.aratechmoveis.almoxarifado.produto.service.imp;
 import com.aratechmoveis.almoxarifado.Response;
 import com.aratechmoveis.almoxarifado.categoria.modelo.Categoria;
 import com.aratechmoveis.almoxarifado.categoria.repository.CategoriaRepository;
+import com.aratechmoveis.almoxarifado.fornecedor.model.Fornecedor;
+import com.aratechmoveis.almoxarifado.fornecedor.repository.FornecedorRepository;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.produto.dto.ProdutoDTO;
@@ -27,6 +29,7 @@ public class ProdutoServiceImp implements ProdutoService {
     private final ProdutoRepository produtoRepository;
     private final ModelMapper modelMapper;
     private final CategoriaRepository categoriaRepository;
+    private final FornecedorRepository fornecedorRepository;
 
     @Override
     @Transactional
@@ -43,8 +46,14 @@ public class ProdutoServiceImp implements ProdutoService {
                         "Categoria não encontrada. Para adicionar um produto, sua categoria deve estar cadastrada."
                 ));
 
+        Fornecedor fornecedorExistente = fornecedorRepository.findById(produtoDTO.getFornecedorID())
+                .orElseThrow(() -> new NotFoundException(
+                        "Fornecedor não encontrado. Para adicionar um produto, o fornecedor deve estar cadastrado."
+                ));
+
         Produto produtoParaSalvar = modelMapper.map(produtoDTO, Produto.class);
         produtoParaSalvar.setCategoria(categoria);
+        produtoParaSalvar.setFornecedor(fornecedorExistente);
 
         if (produtoParaSalvar.getLocalArmazenamento() != null) {
             produtoParaSalvar.setLocalArmazenamento(
@@ -52,8 +61,8 @@ public class ProdutoServiceImp implements ProdutoService {
             );
         }
 
-        ProdutoDTO produto = modelMapper.map(produtoParaSalvar, ProdutoDTO.class);
         produtoRepository.save(produtoParaSalvar);
+        ProdutoDTO produto = modelMapper.map(produtoParaSalvar, ProdutoDTO.class);
 
         return Response.builder()
                 .status(201)
@@ -73,12 +82,14 @@ public class ProdutoServiceImp implements ProdutoService {
             produtoExistente.setCategoria(categoria);
         }
 
-        if (produtoDTO.getNome() != null && !produtoDTO.getNome().isBlank()) {
-            produtoExistente.setNome(produtoDTO.getNome());
+        if (produtoDTO.getFornecedorID() != null && produtoDTO.getFornecedorID() > 0) {
+            Fornecedor fornecedor = fornecedorRepository.findById(produtoDTO.getFornecedorID())
+                    .orElseThrow(() -> new NotFoundException("Fornecedor não encontrado"));
+            produtoExistente.setFornecedor(fornecedor);
         }
 
-        if (produtoDTO.getSku() != null && !produtoDTO.getSku().isBlank()) {
-            produtoExistente.setSku(produtoDTO.getSku());
+        if (produtoDTO.getNome() != null && !produtoDTO.getNome().isBlank()) {
+            produtoExistente.setNome(produtoDTO.getNome());
         }
 
         if (produtoDTO.getDescricao() != null && !produtoDTO.getDescricao().isBlank()) {
@@ -95,10 +106,8 @@ public class ProdutoServiceImp implements ProdutoService {
             produtoExistente.setLocalArmazenamento(local);
         }
 
-
-
-        if (produtoDTO.getQuantidade() != null && produtoDTO.getQuantidade() > 0) {
-            produtoExistente.setQuantidadeEstoque(produtoDTO.getQuantidade());
+        if (produtoDTO.getQuantidade() != null && produtoDTO.getQuantidade() >= 0) {
+            produtoExistente.setQuantidade(produtoDTO.getQuantidade());
         }
 
         produtoRepository.save(produtoExistente);
@@ -112,6 +121,7 @@ public class ProdutoServiceImp implements ProdutoService {
     }
 
     @Override
+    @Transactional
     public Response getProdutos() {
         List<Produto> produtos = produtoRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         List<ProdutoDTO> produtoDTOS = modelMapper.map(produtos, new TypeToken<List<ProdutoDTO>>() {
@@ -125,6 +135,7 @@ public class ProdutoServiceImp implements ProdutoService {
     }
 
     @Override
+    @Transactional
     public Response getProdutoById(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado, confira se o id está correto"));

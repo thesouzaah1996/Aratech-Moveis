@@ -7,6 +7,7 @@ networks:
 volumes:
   almoxarifado-db-data:
   login-db-data:
+  portaria-db-data:
 
 services:
 
@@ -40,6 +41,21 @@ services:
     networks:
       - aratech-network
 
+  portaria-db:
+    image: postgres:17.4
+    container_name: portaria-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: portaria
+    ports:
+      - "5557:5432"
+    volumes:
+      - portaria-db-data:/var/lib/postgresql/data
+    networks:
+      - aratech-network
+
   almoxarifado:
     build: ./almoxarifado
     image: aratech/almoxarifado:latest
@@ -64,11 +80,27 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5432/login
+      SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5433/login
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
       - login-db
+    networks:
+      - aratech-network
+
+  portaria:
+    build: ./portaria
+    image: aratech/portaria:latest
+    container_name: portaria
+    restart: always
+    ports:
+      - "8082:8282"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5433/portaria
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      - portaria-db
     networks:
       - aratech-network
 
@@ -81,3 +113,36 @@ services:
       - "80:80"
     networks:
       - aratech-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.2.15
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.2.15
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092, PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT, PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "29092:29092"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    ports:
+      - "8090:8080"

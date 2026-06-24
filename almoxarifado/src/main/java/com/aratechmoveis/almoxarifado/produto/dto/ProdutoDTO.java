@@ -24,6 +24,10 @@ public class ProdutoDTO {
     @Positive(message = "O ID da categoria deve ser um valor positivo.")
     private Long categoriaID;
 
+    @NotNull(message = "O fornecedor é obrigatório.")
+    @Positive(message = "O ID do fornecedor deve ser um valor positivo")
+    private Long fornecedorID;
+
     @NotBlank(message = "O nome do produto é obrigatório.")
     @Size(min = 2, max = 150, message = "O nome deve ter entre 2 e 150 caracteres.")
     private String nome;

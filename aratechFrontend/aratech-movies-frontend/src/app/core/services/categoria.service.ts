@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Categoria } from '../../componente/almoxarifado/categorias/categorias.component';
 import { LookupItem } from '../models/lookup.model';
+import { environment } from '../../../environments/environment';
 
 interface ApiResponse {
   status: number;
@@ -14,7 +15,7 @@ interface ApiResponse {
 
 @Injectable({ providedIn: 'root' })
 export class CategoriaService {
-  private readonly api = '/almoxarifado/categoria';
+  private readonly api = `${environment.apiUrl}/almoxarifado/categoria`;
 
   constructor(private http: HttpClient) {}
 

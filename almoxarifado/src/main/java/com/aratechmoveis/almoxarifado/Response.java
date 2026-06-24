@@ -21,7 +21,6 @@ public class Response {
     private String message;
 
     private String token;
-//    private PerfilAcesso perfilAcesso;
     private String expirationTime;
 
     private FornecedorDTO fornecedorDTO;

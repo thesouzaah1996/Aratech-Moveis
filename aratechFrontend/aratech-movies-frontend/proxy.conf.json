@@ -1,10 +1,5 @@
 {
-  "/almoxarifado/fornecedor": {
-    "target": "http://localhost:8081",
-    "secure": false,
-    "changeOrigin": true
-  },
-  "/almoxarifado/categoria": {
+  "/almoxarifado": {
     "target": "http://localhost:8081",
     "secure": false,
     "changeOrigin": true

@@ -4,109 +4,116 @@
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3 class="fw-bold mb-0">Gerenciar Produtos</h3>
-      <button class="btn btn-danger" (click)="openAdd()">
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>{{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+      <h3 class="fw-bold mb-0 flex-shrink-0">Gerenciar Produtos</h3>
+
+      <div class="input-group" style="max-width: 340px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+          placeholder="Buscar por nome, SKU ou descrição…"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="page = 1">
+      </div>
+
+      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
         <i class="bi bi-plus-circle me-2"></i>Novo Produto
       </button>
     </div>
 
-    <!-- Busca -->
-    <div class="row mb-4">
-      <div class="col-md-5 col-lg-4">
-        <div class="input-group">
-          <span class="input-group-text bg-white border-end-0">
-            <i class="bi bi-search text-danger"></i>
-          </span>
-          <input type="text" class="form-control border-start-0 ps-0"
-                 placeholder="Buscar por nome, SKU ou descrição..."
-                 [(ngModel)]="searchQuery" (ngModelChange)="page = 1">
-          @if (searchQuery) {
-            <button class="btn btn-outline-danger" type="button" (click)="clearSearch()">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          }
-        </div>
-      </div>
-      <div class="col text-end d-flex align-items-center justify-content-end">
-        @if (searchQuery && filtered.length !== produtos.length) {
-          <span class="text-muted small">
-            {{ filtered.length }} resultado(s) de {{ produtos.length }}
-          </span>
-        }
-      </div>
-    </div>
-
-    <!-- Tabela -->
     <div class="card shadow-sm">
       <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>SKU</th>
-                <th>Quantidade</th>
-                <th>Categoria</th>
-                <th class="text-end" style="width: 1%">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (paged.length === 0) {
+        @if (loading) {
+          <div class="text-center py-5 text-muted">
+            <div class="spinner-border spinner-border-sm me-2"></div>
+            Carregando produtos...
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
                 <tr>
-                  <td colspan="6">
-                    <div class="empty-state">
-                      <i class="bi bi-box-seam"></i>
-                      <p>Nenhum produto cadastrado.</p>
-                    </div>
-                  </td>
+                  <th>ID</th>
+                  <th>Nome</th>
+                  <th>SKU</th>
+                  <th>Quantidade</th>
+                  <th>Categoria</th>
+                  <th class="text-end" style="width: 1%">Ações</th>
                 </tr>
-              } @else {
-                @for (produto of paged; track produto.id) {
+              </thead>
+              <tbody>
+                @if (paged.length === 0) {
                   <tr>
-                    <td><span class="badge-id">#{{ produto.id }}</span></td>
-                    <td class="fw-semibold">{{ produto.nome }}</td>
-                    <td><code>{{ produto.sku }}</code></td>
-                    <td>{{ produto.quantidade }}</td>
-                    <td>{{ categoriaNome(produto.categoriaID) }}</td>
-                    <td class="text-end action-buttons">
-                      <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(produto)">
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                      <button class="btn-action btn-action-delete" title="Excluir" (click)="openDelete(produto)">
-                        <i class="bi bi-trash"></i>
-                      </button>
+                    <td colspan="6">
+                      <div class="empty-state">
+                        <i class="bi bi-box-seam"></i>
+                        <p>{{ searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhum produto cadastrado.' }}</p>
+                      </div>
                     </td>
                   </tr>
+                } @else {
+                  @for (produto of paged; track produto.id) {
+                    <tr>
+                      <td><span class="badge-id">#{{ produto.id }}</span></td>
+                      <td class="fw-semibold">{{ produto.nome }}</td>
+                      <td><code>{{ produto.sku }}</code></td>
+                      <td>{{ produto.quantidade }}</td>
+                      <td>{{ categoriaNome(produto.categoriaID) }}</td>
+                      <td>
+                        <div class="d-flex justify-content-end align-items-center gap-1">
+                          <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(produto)">
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          <button class="btn-action btn-action-delete" title="Excluir" (click)="openDelete(produto)">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
                 }
-              }
-            </tbody>
-          </table>
-        </div>
-
-        @if (totalPages > 1) {
-          <div class="pagination-container">
-            <span class="pagination-info">
-              Mostrando {{ (page - 1) * pageSize + 1 }}–{{ page * pageSize > filtered.length ? filtered.length : page * pageSize }}
-              de {{ filtered.length }}
-            </span>
-            <nav>
-              <ul class="pagination">
-                <li class="page-item" [class.disabled]="page === 1">
-                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
-                </li>
-                @for (p of pages; track p) {
-                  <li class="page-item" [class.active]="p === page">
-                    <a class="page-link" (click)="setPage(p)">{{ p }}</a>
-                  </li>
-                }
-                <li class="page-item" [class.disabled]="page === totalPages">
-                  <a class="page-link" (click)="setPage(page + 1)">›</a>
-                </li>
-              </ul>
-            </nav>
+              </tbody>
+            </table>
           </div>
+
+          @if (totalPages > 1) {
+            <div class="pagination-container">
+              <span class="pagination-info">
+                Mostrando {{ (page - 1) * pageSize + 1 }}–{{ page * pageSize > filtered.length ? filtered.length : page * pageSize }}
+                de {{ filtered.length }}
+              </span>
+              <nav>
+                <ul class="pagination">
+                  <li class="page-item" [class.disabled]="page === 1">
+                    <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                  </li>
+                  @for (p of pages; track p) {
+                    <li class="page-item" [class.active]="p === page">
+                      <a class="page-link" (click)="setPage(p)">{{ p }}</a>
+                    </li>
+                  }
+                  <li class="page-item" [class.disabled]="page === totalPages">
+                    <a class="page-link" (click)="setPage(page + 1)">›</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          }
         }
       </div>
     </div>
@@ -116,7 +123,6 @@
 
 <app-footer />
 
-<!-- Modal: Produto -->
 <div class="modal fade" #productModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
@@ -125,46 +131,90 @@
       </div>
       <div class="modal-body p-4">
         <div class="row g-3">
+
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Nome</label>
-            <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome do produto">
+            <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.nome"
+              placeholder="Nome do produto"
+              [class.is-invalid]="submitted && !form.nome.trim()">
+            <div class="invalid-feedback">Nome é obrigatório.</div>
           </div>
+
           <div class="col-md-6">
-            <label class="form-label fw-semibold">SKU</label>
-            <input type="text" class="form-control" [(ngModel)]="form.sku" placeholder="Ex: PRD-0001">
+            <label class="form-label fw-semibold">SKU <span class="text-danger">*</span></label>
+            @if (isEditing) {
+              <input type="text" class="form-control" [value]="form.sku" disabled>
+              <div class="form-text text-muted">O SKU não pode ser alterado após o cadastro.</div>
+            } @else {
+              <input type="text" class="form-control" [(ngModel)]="form.sku"
+                placeholder="Ex: PRD-0001"
+                [class.is-invalid]="submitted && isSkuInvalid()">
+              <div class="invalid-feedback">
+                {{ !form.sku.trim() ? 'SKU é obrigatório.' : 'Use apenas letras, números, hífens e underscores.' }}
+              </div>
+            }
           </div>
+
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Categoria</label>
-            <select class="form-select" [(ngModel)]="form.categoriaID">
+            <label class="form-label fw-semibold">Categoria <span class="text-danger">*</span></label>
+            <select class="form-select" [(ngModel)]="form.categoriaID"
+              [class.is-invalid]="submitted && form.categoriaID === null">
               <option [ngValue]="null" disabled>Selecione uma categoria</option>
               @for (cat of categorias; track cat.id) {
                 <option [ngValue]="cat.id">{{ cat.nome }}</option>
               }
             </select>
+            <div class="invalid-feedback">Categoria é obrigatória.</div>
           </div>
+
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Quantidade em Estoque</label>
-            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="0">
+            <label class="form-label fw-semibold">Fornecedor</label>
+            <select class="form-select" [(ngModel)]="form.fornecedorID">
+              <option [ngValue]="null">Nenhum</option>
+              @for (forn of fornecedores; track forn.id) {
+                <option [ngValue]="forn.id">{{ forn.nome }}</option>
+              }
+            </select>
           </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Quantidade <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="0"
+              [class.is-invalid]="submitted && (form.quantidade === null || form.quantidade === undefined)">
+            <div class="invalid-feedback">Quantidade é obrigatória.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Local de Armazenamento <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.localArmazenamento"
+              placeholder="Ex: prateleira-a1"
+              [class.is-invalid]="submitted && !form.localArmazenamento.trim()">
+            <div class="invalid-feedback">Local de armazenamento é obrigatório.</div>
+          </div>
+
           <div class="col-md-6">
             <label class="form-label fw-semibold">Data de Vencimento</label>
             <input type="datetime-local" class="form-control" [(ngModel)]="form.vencimentoProduto">
           </div>
+
           <div class="col-12">
             <label class="form-label fw-semibold">Descrição</label>
-            <textarea class="form-control" [(ngModel)]="form.descricao" rows="3" placeholder="Descrição opcional"></textarea>
+            <textarea class="form-control" [(ngModel)]="form.descricao" rows="3"
+              placeholder="Descrição opcional"></textarea>
           </div>
+
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
         <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="save()">Salvar</button>
+        <button type="button" class="btn btn-danger" (click)="save()">
+          <i class="bi bi-check-circle me-1"></i>Salvar
+        </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Modal: Confirmar Exclusão -->
 <div class="modal fade" #deleteModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">

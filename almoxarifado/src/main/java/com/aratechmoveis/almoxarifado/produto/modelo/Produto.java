@@ -1,6 +1,7 @@
 package com.aratechmoveis.almoxarifado.produto.modelo;
 
 import com.aratechmoveis.almoxarifado.categoria.modelo.Categoria;
+import com.aratechmoveis.almoxarifado.fornecedor.model.Fornecedor;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -30,11 +32,8 @@ public class Produto {
     @Column(unique = true)
     private String sku;
 
-    @Min(value = 0, message = "A quantidade não pose ser menor que zero")
+    @Min(value = 0, message = "A quantidade não pode ser menor que zero")
     private Integer quantidade;
-
-    @Min(value = 0, message = "A quantidade no estoque não pode ser menor que zero")
-    private Integer quantidadeEstoque;
 
     @NotBlank(message = "Local de armazenamento é obrigatório")
     private String localArmazenamento;
@@ -43,11 +42,17 @@ public class Produto {
 
     private LocalDateTime vencimentoProduto;
 
-    private final LocalDateTime criadoEm = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime criadoEm;
 
     @ManyToOne
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
+
+    @ManyToOne
+    @JoinColumn(name = "fornecedor_id")
+    private Fornecedor fornecedor;
 
     @Override
     public String toString() {
@@ -55,7 +60,7 @@ public class Produto {
                 "id=" + id +
                 ", nome='" + nome + '\'' +
                 ", sku='" + sku + '\'' +
-                ", quantidadeEstoque=" + quantidadeEstoque +
+                ", quantidade=" + quantidade +
                 ", descricao='" + descricao + '\'' +
                 ", vencimentoProduto=" + vencimentoProduto +
                 ", criadoEm=" + criadoEm +

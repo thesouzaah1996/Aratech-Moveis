@@ -21,7 +21,6 @@ public class FornecedorController {
     private final FornecedorService fornecedorService;
 
     @PostMapping("/add")
-//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> addFornecedor(@RequestBody @Valid FornecedorDTO fornecedorDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(fornecedorService.addFornecedor(fornecedorDTO));
     }

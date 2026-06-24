@@ -77,7 +77,6 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // ── Busca client-side ──────────────────────────────────────────
 
   get filtrados(): Fornecedor[] {
     let lista = this.fornecedores;
@@ -105,7 +104,6 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
     this.page = 1;
   }
 
-  // ── Paginação ──────────────────────────────────────────────────
 
   get paged(): Fornecedor[] {
     const start = (this.page - 1) * this.pageSize;
@@ -136,7 +134,6 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
     this.page = p;
   }
 
-  // ── Modal: Adicionar ───────────────────────────────────────────
 
   openAdd(): void {
     this.submitted = false;
@@ -159,14 +156,12 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // ── Modal: Visualizar ──────────────────────────────────────────
 
   openView(f: Fornecedor): void {
     this.fornecedorEmVisualizacao = f;
     this.viewModal.show();
   }
 
-  // ── Modal: Editar ──────────────────────────────────────────────
 
   openEditModal(f: Fornecedor): void {
     this.submittedEdit = false;
@@ -200,7 +195,6 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // ── Modal: Desativar ───────────────────────────────────────────
 
   onSwitchClick(event: Event, f: Fornecedor): void {
     event.preventDefault();
@@ -244,7 +238,6 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // ── Máscara de telefone ────────────────────────────────────────
 
   applyPhoneMask(event: Event, maxDigits: number, isEdit = false): void {
     const targetForm = isEdit ? this.formEdit : this.form;
@@ -268,7 +261,6 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // ── Helpers ────────────────────────────────────────────────────
 
   private showSuccess(msg: string): void {
     this.successMessage = msg;

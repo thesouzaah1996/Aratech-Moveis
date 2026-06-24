@@ -1,11 +1,14 @@
 package com.aratechmoveis.almoxarifado.fornecedor.model;
 
+import com.aratechmoveis.almoxarifado.produto.modelo.Produto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -37,6 +40,10 @@ public class Fornecedor {
     private String telefone;
 
     private Representante representante;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "fornecedor")
+    private List<Produto> produto;
 
     @Builder.Default
     private Boolean ativo = true;
