@@ -35,5 +35,6 @@ public class Response {
     private List<FornecedorLookupDTO> fornecedorLookup;
     private List<CategoriaLookupDTO> categoriaLookup;
 
+
     private final LocalDateTime timestamp = LocalDateTime.now();
 }

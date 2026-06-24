@@ -1,148 +1,135 @@
-version: '3.9'
+# Nunca suba esse arquivo sozinho. Sempre use junto com um override:
+#   docker compose -f docker-compose.yml -f docker-compose-dev.yml up -d
+#   docker compose -f docker-compose.yml -f docker-compose-prod.yml up -d
 
 networks:
   aratech-network:
     driver: bridge
 
-volumes:
-  almoxarifado-db-data:
-  login-db-data:
-  portaria-db-data:
-
 services:
 
   almoxarifado-db:
     image: postgres:17.4
-    container_name: almoxarifado-db
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: almoxarifado
-    ports:
-      - "5555:5432"
-    volumes:
-      - almoxarifado-db-data:/var/lib/postgresql/data
     networks:
       - aratech-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   login-db:
     image: postgres:17.4
-    container_name: login-db
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: login
-    ports:
-      - "5556:5432"
-    volumes:
-      - login-db-data:/var/lib/postgresql/data
     networks:
       - aratech-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   portaria-db:
     image: postgres:17.4
-    container_name: portaria-db
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: portaria
-    ports:
-      - "5557:5432"
-    volumes:
-      - portaria-db-data:/var/lib/postgresql/data
     networks:
       - aratech-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   almoxarifado:
     build: ./almoxarifado
     image: aratech/almoxarifado:latest
-    container_name: almoxarifado
     restart: always
-    ports:
-      - "8081:8081"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://almoxarifado-db:5432/almoxarifado
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
-      - almoxarifado-db
+      almoxarifado-db:
+        condition: service_healthy
     networks:
       - aratech-network
 
   login:
     build: ./login
     image: aratech/login:latest
-    container_name: login
     restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5433/login
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
-      - login-db
+      login-db:
+        condition: service_healthy
     networks:
       - aratech-network
 
   portaria:
     build: ./portaria
     image: aratech/portaria:latest
-    container_name: portaria
     restart: always
-    ports:
-      - "8082:8282"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5433/portaria
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
-      - portaria-db
-    networks:
-      - aratech-network
-
-  aratech-frontend:
-    build: ./aratechFrontend/aratech-movies-frontend
-    image: aratech/frontend:latest
-    container_name: aratech-frontend
-    restart: always
-    ports:
-      - "80:80"
+      portaria-db:
+        condition: service_healthy
     networks:
       - aratech-network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.15
+    container_name: zookeeper
+    restart: always
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      JVMFLAGS: "-Xmx128m -Xms64m"
     ports:
       - "22181:2181"
+    networks:
+      - aratech-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M
 
   kafka:
     image: confluentinc/cp-kafka:7.2.15
+    container_name: kafka
+    restart: always
     depends_on:
       - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092, PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT, PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_HEAP_OPTS: "-Xmx256m -Xms128m"
     ports:
       - "29092:29092"
+    networks:
+      - aratech-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.2
+    container_name: kafka-ui
+    restart: always
     depends_on:
       - kafka
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      JAVA_TOOL_OPTIONS: "-Xmx128m -Xms64m"
     ports:
       - "8090:8080"
+    networks:
+      - aratech-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 256M

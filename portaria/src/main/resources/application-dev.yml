@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5557/portaria-dev}
+    username: ${PORTARIA_DB_USER_DEV:postgres}
+    password: ${PORTARIA_DB_PASSWORD_DEV:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: portaria-pool-dev
+      maximum-pool-size: 5
+      minimum-idle: 1
+      idle-timeout: 30000
+      connection-timeout: 20000
+      max-lifetime: 1800000
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true

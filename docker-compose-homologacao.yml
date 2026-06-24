@@ -1,0 +1,136 @@
+volumes:
+  almoxarifado-db-homologacao-data:
+  login-db-homologacao-data:
+  portaria-db-homologacao-data:
+
+services:
+
+  aratech-frontend:
+    build: ./aratechFrontend/aratech-movies-frontend
+    image: aratech/frontend:latest
+    container_name: aratech-frontend-homologacao
+    restart: always
+    ports:
+      - "8100:80"
+    networks:
+      - aratech-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+
+  almoxarifado-db:
+    container_name: almoxarifado-db-homologacao
+    ports:
+      - "5565:5432"
+    environment:
+      POSTGRES_USER: ${ALMOXARIFADO_DB_USER_HOMOLOGACAO}
+      POSTGRES_PASSWORD: ${ALMOXARIFADO_DB_PASSWORD_HOMOLOGACAO}
+      POSTGRES_DB: almoxarifado-homologacao
+    command: >
+      postgres
+      -c shared_buffers=64MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=32MB
+      -c max_connections=20
+    volumes:
+      - almoxarifado-db-homologacao-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  login-db:
+    container_name: login-db-homologacao
+    ports:
+      - "5566:5432"
+    environment:
+      POSTGRES_USER: ${LOGIN_DB_USER_HOMOLOGACAO}
+      POSTGRES_PASSWORD: ${LOGIN_DB_PASSWORD_HOMOLOGACAO}
+      POSTGRES_DB: login-homologacao
+    command: >
+      postgres
+      -c shared_buffers=64MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=32MB
+      -c max_connections=20
+    volumes:
+      - login-db-homologacao-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  portaria-db:
+    container_name: portaria-db-homologacao
+    ports:
+      - "5567:5432"
+    environment:
+      POSTGRES_USER: ${PORTARIA_DB_USER_HOMOLOGACAO}
+      POSTGRES_PASSWORD: ${PORTARIA_DB_PASSWORD_HOMOLOGACAO}
+      POSTGRES_DB: portaria-homologacao
+    command: >
+      postgres
+      -c shared_buffers=64MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=32MB
+      -c max_connections=20
+    volumes:
+      - portaria-db-homologacao-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  almoxarifado:
+    container_name: almoxarifado-homologacao
+    ports:
+      - "8181:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: homologacao
+      SPRING_DATASOURCE_URL: jdbc:postgresql://almoxarifado-db:5432/almoxarifado-homologacao
+      ALMOXARIFADO_DB_USER_HOMOLOGACAO: ${ALMOXARIFADO_DB_USER_HOMOLOGACAO}
+      ALMOXARIFADO_DB_PASSWORD_HOMOLOGACAO: ${ALMOXARIFADO_DB_PASSWORD_HOMOLOGACAO}
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:MaxMetaspaceSize=128m"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+
+  login:
+    container_name: login-homologacao
+    ports:
+      - "8180:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: homologacao
+      SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5432/login-homologacao
+      LOGIN_DB_USER_HOMOLOGACAO: ${LOGIN_DB_USER_HOMOLOGACAO}
+      LOGIN_DB_PASSWORD_HOMOLOGACAO: ${LOGIN_DB_PASSWORD_HOMOLOGACAO}
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:MaxMetaspaceSize=128m"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+
+  portaria:
+    container_name: portaria-homologacao
+    ports:
+      - "8182:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: homologacao
+      SPRING_DATASOURCE_URL: jdbc:postgresql://portaria-db:5432/portaria-homologacao
+      PORTARIA_DB_USER_HOMOLOGACAO: ${PORTARIA_DB_USER_HOMOLOGACAO}
+      PORTARIA_DB_PASSWORD_HOMOLOGACAO: ${PORTARIA_DB_PASSWORD_HOMOLOGACAO}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:MaxMetaspaceSize=128m"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M

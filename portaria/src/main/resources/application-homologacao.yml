@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5557/portaria-homologacao}
+    username: ${PORTARIA_DB_USER_HOMOLOGACAO}
+    password: ${PORTARIA_DB_PASSWORD_HOMOLOGACAO}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: portaria-pool-homologacao
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 20000
+      max-lifetime: 1800000
+      leak-detection-threshold: 60000
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false

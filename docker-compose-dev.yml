@@ -1,0 +1,121 @@
+volumes:
+  almoxarifado-db-dev-data:
+  login-db-dev-data:
+  portaria-db-dev-data:
+
+services:
+
+  almoxarifado-db:
+    container_name: almoxarifado-db-dev
+    ports:
+      - "5555:5432"
+    environment:
+      POSTGRES_USER: ${ALMOXARIFADO_DB_USER_DEV}
+      POSTGRES_PASSWORD: ${ALMOXARIFADO_DB_PASSWORD_DEV}
+      POSTGRES_DB: almoxarifado-dev
+    command: >
+      postgres
+      -c shared_buffers=64MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=32MB
+      -c max_connections=20
+    volumes:
+      - almoxarifado-db-dev-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  login-db:
+    container_name: login-db-dev
+    ports:
+      - "5556:5432"
+    environment:
+      POSTGRES_USER: ${LOGIN_DB_USER_DEV}
+      POSTGRES_PASSWORD: ${LOGIN_DB_PASSWORD_DEV}
+      POSTGRES_DB: login-dev
+    command: >
+      postgres
+      -c shared_buffers=64MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=32MB
+      -c max_connections=20
+    volumes:
+      - login-db-dev-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  portaria-db:
+    container_name: portaria-db-dev
+    ports:
+      - "5557:5432"
+    environment:
+      POSTGRES_USER: ${PORTARIA_DB_USER_DEV}
+      POSTGRES_PASSWORD: ${PORTARIA_DB_PASSWORD_DEV}
+      POSTGRES_DB: portaria-dev
+    command: >
+      postgres
+      -c shared_buffers=64MB
+      -c work_mem=4MB
+      -c maintenance_work_mem=32MB
+      -c max_connections=20
+    volumes:
+      - portaria-db-dev-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  almoxarifado:
+    container_name: almoxarifado-dev
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://almoxarifado-db:5432/almoxarifado-dev
+      ALMOXARIFADO_DB_USER_DEV: ${ALMOXARIFADO_DB_USER_DEV}
+      ALMOXARIFADO_DB_PASSWORD_DEV: ${ALMOXARIFADO_DB_PASSWORD_DEV}
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:MaxMetaspaceSize=128m"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+
+  login:
+    container_name: login-dev
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5432/login-dev
+      LOGIN_DB_USER_DEV: ${LOGIN_DB_USER_DEV}
+      LOGIN_DB_PASSWORD_DEV: ${LOGIN_DB_PASSWORD_DEV}
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:MaxMetaspaceSize=128m"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+
+  portaria:
+    container_name: portaria-dev
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://portaria-db:5432/portaria-dev
+      PORTARIA_DB_USER_DEV: ${PORTARIA_DB_USER_DEV}
+      PORTARIA_DB_PASSWORD_DEV: ${PORTARIA_DB_PASSWORD_DEV}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx256m -XX:MaxMetaspaceSize=128m"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
