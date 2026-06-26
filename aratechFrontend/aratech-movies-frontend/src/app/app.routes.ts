@@ -57,6 +57,8 @@ import { AuditoriaComponent } from './componente/administracao/auditoria/auditor
 import { RelatoriosComponent } from './componente/administracao/relatorios/relatorios.component';
 import { ParametrosComponent } from './componente/administracao/parametros/parametros.component';
 
+import { ChamadoTiComponent } from './componente/suporte/chamado-ti/chamado-ti.component';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login',                                  component: LoginComponent },
@@ -115,4 +117,6 @@ export const routes: Routes = [
   { path: 'administracao/relatorios',               component: RelatoriosComponent },
   { path: 'administracao/parametros',               component: ParametrosComponent },
   { path: 'administracao/lotes',                    component: LotesComponent },
+
+  { path: 'suporte/chamado-ti',                     component: ChamadoTiComponent },
 ];

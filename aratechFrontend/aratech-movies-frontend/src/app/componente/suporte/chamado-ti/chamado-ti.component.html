@@ -1,0 +1,174 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+
+        <div class="mb-4">
+          <h3 class="fw-bold mb-1">Suporte de TI</h3>
+          <p class="text-muted mb-0 small">Preencha as informações abaixo para registrar um chamado com a equipe de TI</p>
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+
+            <h6 class="text-danger fw-bold mb-3">Classificação do Chamado</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Tipo de Problema <span class="text-danger">*</span></label>
+                <select class="form-select form-select-lg" [(ngModel)]="form.tipo"
+                  [class.is-invalid]="submitted && !form.tipo">
+                  <option value="">Selecione o tipo...</option>
+                  <option value="Acesso / Permissão">Acesso / Permissão — login, bloqueio, permissões</option>
+                  <option value="Hardware">Hardware — computador, monitor, periféricos</option>
+                  <option value="Software / Sistema">Software / Sistema — erro, travamento, lentidão</option>
+                  <option value="Rede / Internet">Rede / Internet — sem conexão, VPN, wi-fi</option>
+                  <option value="Impressora">Impressora — papel, fila, driver</option>
+                  <option value="E-mail / Comunicação">E-mail / Comunicação — Outlook, Teams, envio</option>
+                  <option value="Outros">Outros</option>
+                </select>
+                <div class="invalid-feedback">Tipo é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Prioridade <span class="text-danger">*</span></label>
+                <select class="form-select form-select-lg" [(ngModel)]="form.prioridade"
+                  [class.is-invalid]="submitted && !form.prioridade">
+                  <option value="">Selecione a prioridade...</option>
+                  <option value="Baixa">Baixa — não impede o trabalho</option>
+                  <option value="Média">Média — dificulta o trabalho</option>
+                  <option value="Alta">Alta — impede o trabalho</option>
+                  <option value="Crítica">Crítica — parou o setor / produção</option>
+                </select>
+                <div class="invalid-feedback">Prioridade é obrigatória.</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Módulo do Sistema Afetado</label>
+                <select class="form-select form-select-lg" [(ngModel)]="form.moduloAfetado">
+                  <option value="">Não se aplica / Não sei informar</option>
+                  <option value="Login / Autenticação">Login / Autenticação</option>
+                  <option value="Dashboard">Dashboard</option>
+                  <option value="Almoxarifado">Almoxarifado</option>
+                  <option value="Portaria">Portaria</option>
+                  <option value="Carregamento">Carregamento</option>
+                  <option value="Manutenção">Manutenção</option>
+                  <option value="Assistência Técnica">Assistência Técnica</option>
+                  <option value="Recursos Humanos">Recursos Humanos</option>
+                  <option value="PCP">PCP</option>
+                  <option value="Compras">Compras</option>
+                  <option value="Financeiro">Financeiro</option>
+                  <option value="Administração">Administração</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Título / Assunto <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.titulo"
+                  placeholder="Ex: Não consigo acessar o sistema, Impressora não imprime..."
+                  [class.is-invalid]="submitted && !form.titulo.trim()">
+                <div class="invalid-feedback">Título é obrigatório.</div>
+              </div>
+            </div>
+
+            <hr class="my-3">
+            <h6 class="text-danger fw-bold mb-3">Dados do Solicitante</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.solicitante"
+                  placeholder="Seu nome completo"
+                  [class.is-invalid]="submitted && !form.solicitante.trim()">
+                <div class="invalid-feedback">Nome é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Setor / Departamento <span class="text-danger">*</span></label>
+                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.setor"
+                  placeholder="Ex: Produção, RH, Financeiro..."
+                  [class.is-invalid]="submitted && !form.setor.trim()">
+                <div class="invalid-feedback">Setor é obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Ramal / Telefone para Contato</label>
+                <input type="text" class="form-control form-control-lg"
+                  [value]="form.contato"
+                  (input)="applyPhoneMask($event)"
+                  placeholder="(XX) XXXXX-XXXX ou ramal">
+              </div>
+            </div>
+
+            <hr class="my-3">
+            <h6 class="text-danger fw-bold mb-3">Detalhes do Problema</h6>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Descrição detalhada <span class="text-danger">*</span></label>
+                <textarea class="form-control" [(ngModel)]="form.descricao" rows="5"
+                  placeholder="Descreva o problema com o máximo de detalhes: o que estava fazendo quando ocorreu, qual mensagem de erro apareceu, desde quando acontece, quantas pessoas são afetadas..."
+                  [class.is-invalid]="submitted && !form.descricao.trim()"></textarea>
+                <div class="invalid-feedback">Descrição é obrigatória.</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">O que já foi tentado para resolver? <span class="text-muted fw-normal">(opcional)</span></label>
+                <textarea class="form-control" [(ngModel)]="form.tentativasSolucao" rows="3"
+                  placeholder="Ex: Reiniciei o computador, tentei em outro navegador, verifiquei o cabo de rede..."></textarea>
+                <div class="form-text">Informar isso ajuda a TI a agilizar o atendimento.</div>
+              </div>
+            </div>
+
+          </div>
+          <div class="card-footer border-0 bg-light px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <button type="button" class="btn btn-cancelar" (click)="voltar()">
+                <i class="bi bi-arrow-left me-1"></i>Voltar
+              </button>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-cancelar" (click)="resetForm()">
+                  <i class="bi bi-arrow-counterclockwise me-1"></i>Limpar
+                </button>
+                <button type="button" class="btn btn-danger btn-lg px-4" (click)="submit()">
+                  <i class="bi bi-send me-2"></i>Abrir Chamado
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<app-footer />
+
+<div class="modal fade" #resultModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header text-white" [class.bg-danger]="!resultadoSucesso" [class.bg-success]="resultadoSucesso">
+        <h5 class="modal-title fw-bold">
+          <i class="me-2" [class.bi-check-circle-fill]="resultadoSucesso" [class.bi-exclamation-triangle-fill]="!resultadoSucesso"></i>
+          {{ resultadoSucesso ? 'Chamado Registrado' : 'Erro ao Registrar' }}
+        </h5>
+      </div>
+      <div class="modal-body text-center p-4">
+        @if (resultadoSucesso) {
+          <i class="bi bi-headset text-success" style="font-size: 3rem;"></i>
+          <h5 class="mt-3 fw-bold">Chamado aberto com sucesso!</h5>
+          <p class="text-muted mb-3">A equipe de TI foi notificada e entrará em contato em breve.</p>
+          <div class="delete-warning">
+            <p class="mb-1 small text-muted">Número do chamado</p>
+            <p class="fw-bold fs-4 mb-0 text-danger">{{ numeroChamado }}</p>
+            <p class="small text-muted mt-1">Guarde este número para acompanhamento.</p>
+          </div>
+        } @else {
+          <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
+          <h5 class="mt-3 fw-bold">Não foi possível registrar</h5>
+          <p class="text-muted mb-0">Tente novamente ou entre em contato diretamente com a TI.</p>
+        }
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-danger" (click)="fecharResultado()">
+          {{ resultadoSucesso ? 'Novo Chamado' : 'Fechar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

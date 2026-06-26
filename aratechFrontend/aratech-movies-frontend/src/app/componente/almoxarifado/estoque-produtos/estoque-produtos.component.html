@@ -172,7 +172,7 @@
             <select class="form-select" [(ngModel)]="form.fornecedorID">
               <option [ngValue]="null">Nenhum</option>
               @for (forn of fornecedores; track forn.id) {
-                <option [ngValue]="forn.id">{{ forn.nome }}</option>
+                <option [ngValue] ="forn.id">{{ forn.nome }}</option>
               }
             </select>
           </div>

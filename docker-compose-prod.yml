@@ -101,7 +101,7 @@ services:
         limits:
           cpus: '1.0'
 
-          
+
           memory: 768M
 
   login:

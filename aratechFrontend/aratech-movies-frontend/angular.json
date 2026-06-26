@@ -42,6 +42,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -54,6 +60,16 @@
                   "maximumError": "8kB"
                 }
               ],
+              "outputHashing": "all"
+            },
+            "homologacao": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.homologacao.ts"
+                }
+              ],
+              "optimization": true,
               "outputHashing": "all"
             },
             "development": {
@@ -72,6 +88,9 @@
           "configurations": {
             "production": {
               "buildTarget": "aratech-movies-frontend:build:production"
+            },
+            "homologacao": {
+              "buildTarget": "aratech-movies-frontend:build:homologacao"
             },
             "development": {
               "buildTarget": "aratech-movies-frontend:build:development"

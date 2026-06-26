@@ -1,5 +1,6 @@
 <footer class="app-footer">
-  <div class="container text-center">
-    © {{ anoAtual }} Aratech Móveis
+  <div class="container-fluid footer-content">
+    <span class="footer-copyright">© {{ anoAtual }} Aratech Móveis</span>
+    <span [class]="envBadgeClass">v{{ version }} | {{ envName }}</span>
   </div>
 </footer>

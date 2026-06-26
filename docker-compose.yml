@@ -8,6 +8,13 @@ networks:
 
 services:
 
+  aratech-frontend:
+    build: ./aratechFrontend/aratech-movies-frontend
+    image: aratech/frontend:latest
+    restart: always
+    networks:
+      - aratech-network
+
   almoxarifado-db:
     image: postgres:17.4
     restart: always

@@ -1,4 +1,4 @@
-<app-navbar />
+﻿<app-navbar />
 
 <main class="app-main">
   <app-breadcrumb [items]="breadcrumb" />
@@ -12,14 +12,14 @@
     }
 
     <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
-      <h3 class="fw-bold mb-0 flex-shrink-0">Funcionários</h3>
+      <h3 class="fw-bold mb-0 flex-shrink-0">FuncionÃ¡rios</h3>
 
       <div class="input-group" style="max-width: 320px;">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
         </span>
         <input type="text" class="form-control border-start-0 ps-0"
-          placeholder="Buscar por nome, matrícula ou setor…"
+          placeholder="Buscar por nome, matrÃ­cula ou setorâ€¦"
           [(ngModel)]="searchTerm" (ngModelChange)="onSearch()">
       </div>
 
@@ -30,7 +30,7 @@
       </div>
 
       <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
-        <i class="bi bi-plus-circle me-2"></i>Novo Funcionário
+        <i class="bi bi-plus-circle me-2"></i>Novo FuncionÃ¡rio
       </button>
     </div>
 
@@ -40,12 +40,12 @@
           <table class="table table-hover align-middle">
             <thead>
               <tr>
-                <th>Matrícula</th>
+                <th>MatrÃ­cula</th>
                 <th>Nome</th>
                 <th>Cargo</th>
                 <th>Setor</th>
                 <th>Status</th>
-                <th class="text-end">Ações</th>
+                <th class="text-end">AÃ§Ãµes</th>
               </tr>
             </thead>
             <tbody>
@@ -54,7 +54,7 @@
                   <td colspan="6">
                     <div class="empty-state">
                       <i class="bi bi-people"></i>
-                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum funcionário cadastrado.' }}</p>
+                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum funcionÃ¡rio cadastrado.' }}</p>
                     </div>
                   </td>
                 </tr>
@@ -90,16 +90,16 @@
         @if (totalPages > 1) {
           <div class="pagination-container">
             <span class="pagination-info">
-              Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} funcionário(s)
+              Mostrando {{ paginationStart }}â€“{{ paginationEnd }} de {{ filtrados.length }} funcionÃ¡rio(s)
             </span>
             <nav>
               <ul class="pagination">
                 <li class="page-item" [class.disabled]="page === 1">
-                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                  <a class="page-link" (click)="setPage(page - 1)">â€¹</a>
                 </li>
                 @if (visiblePages[0] > 1) {
                   <li class="page-item"><a class="page-link" (click)="setPage(1)">1</a></li>
-                  @if (visiblePages[0] > 2) { <li class="page-item disabled"><span class="page-link">…</span></li> }
+                  @if (visiblePages[0] > 2) { <li class="page-item disabled"><span class="page-link">â€¦</span></li> }
                 }
                 @for (p of visiblePages; track p) {
                   <li class="page-item" [class.active]="p === page">
@@ -107,11 +107,11 @@
                   </li>
                 }
                 @if (visiblePages[visiblePages.length - 1] < totalPages) {
-                  @if (visiblePages[visiblePages.length - 1] < totalPages - 1) { <li class="page-item disabled"><span class="page-link">…</span></li> }
+                  @if (visiblePages[visiblePages.length - 1] < totalPages - 1) { <li class="page-item disabled"><span class="page-link">â€¦</span></li> }
                   <li class="page-item"><a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a></li>
                 }
                 <li class="page-item" [class.disabled]="page === totalPages">
-                  <a class="page-link" (click)="setPage(page + 1)">›</a>
+                  <a class="page-link" (click)="setPage(page + 1)">â€º</a>
                 </li>
               </ul>
             </nav>
@@ -129,39 +129,39 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">Novo Funcionário</h5>
+        <h5 class="modal-title fw-bold">Novo FuncionÃ¡rio</h5>
       </div>
       <div class="modal-body p-4">
         <div class="row g-3">
           <div class="col-md-4">
-            <label class="form-label fw-semibold">Matrícula <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">MatrÃ­cula <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="form.matricula" placeholder="Ex: 00123"
-              [class.is-invalid]="submitted && !form.matricula?.trim()">
-            <div class="invalid-feedback">Matrícula é obrigatória.</div>
+              [class.is-invalid]="submitted && !form.matricula.trim()">
+            <div class="invalid-feedback">MatrÃ­cula Ã© obrigatÃ³ria.</div>
           </div>
           <div class="col-md-8">
             <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome do funcionário"
-              [class.is-invalid]="submitted && !form.nome?.trim()">
-            <div class="invalid-feedback">Nome é obrigatório.</div>
+            <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome do funcionÃ¡rio"
+              [class.is-invalid]="submitted && !form.nome.trim()">
+            <div class="invalid-feedback">Nome Ã© obrigatÃ³rio.</div>
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold">Cargo <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.cargo" placeholder="Ex: Operador de Produção"
-              [class.is-invalid]="submitted && !form.cargo?.trim()">
-            <div class="invalid-feedback">Cargo é obrigatório.</div>
+            <input type="text" class="form-control" [(ngModel)]="form.cargo" placeholder="Ex: Operador de ProduÃ§Ã£o"
+              [class.is-invalid]="submitted && !form.cargo.trim()">
+            <div class="invalid-feedback">Cargo Ã© obrigatÃ³rio.</div>
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold">Setor <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.setor" placeholder="Ex: Produção"
-              [class.is-invalid]="submitted && !form.setor?.trim()">
-            <div class="invalid-feedback">Setor é obrigatório.</div>
+            <input type="text" class="form-control" [(ngModel)]="form.setor" placeholder="Ex: ProduÃ§Ã£o"
+              [class.is-invalid]="submitted && !form.setor.trim()">
+            <div class="invalid-feedback">Setor Ã© obrigatÃ³rio.</div>
           </div>
           <div class="col-md-7">
             <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
             <input type="email" class="form-control" [(ngModel)]="form.email" placeholder="email@empresa.com"
-              [class.is-invalid]="submitted && (!form.email?.trim() || !isValidEmail(form.email!))">
-            <div class="invalid-feedback">Informe um e-mail válido.</div>
+              [class.is-invalid]="submitted && (!form.email.trim() || !isValidEmail(form.email))">
+            <div class="invalid-feedback">Informe um e-mail vÃ¡lido.</div>
           </div>
           <div class="col-md-5">
             <label class="form-label fw-semibold">Telefone</label>
@@ -184,13 +184,13 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">Dados do Funcionário</h5>
+        <h5 class="modal-title fw-bold">Dados do FuncionÃ¡rio</h5>
       </div>
       @if (funcionarioEmVisualizacao) {
         <div class="modal-body p-4">
           <div class="row g-3">
             <div class="col-md-3">
-              <p class="text-muted small mb-1">Matrícula</p>
+              <p class="text-muted small mb-1">MatrÃ­cula</p>
               <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.matricula }}</p>
             </div>
             <div class="col-md-9">
@@ -211,7 +211,7 @@
             </div>
             <div class="col-md-5">
               <p class="text-muted small mb-1">Telefone</p>
-              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.telefone || '—' }}</p>
+              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.telefone || 'â€”' }}</p>
             </div>
             <div class="col-md-3">
               <p class="text-muted small mb-1">Status</p>
@@ -235,39 +235,39 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">Editar Funcionário</h5>
+        <h5 class="modal-title fw-bold">Editar FuncionÃ¡rio</h5>
       </div>
       <div class="modal-body p-4">
         <div class="row g-3">
           <div class="col-md-4">
-            <label class="form-label fw-semibold">Matrícula <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">MatrÃ­cula <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="formEdit.matricula"
               [class.is-invalid]="submittedEdit && !formEdit.matricula.trim()">
-            <div class="invalid-feedback">Matrícula é obrigatória.</div>
+            <div class="invalid-feedback">MatrÃ­cula Ã© obrigatÃ³ria.</div>
           </div>
           <div class="col-md-8">
             <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="formEdit.nome"
               [class.is-invalid]="submittedEdit && !formEdit.nome.trim()">
-            <div class="invalid-feedback">Nome é obrigatório.</div>
+            <div class="invalid-feedback">Nome Ã© obrigatÃ³rio.</div>
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold">Cargo <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="formEdit.cargo"
               [class.is-invalid]="submittedEdit && !formEdit.cargo.trim()">
-            <div class="invalid-feedback">Cargo é obrigatório.</div>
+            <div class="invalid-feedback">Cargo Ã© obrigatÃ³rio.</div>
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold">Setor <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="formEdit.setor"
               [class.is-invalid]="submittedEdit && !formEdit.setor.trim()">
-            <div class="invalid-feedback">Setor é obrigatório.</div>
+            <div class="invalid-feedback">Setor Ã© obrigatÃ³rio.</div>
           </div>
           <div class="col-md-7">
             <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
             <input type="email" class="form-control" [(ngModel)]="formEdit.email"
               [class.is-invalid]="submittedEdit && (!formEdit.email.trim() || !isValidEmail(formEdit.email))">
-            <div class="invalid-feedback">Informe um e-mail válido.</div>
+            <div class="invalid-feedback">Informe um e-mail vÃ¡lido.</div>
           </div>
           <div class="col-md-5">
             <label class="form-label fw-semibold">Telefone</label>

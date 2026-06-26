@@ -5,6 +5,20 @@ volumes:
 
 services:
 
+  aratech-frontend:
+    container_name: aratech-frontend-dev
+    build:
+      context: ./aratechFrontend/aratech-movies-frontend
+      args:
+        BUILD_CONFIG: development
+    ports:
+      - "4200:80"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+
   almoxarifado-db:
     container_name: almoxarifado-db-dev
     ports:
