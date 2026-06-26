@@ -1,8 +1,7 @@
 package com.aratechmoveis.almoxarifado.categoria.service.imp;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.res.Response;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
-import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaLookupDTO;
 import com.aratechmoveis.almoxarifado.categoria.modelo.Categoria;
 import com.aratechmoveis.almoxarifado.categoria.repository.CategoriaRepository;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;

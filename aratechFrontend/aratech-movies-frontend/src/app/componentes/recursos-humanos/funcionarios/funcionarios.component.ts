@@ -8,19 +8,73 @@ declare const bootstrap: any;
 
 export interface Funcionario {
   id: number;
-  matricula: string;
+  ativo: boolean;
   nome: string;
-  cargo: string;
-  setor: string;
+  sobrenome: string;
+  rg: string;
+  cpf: string;
+  nascimento: string;
+  genero: string;
+  estadoCivil: string;
+  nacionalidade: string;
   email: string;
   telefone: string;
-  ativo: boolean;
+  contatoEmergencia: string;
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  matricula: string;
+  area: string;
+  setor: string;
+  tipoContrato: string;
+  admissao: string;
+  salario: string;
+  pis: string;
+  banco: string;
+  agencia: string;
+  conta: string;
 }
 
 interface FormFuncionario {
+  nome: string;
+  sobrenome: string;
+  rg: string;
+  cpf: string;
+  nascimento: string;
+  genero: string;
+  estadoCivil: string;
+  nacionalidade: string;
+  email: string;
+  telefone: string;
+  contatoEmergencia: string;
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  matricula: string;
+  area: string;
+  setor: string;
+  tipoContrato: string;
+  admissao: string;
+  salario: string;
+  pis: string;
+  banco: string;
+  agencia: string;
+  conta: string;
+}
+
+interface FormEditFuncionario {
   matricula: string;
   nome: string;
-  cargo: string;
+  sobrenome: string;
+  area: string;
   setor: string;
   email: string;
   telefone: string;
@@ -56,7 +110,7 @@ export class FuncionariosComponent implements AfterViewInit {
   errorMessage = '';
 
   form: FormFuncionario = this.emptyForm();
-  formEdit: FormFuncionario = this.emptyForm();
+  formEdit: FormEditFuncionario = this.emptyEditForm();
   funcionarioEmVisualizacao: Funcionario | null = null;
   private funcionarioEditandoId: number | null = null;
 
@@ -131,7 +185,7 @@ export class FuncionariosComponent implements AfterViewInit {
 
   save(): void {
     this.submitted = true;
-    if (!this.isFormValid(this.form)) return;
+    if (!this.isAddFormValid()) return;
     const newId = this.funcionarios.length ? Math.max(...this.funcionarios.map(f => f.id)) + 1 : 1;
     this.funcionarios.push({ ...this.form, id: newId, ativo: true });
     this.funcionarioModal.hide();
@@ -146,13 +200,13 @@ export class FuncionariosComponent implements AfterViewInit {
   openEdit(f: Funcionario): void {
     this.submittedEdit = false;
     this.funcionarioEditandoId = f.id;
-    this.formEdit = { matricula: f.matricula, nome: f.nome, cargo: f.cargo, setor: f.setor, email: f.email, telefone: f.telefone };
+    this.formEdit = { matricula: f.matricula, nome: f.nome, sobrenome: f.sobrenome, area: f.area, setor: f.setor, email: f.email, telefone: f.telefone };
     this.editModal.show();
   }
 
   saveEdit(): void {
     this.submittedEdit = true;
-    if (!this.isFormValid(this.formEdit) || !this.funcionarioEditandoId) return;
+    if (!this.isEditFormValid() || !this.funcionarioEditandoId) return;
     const idx = this.funcionarios.findIndex(f => f.id === this.funcionarioEditandoId);
     if (idx > -1) Object.assign(this.funcionarios[idx], this.formEdit);
     this.editModal.hide();
@@ -182,8 +236,24 @@ export class FuncionariosComponent implements AfterViewInit {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   }
 
-  private isFormValid(f: FormFuncionario): boolean {
-    return !!(f.matricula.trim() && f.nome.trim() && f.cargo.trim() && f.setor.trim() &&
+  private isAddFormValid(): boolean {
+    const f = this.form;
+    return !!(
+      f.nome.trim() && f.sobrenome.trim() && f.rg.trim() &&
+      f.cpf.trim().length === 11 && f.nascimento && f.genero &&
+      f.estadoCivil && f.nacionalidade.trim() &&
+      f.email.trim() && this.isValidEmail(f.email) && f.telefone.trim() && f.contatoEmergencia.trim() &&
+      f.cep.trim().length === 8 && f.logradouro.trim() && f.numero.trim() &&
+      f.bairro.trim() && f.cidade.trim() && f.uf.trim().length === 2 &&
+      f.matricula.trim() && f.area && f.setor.trim() && f.tipoContrato &&
+      f.admissao && f.salario && f.pis.trim().length === 11 &&
+      f.banco.trim() && f.agencia.trim() && f.conta.trim()
+    );
+  }
+
+  private isEditFormValid(): boolean {
+    const f = this.formEdit;
+    return !!(f.matricula.trim() && f.nome.trim() && f.sobrenome.trim() && f.area && f.setor.trim() &&
               f.email.trim() && this.isValidEmail(f.email));
   }
 
@@ -194,6 +264,16 @@ export class FuncionariosComponent implements AfterViewInit {
   }
 
   private emptyForm(): FormFuncionario {
-    return { matricula: '', nome: '', cargo: '', setor: '', email: '', telefone: '' };
+    return {
+      nome: '', sobrenome: '', rg: '', cpf: '', nascimento: '', genero: '', estadoCivil: '', nacionalidade: '',
+      email: '', telefone: '', contatoEmergencia: '', cep: '', logradouro: '', numero: '',
+      complemento: '', bairro: '', cidade: '', uf: '',
+      matricula: '', area: '', setor: '', tipoContrato: '', admissao: '', salario: '', pis: '',
+      banco: '', agencia: '', conta: ''
+    };
+  }
+
+  private emptyEditForm(): FormEditFuncionario {
+    return { matricula: '', nome: '', sobrenome: '', area: '', setor: '', email: '', telefone: '' };
   }
 }

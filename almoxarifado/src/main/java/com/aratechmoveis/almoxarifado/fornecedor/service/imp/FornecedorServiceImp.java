@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.fornecedor.service.imp;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.res.Response;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;
@@ -40,12 +40,11 @@ public class FornecedorServiceImp implements FornecedorService {
 
         Fornecedor fornecedorSalvo = fornecedorRepository.save(novoFornecedor);
         log.info("Fornecedor criado com nome={}", fornecedorSalvo.getNome());
-        FornecedorDTO fornecedorCriadoDTO = modelMapper.map(fornecedorSalvo, FornecedorDTO.class);
 
         return Response.builder()
                 .status(201)
-                .message("Fornecedor adicionado com sucesso")
-                .fornecedorDTO(fornecedorCriadoDTO)
+                .mensagem("Fornecedor adicionado com sucesso")
+                .fornecedorDTO(modelMapper.map(fornecedorSalvo, FornecedorDTO.class))
                 .build();
     }
 
@@ -78,12 +77,10 @@ public class FornecedorServiceImp implements FornecedorService {
         fornecedorRepository.save(fornecedorExistente);
         log.info("Fornecedor atualizado com id={}", id);
 
-        FornecedorDTO fornecedorEditado = modelMapper.map(fornecedorExistente, FornecedorDTO.class);
-
         return Response.builder()
                 .status(200)
-                .message("Fornecedor atualizado com sucesso")
-                .fornecedorDTO(fornecedorEditado)
+                .mensagem("Fornecedor atualizado com sucesso")
+                .fornecedorDTO(modelMapper.map(fornecedorExistente, FornecedorDTO.class))
                 .build();
 
     }
@@ -92,13 +89,10 @@ public class FornecedorServiceImp implements FornecedorService {
     public Response getFornecedores() {
         List<Fornecedor> fornecedores = fornecedorRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
 
-        List<FornecedorDTO> fornecedoresDTO = modelMapper.map(fornecedores, new TypeToken<List<FornecedorDTO>>()
-        {}.getType());
-
         return Response.builder()
                 .status(200)
-                .message("Fornecedores listados com sucesso")
-                .fornecedores(fornecedoresDTO)
+                .mensagem("Fornecedores listados com sucesso")
+                .fornecedores(modelMapper.map(fornecedores, new TypeToken<List<FornecedorDTO>>(){}.getType()))
                 .build();
     }
 
@@ -115,21 +109,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
         return Response.builder()
                 .status(200)
-                .message("Fornecedor desabilitado com sucesso")
-                .build();
-    }
-
-    @Override
-    public Response lookupFornecedor() {
-        List<FornecedorLookupDTO> lookup = fornecedorRepository.findByAtivoTrue()
-                .stream()
-                .map(fornecedor -> new FornecedorLookupDTO(fornecedor.getId(), fornecedor.getNome()))
-                .toList();
-
-        return Response.builder()
-                .status(200)
-                .message("Lookup de fornecedores carregado com sucesso")
-                .fornecedorLookup(lookup)
+                .mensagem("Fornecedor desabilitado com sucesso")
                 .build();
     }
 
@@ -146,7 +126,21 @@ public class FornecedorServiceImp implements FornecedorService {
 
         return Response.builder()
                 .status(200)
-                .message("Fornecedor ativado com sucesso.")
+                .mensagem("Fornecedor ativado com sucesso.")
+                .build();
+    }
+
+    @Override
+    public Response lookupFornecedor() {
+        List<FornecedorLookupDTO> lookup = fornecedorRepository.findByAtivoTrue()
+                .stream()
+                .map(fornecedor -> new FornecedorLookupDTO(fornecedor.getId(), fornecedor.getNome()))
+                .toList();
+
+        return Response.builder()
+                .status(200)
+                .mensagem("Lookup de fornecedores carregado com sucesso")
+                .fornecedorLookup(lookup)
                 .build();
     }
 }

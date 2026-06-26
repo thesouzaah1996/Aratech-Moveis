@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.categoria.service;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.res.Response;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
 
 public interface CategoriaService {

@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.categoria.service.imp;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.res.Response;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaLookupDTO;
 import com.aratechmoveis.almoxarifado.categoria.modelo.Categoria;
@@ -38,24 +38,21 @@ public class CategoriaServiceImp implements CategoriaService {
         categoriaRepository.save(categoriaParaSalvar);
         log.info("Categoria criada com nome={}", categoriaParaSalvar.getNome());
 
-        CategoriaDTO categoriaCriadaDTO = modelMapper.map(categoriaParaSalvar, CategoriaDTO.class);
-
         return Response.builder()
                 .status(201)
-                .message("Categoria criada com sucesso")
-                .categoria(categoriaCriadaDTO)
+                .mensagem("Categoria criada com sucesso")
+                .categoria(modelMapper.map(categoriaParaSalvar, CategoriaDTO.class))
                 .build();
     }
 
     @Override
     public Response getCategorias() {
         List<Categoria> categorias = categoriaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-        List<CategoriaDTO> categoriasDTO = modelMapper.map(categorias, new TypeToken<List<CategoriaDTO>>(){}.getType());
 
         return Response.builder()
-                .message("Categorias listadas com sucesso")
+                .mensagem("Categorias listadas com sucesso")
                 .status(200)
-                .categorias(categoriasDTO)
+                .categorias(modelMapper.map(categorias, new TypeToken<List<CategoriaDTO>>(){}.getType()))
                 .build();
     }
 
@@ -76,12 +73,10 @@ public class CategoriaServiceImp implements CategoriaService {
         categoriaRepository.save(categoriaExistente);
         log.info("Categoria com id={} alterada com sucesso", id);
 
-        CategoriaDTO novaCategoria = modelMapper.map(categoriaExistente, CategoriaDTO.class);
-
         return Response.builder()
                 .status(200)
-                .message("Categoria alterada com sucesso")
-                .categoria(novaCategoria)
+                .mensagem("Categoria alterada com sucesso")
+                .categoria(modelMapper.map(categoriaExistente, CategoriaDTO.class))
                 .build();
     }
 
@@ -100,7 +95,7 @@ public class CategoriaServiceImp implements CategoriaService {
 
         return Response.builder()
                 .status(204)
-                .message("Categoria deletada com sucesso")
+                .mensagem("Categoria deletada com sucesso")
                 .build();
     }
 
@@ -113,7 +108,7 @@ public class CategoriaServiceImp implements CategoriaService {
 
         return Response.builder()
                 .status(200)
-                .message("Lookup de categorias carregado com sucesso")
+                .mensagem("Lookup de categorias carregado com sucesso")
                 .categoriaLookup(lookup)
                 .build();
     }

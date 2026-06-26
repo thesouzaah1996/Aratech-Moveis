@@ -46,6 +46,7 @@ public class ProdutoDTO {
     private String descricao;
 
     @NotNull(message = "Local de Armazenamento é obrigatório")
+    @Size(max = 100, message = "O local de armazenamento deve ter no máximo 100 caracteres.")
     private String localArmazenamento;
 
     @FutureOrPresent(message = "A data de vencimento deve ser uma data presente ou futura.")

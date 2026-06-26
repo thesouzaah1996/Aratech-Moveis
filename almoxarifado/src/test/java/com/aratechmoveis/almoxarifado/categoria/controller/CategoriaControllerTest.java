@@ -1,6 +1,6 @@
 //package com.aratechmoveis.almoxarifado.categoria.controller;
 //
-//import com.aratechmoveis.almoxarifado.Response;
+//import com.aratechmoveis.almoxarifado.res.Response;
 //import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
 //import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaLookupDTO;
 //import com.aratechmoveis.almoxarifado.categoria.service.CategoriaService;

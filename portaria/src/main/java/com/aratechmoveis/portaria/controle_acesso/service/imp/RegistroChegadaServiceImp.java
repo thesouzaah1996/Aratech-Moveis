@@ -25,15 +25,13 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
         try {
 
             RegistroChegada registro = modelMapper.map(registroChegadaDTO, RegistroChegada.class);
-            RegistroChegadaDTO registroChegada = modelMapper.map(registro, RegistroChegadaDTO.class);
-
             registroChegadaRepository.save(registro);
             log.info("Registro salvo com sucesso.");
 
-       return Response.builder()
-                    .message("Registro de chegada salvo com sucesso.")
+            return Response.builder()
+                    .mensagem("Registro de chegada salvo com sucesso.")
                     .status(201)
-                    .registroChegada(registroChegada)
+                    .registroChegada(modelMapper.map(registro, RegistroChegadaDTO.class))
                     .build();
 
         } catch (Exception e) {
@@ -45,13 +43,14 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
 
     @Override
     public Response getRegistrosChegada() {
-       List<RegistroChegada> registroChegadas = registroChegadaRepository.findAll();
-       List<RegistroChegadaDTO> registroChegadaDTO = modelMapper.map(registroChegadas, RegistroChegadaDTO.class);
+        List<RegistroChegada> registroChegadas = registroChegadaRepository.findAll();
 
         return Response.builder()
                 .status(200)
-                .message("Registros listados com sucesso.")
-                .registrosChegada()
+                .mensagem("Registros listados com sucesso.")
+                .registrosChegada(registroChegadas.stream()
+                        .map(r -> modelMapper.map(r, RegistroChegadaDTO.class))
+                        .toList())
                 .build();
     }
 }

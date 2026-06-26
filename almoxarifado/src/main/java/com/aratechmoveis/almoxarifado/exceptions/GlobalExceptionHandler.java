@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.exceptions;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.res.Response;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,14 +16,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Response> handleNotFound(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                Response.builder().status(404).message(ex.getMessage()).build()
+                Response.builder().status(404).mensagem(ex.getMessage()).build()
         );
     }
 
     @ExceptionHandler(RecursoJaExistenteException.class)
     public ResponseEntity<Response> handleConflict(RecursoJaExistenteException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                Response.builder().status(409).message(ex.getMessage()).build()
+                Response.builder().status(409).mensagem(ex.getMessage()).build()
         );
     }
 
@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
                 .map(e -> e.getField() + ": " + e.getDefaultMessage())
                 .collect(Collectors.joining("; "));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                Response.builder().status(400).message(msg).build()
+                Response.builder().status(400).mensagem(msg).build()
         );
     }
 
@@ -43,14 +43,14 @@ public class GlobalExceptionHandler {
                 .map(v -> v.getPropertyPath() + ": " + v.getMessage())
                 .collect(Collectors.joining("; "));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                Response.builder().status(400).message(msg).build()
+                Response.builder().status(400).mensagem(msg).build()
         );
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response> handleGeneric(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                Response.builder().status(500).message("Erro interno: " + ex.getMessage()).build()
+                Response.builder().status(500).mensagem("Erro interno: " + ex.getMessage()).build()
         );
     }
 }

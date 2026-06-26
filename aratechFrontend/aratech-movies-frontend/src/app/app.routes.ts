@@ -1,61 +1,62 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './componente/login/login.component';
-import { DashboardComponent } from './componente/dashboard/dashboard.component';
+import { LoginComponent } from './componentes/login/login.component';
+import { DashboardComponent } from './componentes/dashboard/dashboard.component';
 
-import { AlmoxarifadoComponent } from './componente/almoxarifado/almoxarifado.component';
-import { EstoqueProdutosComponent } from './componente/almoxarifado/estoque-produtos/estoque-produtos.component';
-import { CategoriasComponent } from './componente/almoxarifado/categorias/categorias.component';
-import { FornecedoresComponent } from './componente/almoxarifado/fornecedores/fornecedores.component';
-import { AguardandoDescargaComponent } from './componente/almoxarifado/aguardando-descarga/aguardando-descarga.component';
+import { AlmoxarifadoComponent } from './componentes/almoxarifado/almoxarifado.component';
+import { EstoqueProdutosComponent } from './componentes/almoxarifado/estoque-produtos/estoque-produtos.component';
+import { CategoriasComponent } from './componentes/almoxarifado/categorias/categorias.component';
+import { FornecedoresComponent } from './componentes/almoxarifado/fornecedores/fornecedores.component';
+import { AguardandoDescargaComponent } from './componentes/almoxarifado/aguardando-descarga/aguardando-descarga.component';
 
-import { PortariaComponent } from './componente/portaria/portaria.component';
-import { BaixaNotasComponent } from './componente/portaria/baixa-notas/baixa-notas.component';
-import { ControleAcessoComponent } from './componente/portaria/controle-acesso/controle-acesso.component';
+import { PortariaComponent } from './componentes/portaria/portaria.component';
+import { BaixaNotasComponent } from './componentes/portaria/baixa-notas/baixa-notas.component';
+import { ControleAcessoComponent } from './componentes/portaria/controle-acesso/controle-acesso.component';
 
-import { CarregamentoComponent } from './componente/carregamento/carregamento.component';
-import { CarregamentoAssistenciaComponent } from './componente/carregamento/assistencia/assistencia.component';
-import { CarregamentoAguardandoDescargaComponent } from './componente/carregamento/aguardando-descarga/aguardando-descarga.component';
+import { CarregamentoComponent } from './componentes/carregamento/carregamento.component';
+import { CarregamentoAssistenciaComponent } from './componentes/carregamento/assistencia/assistencia.component';
+import { CarregamentoAguardandoDescargaComponent } from './componentes/carregamento/aguardando-descarga/aguardando-descarga.component';
 
-import { ManutencaoComponent } from './componente/manutencao/manutencao.component';
-import { SolicitarManutencaoComponent } from './componente/manutencao/solicitar-manutencao/solicitar-manutencao.component';
-import { EstoqueManutencaoComponent } from './componente/manutencao/estoque/estoque.component';
-import { AcompanhamentoComponent } from './componente/manutencao/acompanhamento/acompanhamento.component';
-import { FilaChamadosComponent } from './componente/manutencao/fila-chamados/fila-chamados.component';
-import { SolicitarPecaComponent } from './componente/manutencao/solicitar-peca/solicitar-peca.component';
+import { ManutencaoComponent } from './componentes/manutencao/manutencao.component';
+import { SolicitarManutencaoComponent } from './componentes/manutencao/solicitar-manutencao/solicitar-manutencao.component';
+import { EstoqueManutencaoComponent } from './componentes/manutencao/estoque/estoque.component';
+import { AcompanhamentoComponent } from './componentes/manutencao/acompanhamento/acompanhamento.component';
+import { FilaChamadosComponent } from './componentes/manutencao/fila-chamados/fila-chamados.component';
+import { SolicitarPecaComponent } from './componentes/manutencao/solicitar-peca/solicitar-peca.component';
 
-import { AssistenciaTecnicaComponent } from './componente/assistencia/assistencia.component';
-import { AssistenciaLotesComponent } from './componente/assistencia/lotes/lotes.component';
-import { EstoquePecasComponent } from './componente/assistencia/estoque-pecas/estoque-pecas.component';
+import { AssistenciaTecnicaComponent } from './componentes/assistencia/assistencia.component';
+import { AssistenciaLotesComponent } from './componentes/assistencia/lotes/lotes.component';
+import { EstoquePecasComponent } from './componentes/assistencia/estoque-pecas/estoque-pecas.component';
 
-import { RecursosHumanosComponent } from './componente/recursos-humanos/recursos-humanos.component';
-import { PontoComponent } from './componente/recursos-humanos/ponto/ponto.component';
-import { FuncionariosComponent } from './componente/recursos-humanos/funcionarios/funcionarios.component';
-import { FeriasComponent } from './componente/recursos-humanos/ferias/ferias.component';
-import { SolicitacoesRhComponent } from './componente/recursos-humanos/solicitacoes/solicitacoes.component';
+import { RecursosHumanosComponent } from './componentes/recursos-humanos/recursos-humanos.component';
+import { PontoComponent } from './componentes/recursos-humanos/ponto/ponto.component';
+import { FuncionariosComponent } from './componentes/recursos-humanos/funcionarios/funcionarios.component';
+import { FeriasComponent } from './componentes/recursos-humanos/ferias/ferias.component';
+import { SolicitacoesRhComponent } from './componentes/recursos-humanos/solicitacoes/solicitacoes.component';
+import { PermissaoAcessoComponent } from './componentes/recursos-humanos/permissao-acesso/permissao-acesso.component';
 
-import { PcpComponent } from './componente/pcp/pcp.component';
-import { OrdensProducaoComponent } from './componente/pcp/ordens/ordens.component';
-import { ProgramacaoComponent } from './componente/pcp/programacao/programacao.component';
-import { CapacidadeComponent } from './componente/pcp/capacidade/capacidade.component';
-import { KpisComponent } from './componente/pcp/kpis/kpis.component';
+import { PcpComponent } from './componentes/pcp/pcp.component';
+import { OrdensProducaoComponent } from './componentes/pcp/ordens/ordens.component';
+import { ProgramacaoComponent } from './componentes/pcp/programacao/programacao.component';
+import { CapacidadeComponent } from './componentes/pcp/capacidade/capacidade.component';
+import { KpisComponent } from './componentes/pcp/kpis/kpis.component';
 
-import { ComprasComponent } from './componente/compras/compras.component';
-import { PedidosCompraComponent } from './componente/compras/pedidos/pedidos.component';
-import { CotacoesComponent } from './componente/compras/cotacoes/cotacoes.component';
-import { AprovacoesComponent } from './componente/compras/aprovacoes/aprovacoes.component';
+import { ComprasComponent } from './componentes/compras/compras.component';
+import { PedidosCompraComponent } from './componentes/compras/pedidos/pedidos.component';
+import { CotacoesComponent } from './componentes/compras/cotacoes/cotacoes.component';
+import { AprovacoesComponent } from './componentes/compras/aprovacoes/aprovacoes.component';
 
-import { FinanceiroComponent } from './componente/financeiro/financeiro.component';
-import { ContasPagarComponent } from './componente/financeiro/contas-pagar/contas-pagar.component';
-import { ContasReceberComponent } from './componente/financeiro/contas-receber/contas-receber.component';
-import { FluxoCaixaComponent } from './componente/financeiro/fluxo-caixa/fluxo-caixa.component';
+import { FinanceiroComponent } from './componentes/financeiro/financeiro.component';
+import { ContasPagarComponent } from './componentes/financeiro/contas-pagar/contas-pagar.component';
+import { ContasReceberComponent } from './componentes/financeiro/contas-receber/contas-receber.component';
+import { FluxoCaixaComponent } from './componentes/financeiro/fluxo-caixa/fluxo-caixa.component';
 
-import { LotesComponent } from './componente/lotes/lotes.component';
+import { LotesComponent } from './componentes/lotes/lotes.component';
 
-import { AdministracaoComponent } from './componente/administracao/administracao.component';
-import { UsuariosComponent } from './componente/administracao/usuarios/usuarios.component';
-import { AuditoriaComponent } from './componente/administracao/auditoria/auditoria.component';
-import { RelatoriosComponent } from './componente/administracao/relatorios/relatorios.component';
-import { ParametrosComponent } from './componente/administracao/parametros/parametros.component';
+import { AdministracaoComponent } from './componentes/administracao/administracao.component';
+import { UsuariosComponent } from './componentes/administracao/usuarios/usuarios.component';
+import { AuditoriaComponent } from './componentes/administracao/auditoria/auditoria.component';
+import { RelatoriosComponent } from './componentes/administracao/relatorios/relatorios.component';
+import { ParametrosComponent } from './componentes/administracao/parametros/parametros.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -91,7 +92,8 @@ export const routes: Routes = [
   { path: 'recursos-humanos/ponto',                 component: PontoComponent },
   { path: 'recursos-humanos/funcionarios',          component: FuncionariosComponent },
   { path: 'recursos-humanos/ferias',                component: FeriasComponent },
-  { path: 'recursos-humanos/solicitacoes',          component: SolicitacoesRhComponent },
+  { path: 'recursos-humanos/solicitacoes',           component: SolicitacoesRhComponent },
+  { path: 'recursos-humanos/permissao-acesso',       component: PermissaoAcessoComponent },
 
   { path: 'pcp',                                    component: PcpComponent },
   { path: 'pcp/ordens',                             component: OrdensProducaoComponent },

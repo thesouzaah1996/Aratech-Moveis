@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.produto.controller;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.res.Response;
 import com.aratechmoveis.almoxarifado.produto.dto.ProdutoDTO;
 import com.aratechmoveis.almoxarifado.produto.service.ProdutoService;
 import jakarta.validation.Valid;

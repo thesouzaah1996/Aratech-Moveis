@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${PORTARIA_DATASOURCE_URL}
     username: ${PORTARIA_DB_USER_PROD}
     password: ${PORTARIA_DB_PASSWORD_PROD}
     driver-class-name: org.postgresql.Driver

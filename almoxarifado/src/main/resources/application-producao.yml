@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${ALMOXARIFADO_DATASOURCE_URL}
     username: ${ALMOXARIFADO_DB_USER_PROD}
     password: ${ALMOXARIFADO_DB_PASSWORD_PROD}
     driver-class-name: org.postgresql.Driver

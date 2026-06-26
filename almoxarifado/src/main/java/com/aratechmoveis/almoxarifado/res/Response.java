@@ -1,4 +1,4 @@
-package com.aratechmoveis.almoxarifado;
+package com.aratechmoveis.almoxarifado.res;
 
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaLookupDTO;
@@ -18,7 +18,7 @@ import java.util.List;
 public class Response {
 
     private int status;
-    private String message;
+    private String mensagem;
 
     private String token;
     private String expirationTime;

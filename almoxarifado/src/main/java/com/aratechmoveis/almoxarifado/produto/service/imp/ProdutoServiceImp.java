@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.produto.service.imp;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.res.Response;
 import com.aratechmoveis.almoxarifado.categoria.modelo.Categoria;
 import com.aratechmoveis.almoxarifado.categoria.repository.CategoriaRepository;
 import com.aratechmoveis.almoxarifado.fornecedor.model.Fornecedor;
@@ -35,6 +35,8 @@ public class ProdutoServiceImp implements ProdutoService {
     @Transactional
     public Response addProduto(ProdutoDTO produtoDTO) {
 
+        produtoDTO.setSku(produtoDTO.getSku().trim().toUpperCase());
+
         if (produtoRepository.existsBySku(produtoDTO.getSku())) {
             throw new RecursoJaExistenteException(
                     "Já existe um produto cadastrado com o SKU: " + produtoDTO.getSku()
@@ -51,27 +53,33 @@ public class ProdutoServiceImp implements ProdutoService {
                         "Fornecedor não encontrado. Para adicionar um produto, o fornecedor deve estar cadastrado."
                 ));
 
+        if (!Boolean.TRUE.equals(fornecedorExistente.getAtivo())) {
+            throw new RecursoJaExistenteException("O fornecedor informado está inativo. Apenas fornecedores ativos podem ser vinculados a produtos.");
+        }
+
         Produto produtoParaSalvar = modelMapper.map(produtoDTO, Produto.class);
         produtoParaSalvar.setCategoria(categoria);
         produtoParaSalvar.setFornecedor(fornecedorExistente);
 
         if (produtoParaSalvar.getLocalArmazenamento() != null) {
-            produtoParaSalvar.setLocalArmazenamento(
-                    produtoParaSalvar.getLocalArmazenamento().trim().toLowerCase().replaceAll("\\s+", "")
-            );
+            String local = produtoParaSalvar.getLocalArmazenamento().trim().toLowerCase().replaceAll("\\s+", "");
+            if (produtoRepository.existsByLocalArmazenamento(local)) {
+                throw new RecursoJaExistenteException("Já existe um produto armazenado no local: " + local);
+            }
+            produtoParaSalvar.setLocalArmazenamento(local);
         }
 
         produtoRepository.save(produtoParaSalvar);
-        ProdutoDTO produto = modelMapper.map(produtoParaSalvar, ProdutoDTO.class);
 
         return Response.builder()
                 .status(201)
-                .produto(produto)
-                .message("Produto criado com sucesso")
+                .produto(modelMapper.map(produtoParaSalvar, ProdutoDTO.class))
+                .mensagem("Produto criado com sucesso")
                 .build();
     }
 
     @Override
+    @Transactional
     public Response updateProduto(Long id, ProdutoDTO produtoDTO) {
         Produto produtoExistente = produtoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
@@ -111,12 +119,11 @@ public class ProdutoServiceImp implements ProdutoService {
         }
 
         produtoRepository.save(produtoExistente);
-        ProdutoDTO produto = modelMapper.map(produtoExistente, ProdutoDTO.class);
 
         return Response.builder()
                 .status(200)
-                .produto(produto)
-                .message("Produto atualizado com sucesso")
+                .produto(modelMapper.map(produtoExistente, ProdutoDTO.class))
+                .mensagem("Produto atualizado com sucesso")
                 .build();
     }
 
@@ -124,13 +131,11 @@ public class ProdutoServiceImp implements ProdutoService {
     @Transactional
     public Response getProdutos() {
         List<Produto> produtos = produtoRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-        List<ProdutoDTO> produtoDTOS = modelMapper.map(produtos, new TypeToken<List<ProdutoDTO>>() {
-        }.getType());
 
         return Response.builder()
                 .status(200)
-                .message("Produtos listados com sucesso")
-                .produtos(produtoDTOS)
+                .mensagem("Produtos listados com sucesso")
+                .produtos(modelMapper.map(produtos, new TypeToken<List<ProdutoDTO>>(){}.getType()))
                 .build();
     }
 
@@ -140,16 +145,15 @@ public class ProdutoServiceImp implements ProdutoService {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado, confira se o id está correto"));
 
-        ProdutoDTO produtoDTO = modelMapper.map(produto, ProdutoDTO.class);
-
         return Response.builder()
                 .status(200)
-                .message("Produto listado com sucesso")
-                .produto(produtoDTO)
+                .mensagem("Produto listado com sucesso")
+                .produto(modelMapper.map(produto, ProdutoDTO.class))
                 .build();
     }
 
     @Override
+    @Transactional
     public Response deleteProduto(Long id) {
         produtoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado, para deletar, confira se o id está correto"));
@@ -158,7 +162,7 @@ public class ProdutoServiceImp implements ProdutoService {
 
         return Response.builder()
                 .status(204)
-                .message("Produto deletado com sucesso")
+                .mensagem("Produto deletado com sucesso")
                 .build();
     }
 }

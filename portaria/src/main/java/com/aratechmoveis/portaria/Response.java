@@ -13,7 +13,7 @@ import java.util.List;
 public class Response {
 
     private int status;
-    private String message;
+    private String mensagem;
 
     private RegistroChegadaDTO registroChegada;
     private List<RegistroChegadaDTO> registrosChegada;

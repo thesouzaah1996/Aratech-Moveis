@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.fornecedor.controller;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.res.Response;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;
 import com.aratechmoveis.almoxarifado.fornecedor.service.FornecedorService;
 import jakarta.validation.Valid;
