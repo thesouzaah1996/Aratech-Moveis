@@ -1,0 +1,118 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+      <h3 class="fw-bold mb-0 flex-shrink-0">Chamados de TI</h3>
+
+      <div class="input-group" style="max-width: 320px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+          placeholder="Buscar por nº, título, solicitante ou tipo…"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="page = 1">
+      </div>
+
+      <div class="filtro-status flex-shrink-0">
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'"           (click)="setFiltro('Todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Aberto'"          (click)="setFiltro('Aberto')">Abertos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Em Atendimento'"  (click)="setFiltro('Em Atendimento')">Em Atendimento</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Concluído'"       (click)="setFiltro('Concluído')">Concluídos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Cancelado'"       (click)="setFiltro('Cancelado')">Cancelados</button>
+      </div>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Nº Chamado</th>
+                <th>Tipo</th>
+                <th>Prioridade</th>
+                <th>Título / Assunto</th>
+                <th>Solicitante</th>
+                <th>Status</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (paged.length === 0) {
+                <tr>
+                  <td colspan="7">
+                    <div class="empty-state">
+                      <i class="bi bi-headset"></i>
+                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum chamado registrado.' }}</p>
+                    </div>
+                  </td>
+                </tr>
+              } @else {
+                @for (chamado of paged; track chamado.id) {
+                  <tr [class.row-em-atendimento]="chamado.status === 'Em Atendimento'">
+                    <td><span class="badge-id">{{ chamado.id }}</span></td>
+                    <td class="text-muted small">{{ chamado.tipo }}</td>
+                    <td><span [class]="prioridadeClass(chamado.prioridade)">{{ chamado.prioridade }}</span></td>
+                    <td class="fw-semibold">{{ chamado.titulo }}</td>
+                    <td>
+                      <span class="fw-semibold">{{ chamado.solicitante }}</span>
+                      <br><span class="text-muted small">{{ chamado.setor }}</span>
+                    </td>
+                    <td><span class="badge" [class]="statusBadge(chamado.status)">{{ chamado.status }}</span></td>
+                    <td class="text-muted small">{{ chamado.data }}</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (totalPages > 1) {
+          <div class="pagination-container">
+            <span class="pagination-info">
+              Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} chamado(s)
+            </span>
+            <nav>
+              <ul class="pagination">
+                <li class="page-item" [class.disabled]="page === 1">
+                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                </li>
+
+                @if (visiblePages[0] > 1) {
+                  <li class="page-item"><a class="page-link" (click)="setPage(1)">1</a></li>
+                  @if (visiblePages[0] > 2) {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                  }
+                }
+
+                @for (p of visiblePages; track p) {
+                  <li class="page-item" [class.active]="p === page">
+                    <a class="page-link" (click)="setPage(p)">{{ p }}</a>
+                  </li>
+                }
+
+                @if (visiblePages[visiblePages.length - 1] < totalPages) {
+                  @if (visiblePages[visiblePages.length - 1] < totalPages - 1) {
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                  }
+                  <li class="page-item"><a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a></li>
+                }
+
+                <li class="page-item" [class.disabled]="page === totalPages">
+                  <a class="page-link" (click)="setPage(page + 1)">›</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer />

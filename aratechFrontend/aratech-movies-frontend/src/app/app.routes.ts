@@ -57,7 +57,9 @@ import { AuditoriaComponent } from './componente/administracao/auditoria/auditor
 import { RelatoriosComponent } from './componente/administracao/relatorios/relatorios.component';
 import { ParametrosComponent } from './componente/administracao/parametros/parametros.component';
 
+import { SuporteComponent } from './componente/suporte/suporte.component';
 import { ChamadoTiComponent } from './componente/suporte/chamado-ti/chamado-ti.component';
+import { AcompanhamentoTiComponent } from './componente/suporte/acompanhamento/acompanhamento-ti.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -118,5 +120,7 @@ export const routes: Routes = [
   { path: 'administracao/parametros',               component: ParametrosComponent },
   { path: 'administracao/lotes',                    component: LotesComponent },
 
+  { path: 'suporte',                                component: SuporteComponent },
   { path: 'suporte/chamado-ti',                     component: ChamadoTiComponent },
+  { path: 'suporte/acompanhamento',                 component: AcompanhamentoTiComponent },
 ];

@@ -31,7 +31,8 @@ export class ChamadoTiComponent implements AfterViewInit {
 
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
-    { label: 'Suporte de TI' }
+    { label: 'Suporte TI', route: '/suporte' },
+    { label: 'Abrir Chamado' }
   ];
 
   form: FormChamadoTi = this.emptyForm();
