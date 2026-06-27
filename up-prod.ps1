@@ -14,7 +14,7 @@ $toBuild = $map.Keys | Where-Object {
     $changed | Where-Object { $_ -like "$prefix*" }
 }
 
-$base = "docker compose -f docker-compose.yml -f docker-compose-prod.yml"
+$base = "docker compose"
 
 if ($toBuild) {
     $lista = $toBuild -join " "

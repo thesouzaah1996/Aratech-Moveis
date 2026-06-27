@@ -1,82 +1,73 @@
-# Nunca suba esse arquivo sozinho. Sempre use junto com um override:
-#   docker compose -f docker-compose.yml -f docker-compose-dev.yml up -d
-#   docker compose -f docker-compose.yml -f docker-compose-prod.yml up -d
-
 networks:
   aratech-network:
     driver: bridge
 
-services:
+volumes:
+  almoxarifado-db-prod-data:
+  login-db-prod-data:
+  portaria-db-prod-data:
 
-  aratech-frontend:
-    build: ./aratechFrontend/aratech-movies-frontend
-    image: aratech/frontend:latest
-    restart: always
-    networks:
-      - aratech-network
+services:
 
   almoxarifado-db:
     image: postgres:17.4
+    container_name: almoxarifado-db-prod
     restart: always
+    ports:
+      - "5575:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: almoxarifado-prod
+    volumes:
+      - almoxarifado-db-prod-data:/var/lib/postgresql/data
     networks:
       - aratech-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   login-db:
     image: postgres:17.4
+    container_name: login-db-prod
     restart: always
+    ports:
+      - "5576:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: login-prod
+    volumes:
+      - login-db-prod-data:/var/lib/postgresql/data
     networks:
       - aratech-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   portaria-db:
     image: postgres:17.4
+    container_name: portaria-db-prod
     restart: always
+    ports:
+      - "5577:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: portaria-prod
+    volumes:
+      - portaria-db-prod-data:/var/lib/postgresql/data
     networks:
       - aratech-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-
-  almoxarifado:
-    build: ./almoxarifado
-    image: aratech/almoxarifado:latest
-    restart: always
-    depends_on:
-      almoxarifado-db:
-        condition: service_healthy
-    networks:
-      - aratech-network
-
-  login:
-    build: ./login
-    image: aratech/login:latest
-    restart: always
-    depends_on:
-      login-db:
-        condition: service_healthy
-    networks:
-      - aratech-network
-
-  portaria:
-    build: ./portaria
-    image: aratech/portaria:latest
-    restart: always
-    depends_on:
-      portaria-db:
-        condition: service_healthy
-    networks:
-      - aratech-network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.15
@@ -85,16 +76,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-      JVMFLAGS: "-Xmx128m -Xms64m"
-    ports:
-      - "22181:2181"
     networks:
       - aratech-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 256M
 
   kafka:
     image: confluentinc/cp-kafka:7.2.15
@@ -105,38 +88,68 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_HEAP_OPTS: "-Xmx256m -Xms128m"
-    ports:
-      - "29092:29092"
     networks:
       - aratech-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:v0.7.2
-    container_name: kafka-ui
+  almoxarifado:
+    build: ./almoxarifado
+    container_name: almoxarifado
     restart: always
-    depends_on:
-      - kafka
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-      JAVA_TOOL_OPTIONS: "-Xmx128m -Xms64m"
     ports:
-      - "8090:8080"
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: producao
+      SPRING_DATASOURCE_URL: jdbc:postgresql://almoxarifado-db:5432/almoxarifado-prod
+      ALMOXARIFADO_DB_USER_PROD: postgres
+      ALMOXARIFADO_DB_PASSWORD_PROD: postgres
+    depends_on:
+      almoxarifado-db:
+        condition: service_healthy
     networks:
       - aratech-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.3'
-          memory: 256M
+
+  login:
+    build: ./login
+    container_name: login
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: producao
+      SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5432/login-prod
+      LOGIN_DB_USER_PROD: postgres
+      LOGIN_DB_PASSWORD_PROD: postgres
+    depends_on:
+      login-db:
+        condition: service_healthy
+    networks:
+      - aratech-network
+
+  portaria:
+    build: ./portaria
+    container_name: portaria
+    restart: always
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: producao
+      SPRING_DATASOURCE_URL: jdbc:postgresql://portaria-db:5432/portaria-prod
+      PORTARIA_DB_USER_PROD: postgres
+      PORTARIA_DB_PASSWORD_PROD: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      portaria-db:
+        condition: service_healthy
+    networks:
+      - aratech-network
+
+  aratech-frontend:
+    build: ./aratechFrontend/aratech-movies-frontend
+    container_name: aratech-frontend
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - aratech-network

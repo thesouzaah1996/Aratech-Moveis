@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,12 +47,14 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
     @Override
     public Response getRegistrosChegada() {
        List<RegistroChegada> registroChegadas = registroChegadaRepository.findAll();
-       List<RegistroChegadaDTO> registroChegadaDTO = modelMapper.map(registroChegadas, RegistroChegadaDTO.class);
+       List<RegistroChegadaDTO> registroChegadaDTO = registroChegadas.stream()
+               .map(r -> modelMapper.map(r, RegistroChegadaDTO.class))
+               .collect(Collectors.toList());
 
         return Response.builder()
                 .status(200)
                 .message("Registros listados com sucesso.")
-                .registrosChegada()
+                .registrosChegada(registroChegadaDTO)
                 .build();
     }
 }
