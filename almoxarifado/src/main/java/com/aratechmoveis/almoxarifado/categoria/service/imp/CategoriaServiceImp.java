@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.categoria.service.imp;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.response.Response;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaLookupDTO;
 import com.aratechmoveis.almoxarifado.categoria.modelo.Categoria;

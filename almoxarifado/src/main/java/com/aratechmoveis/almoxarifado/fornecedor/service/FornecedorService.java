@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.fornecedor.service;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.response.Response;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;
 
 public interface FornecedorService {

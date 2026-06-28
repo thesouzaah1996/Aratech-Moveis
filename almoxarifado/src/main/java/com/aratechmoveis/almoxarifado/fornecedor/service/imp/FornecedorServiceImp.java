@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.fornecedor.service.imp;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.response.Response;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;

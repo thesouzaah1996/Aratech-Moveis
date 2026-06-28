@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.produto.service;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.response.Response;
 import com.aratechmoveis.almoxarifado.produto.dto.ProdutoDTO;
 
 public interface ProdutoService {

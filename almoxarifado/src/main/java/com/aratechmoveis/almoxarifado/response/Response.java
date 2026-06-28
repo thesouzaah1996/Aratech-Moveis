@@ -1,4 +1,4 @@
-package com.aratechmoveis.almoxarifado;
+package com.aratechmoveis.almoxarifado.response;
 
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaLookupDTO;

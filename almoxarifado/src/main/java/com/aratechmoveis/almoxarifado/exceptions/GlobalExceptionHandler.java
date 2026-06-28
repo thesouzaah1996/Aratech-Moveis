@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.exceptions;
 
-import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.response.Response;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
