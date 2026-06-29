@@ -61,6 +61,8 @@ import { SuporteComponent } from './componente/suporte/suporte.component';
 import { ChamadoTiComponent } from './componente/suporte/chamado-ti/chamado-ti.component';
 import { AcompanhamentoTiComponent } from './componente/suporte/acompanhamento/acompanhamento-ti.component';
 
+import { MeuPerfilComponent } from './componente/meu-perfil/meu-perfil.component';
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login',                                  component: LoginComponent },
@@ -119,6 +121,8 @@ export const routes: Routes = [
   { path: 'administracao/relatorios',               component: RelatoriosComponent },
   { path: 'administracao/parametros',               component: ParametrosComponent },
   { path: 'administracao/lotes',                    component: LotesComponent },
+
+  { path: 'meu-perfil',                             component: MeuPerfilComponent },
 
   { path: 'suporte',                                component: SuporteComponent },
   { path: 'suporte/chamado-ti',                     component: ChamadoTiComponent },

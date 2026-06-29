@@ -1,10 +1,8 @@
-import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
-
-declare const bootstrap: any;
 
 export type PerfilUsuario = 'Administrador' | 'Gerente' | 'Operador' | 'Visualizador';
 
@@ -18,12 +16,41 @@ export interface Usuario {
   ultimoAcesso: string;
 }
 
-interface FormUsuario {
-  nome: string;
-  email: string;
-  perfil: PerfilUsuario | '';
-  modulos: string;
+interface Permissao {
+  id: string;
+  modulo: string;
+  acao: string;
 }
+
+const PERMISSOES_DISPONIVEIS: Permissao[] = [
+  { id: 'alm.view',   modulo: 'Almoxarifado',     acao: 'Visualizar'   },
+  { id: 'alm.create', modulo: 'Almoxarifado',     acao: 'Criar'        },
+  { id: 'alm.edit',   modulo: 'Almoxarifado',     acao: 'Editar'       },
+  { id: 'alm.delete', modulo: 'Almoxarifado',     acao: 'Excluir'      },
+  { id: 'rh.view',    modulo: 'Recursos Humanos', acao: 'Visualizar'   },
+  { id: 'rh.create',  modulo: 'Recursos Humanos', acao: 'Criar'        },
+  { id: 'rh.edit',    modulo: 'Recursos Humanos', acao: 'Editar'       },
+  { id: 'rh.delete',  modulo: 'Recursos Humanos', acao: 'Excluir'      },
+  { id: 'fin.view',   modulo: 'Financeiro',       acao: 'Visualizar'   },
+  { id: 'fin.create', modulo: 'Financeiro',       acao: 'Criar'        },
+  { id: 'fin.edit',   modulo: 'Financeiro',       acao: 'Editar'       },
+  { id: 'fin.delete', modulo: 'Financeiro',       acao: 'Excluir'      },
+  { id: 'pcp.view',   modulo: 'PCP',              acao: 'Visualizar'   },
+  { id: 'pcp.edit',   modulo: 'PCP',              acao: 'Editar'       },
+  { id: 'comp.view',  modulo: 'Compras',          acao: 'Visualizar'   },
+  { id: 'comp.edit',  modulo: 'Compras',          acao: 'Editar'       },
+  { id: 'comp.aprov', modulo: 'Compras',          acao: 'Aprovar'      },
+  { id: 'mnt.view',   modulo: 'Manutenção',       acao: 'Visualizar'   },
+  { id: 'mnt.edit',   modulo: 'Manutenção',       acao: 'Editar'       },
+  { id: 'port.view',  modulo: 'Portaria',         acao: 'Visualizar'   },
+  { id: 'port.edit',  modulo: 'Portaria',         acao: 'Editar'       },
+  { id: 'car.view',   modulo: 'Carregamento',     acao: 'Visualizar'   },
+  { id: 'car.edit',   modulo: 'Carregamento',     acao: 'Editar'       },
+  { id: 'ast.view',   modulo: 'Assistência',      acao: 'Visualizar'   },
+  { id: 'ast.edit',   modulo: 'Assistência',      acao: 'Editar'       },
+  { id: 'adm.view',   modulo: 'Administração',    acao: 'Visualizar'   },
+  { id: 'adm.full',   modulo: 'Administração',    acao: 'Acesso Total' },
+];
 
 @Component({
   selector: 'app-usuarios',
@@ -32,133 +59,105 @@ interface FormUsuario {
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
-export class UsuariosComponent implements AfterViewInit {
-  @ViewChild('usuarioModal') usuarioModalEl!: ElementRef;
-  @ViewChild('deleteModal') deleteModalEl!: ElementRef;
-
+export class UsuariosComponent {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
     { label: 'Administração', route: '/administracao' },
-    { label: 'Usuários e Permissões' }
+    { label: 'Permissões de Usuário' }
   ];
 
   usuarios: Usuario[] = [];
-  searchTerm = '';
-  filtroStatus = 'todos';
-  page = 1;
-  pageSize = 8;
-  isEditing = false;
-  submitted = false;
+
+  searchQuery = '';
+  buscando = false;
+  naoEncontrado = false;
+  usuarioEncontrado: Usuario | null = null;
+
+  permissoesDisponiveis: Permissao[] = PERMISSOES_DISPONIVEIS;
+  permissoesSelecionadas = new Set<string>();
+  dropdownAberto = false;
+  salvando = false;
+
   successMessage = '';
 
-  form: FormUsuario = this.emptyForm();
-  editandoId: number | null = null;
-  usuarioParaExcluir: Usuario | null = null;
+  buscar(): void {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return;
+    this.buscando = true;
+    this.naoEncontrado = false;
+    this.usuarioEncontrado = null;
+    this.dropdownAberto = false;
 
-  private usuarioModal?: any;
-  private deleteModal?: any;
-
-  ngAfterViewInit(): void {
-    this.usuarioModal = new bootstrap.Modal(this.usuarioModalEl.nativeElement);
-    this.deleteModal  = new bootstrap.Modal(this.deleteModalEl.nativeElement);
+    setTimeout(() => {
+      const found = this.usuarios.find(u =>
+        u.email.toLowerCase().includes(q) ||
+        u.nome.toLowerCase().includes(q)
+      ) ?? null;
+      this.usuarioEncontrado = found;
+      this.naoEncontrado = !found;
+      this.buscando = false;
+      if (found) this.permissoesSelecionadas = new Set();
+    }, 400);
   }
 
-  get filtrados(): Usuario[] {
-    let lista = [...this.usuarios];
-    if (this.filtroStatus === 'ativos')   lista = lista.filter(u => u.ativo);
-    if (this.filtroStatus === 'inativos') lista = lista.filter(u => !u.ativo);
-    const term = this.searchTerm.trim().toLowerCase();
-    if (term) lista = lista.filter(u =>
-      u.nome.toLowerCase().includes(term) ||
-      u.email.toLowerCase().includes(term) ||
-      u.perfil.toLowerCase().includes(term)
-    );
-    return lista;
+  limparBusca(): void {
+    this.searchQuery = '';
+    this.usuarioEncontrado = null;
+    this.naoEncontrado = false;
+    this.dropdownAberto = false;
   }
 
-  get paged(): Usuario[] {
-    const start = (this.page - 1) * this.pageSize;
-    return this.filtrados.slice(start, start + this.pageSize);
+  get modulosUnicos(): string[] {
+    return [...new Set(this.permissoesDisponiveis.map(p => p.modulo))];
   }
 
-  get totalPages(): number { return Math.ceil(this.filtrados.length / this.pageSize); }
-  get visiblePages(): number[] {
-    const start = Math.max(1, Math.min(this.page - 2, this.totalPages - 4));
-    return Array.from({ length: Math.min(this.totalPages, start + 4) - start + 1 }, (_, i) => start + i);
-  }
-  get paginationStart(): number { return this.filtrados.length === 0 ? 0 : (this.page - 1) * this.pageSize + 1; }
-  get paginationEnd(): number { return Math.min(this.page * this.pageSize, this.filtrados.length); }
-  setPage(p: number): void { if (p >= 1 && p <= this.totalPages) this.page = p; }
-
-  openAdd(): void {
-    this.isEditing = false;
-    this.submitted = false;
-    this.form = this.emptyForm();
-    this.usuarioModal.show();
+  permissoesPorModulo(modulo: string): Permissao[] {
+    return this.permissoesDisponiveis.filter(p => p.modulo === modulo);
   }
 
-  openEdit(u: Usuario): void {
-    this.isEditing = true;
-    this.submitted = false;
-    this.editandoId = u.id;
-    this.form = { nome: u.nome, email: u.email, perfil: u.perfil, modulos: u.modulos };
-    this.usuarioModal.show();
+  toggleDropdown(): void { this.dropdownAberto = !this.dropdownAberto; }
+
+  temPermissao(id: string): boolean { return this.permissoesSelecionadas.has(id); }
+
+  togglePermissao(id: string): void {
+    const s = new Set(this.permissoesSelecionadas);
+    s.has(id) ? s.delete(id) : s.add(id);
+    this.permissoesSelecionadas = s;
   }
 
-  openDelete(u: Usuario): void {
-    this.usuarioParaExcluir = u;
-    this.deleteModal.show();
+  toggleModulo(modulo: string): void {
+    const perms = this.permissoesPorModulo(modulo);
+    const todas = perms.every(p => this.permissoesSelecionadas.has(p.id));
+    const s = new Set(this.permissoesSelecionadas);
+    perms.forEach(p => todas ? s.delete(p.id) : s.add(p.id));
+    this.permissoesSelecionadas = s;
   }
 
-  save(): void {
-    this.submitted = true;
-    if (!this.isFormValid()) return;
-    if (this.isEditing && this.editandoId) {
-      const idx = this.usuarios.findIndex(u => u.id === this.editandoId);
-      if (idx > -1) Object.assign(this.usuarios[idx], this.form);
-      this.showSuccess('Usuário atualizado com sucesso!');
-    } else {
-      const newId = this.usuarios.length ? Math.max(...this.usuarios.map(u => u.id)) + 1 : 1;
-      this.usuarios.push({ ...this.form, id: newId, ativo: true, ultimoAcesso: '—' } as Usuario);
-      this.showSuccess('Usuário cadastrado com sucesso!');
-    }
-    this.usuarioModal.hide();
+  moduloSelecionado(modulo: string): boolean {
+    return this.permissoesPorModulo(modulo).every(p => this.permissoesSelecionadas.has(p.id));
   }
 
-  toggleAtivo(u: Usuario): void {
-    u.ativo = !u.ativo;
-    this.showSuccess(`Usuário ${u.ativo ? 'ativado' : 'desativado'} com sucesso!`);
+  moduloParcial(modulo: string): boolean {
+    const perms = this.permissoesPorModulo(modulo);
+    const count = perms.filter(p => this.permissoesSelecionadas.has(p.id)).length;
+    return count > 0 && count < perms.length;
   }
 
-  confirmDelete(): void {
-    if (!this.usuarioParaExcluir) return;
-    this.usuarios = this.usuarios.filter(u => u.id !== this.usuarioParaExcluir!.id);
-    this.usuarioParaExcluir = null;
-    this.deleteModal.hide();
-    this.showSuccess('Usuário removido com sucesso!');
+  salvarPermissoes(): void {
+    this.salvando = true;
+    setTimeout(() => {
+      this.salvando = false;
+      this.dropdownAberto = false;
+      this.showSuccess(`Permissões de ${this.usuarioEncontrado?.nome} atualizadas com sucesso!`);
+    }, 600);
   }
 
   perfilBadge(perfil: PerfilUsuario): string {
-    const map: Record<PerfilUsuario, string> = {
-      'Administrador': 'bg-danger',
-      'Gerente':       'bg-warning text-dark',
-      'Operador':      'bg-primary',
-      'Visualizador':  'bg-secondary'
-    };
-    return map[perfil] ?? 'bg-secondary';
-  }
-
-  private isFormValid(): boolean {
-    return !!(this.form.nome.trim() && this.form.email.trim() && this.form.perfil &&
-              /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email));
+    return ({ Administrador: 'bg-danger', Gerente: 'bg-warning text-dark', Operador: 'bg-primary', Visualizador: 'bg-secondary' } as Record<string,string>)[perfil] ?? 'bg-secondary';
   }
 
   private showSuccess(msg: string): void {
     this.successMessage = msg;
-    setTimeout(() => (this.successMessage = ''), 3000);
-  }
-
-  private emptyForm(): FormUsuario {
-    return { nome: '', email: '', perfil: '', modulos: '' };
+    setTimeout(() => (this.successMessage = ''), 3500);
   }
 }

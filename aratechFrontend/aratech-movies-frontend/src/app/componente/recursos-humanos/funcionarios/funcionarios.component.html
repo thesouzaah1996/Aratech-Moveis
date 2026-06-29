@@ -1,4 +1,4 @@
-﻿<app-navbar />
+<app-navbar />
 
 <main class="app-main">
   <app-breadcrumb [items]="breadcrumb" />
@@ -12,25 +12,25 @@
     }
 
     <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
-      <h3 class="fw-bold mb-0 flex-shrink-0">FuncionÃ¡rios</h3>
+      <h3 class="fw-bold mb-0 flex-shrink-0">Funcionários</h3>
 
       <div class="input-group" style="max-width: 320px;">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
         </span>
         <input type="text" class="form-control border-start-0 ps-0"
-          placeholder="Buscar por nome, matrÃ­cula ou setorâ€¦"
+          placeholder="Buscar por nome, matrícula ou setor…"
           [(ngModel)]="searchTerm" (ngModelChange)="onSearch()">
       </div>
 
       <div class="filtro-status flex-shrink-0">
-        <button type="button" [class.ativo]="filtroStatus === 'todos'"   (click)="setFiltroStatus('todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'ativos'"  (click)="setFiltroStatus('ativos')">Ativos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'todos'"    (click)="setFiltroStatus('todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ativos'"   (click)="setFiltroStatus('ativos')">Ativos</button>
         <button type="button" [class.ativo]="filtroStatus === 'inativos'" (click)="setFiltroStatus('inativos')">Inativos</button>
       </div>
 
       <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
-        <i class="bi bi-plus-circle me-2"></i>Novo FuncionÃ¡rio
+        <i class="bi bi-plus-circle me-2"></i>Novo Funcionário
       </button>
     </div>
 
@@ -40,12 +40,12 @@
           <table class="table table-hover align-middle">
             <thead>
               <tr>
-                <th>MatrÃ­cula</th>
+                <th>Matrícula</th>
                 <th>Nome</th>
                 <th>Cargo</th>
                 <th>Setor</th>
                 <th>Status</th>
-                <th class="text-end">AÃ§Ãµes</th>
+                <th class="text-end">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -54,7 +54,7 @@
                   <td colspan="6">
                     <div class="empty-state">
                       <i class="bi bi-people"></i>
-                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum funcionÃ¡rio cadastrado.' }}</p>
+                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum funcionário cadastrado.' }}</p>
                     </div>
                   </td>
                 </tr>
@@ -73,10 +73,10 @@
                       </div>
                     </td>
                     <td class="text-end action-buttons">
-                      <button class="btn-action btn-action-edit" title="Visualizar" (click)="openView(f)">
+                      <button class="btn-action" title="Visualizar" (click)="openView(f)">
                         <i class="bi bi-eye"></i>
                       </button>
-                      <button class="btn-action btn-action-edit ms-1" title="Editar" (click)="openEdit(f)">
+                      <button class="btn-action ms-1" title="Editar" (click)="openEdit(f)">
                         <i class="bi bi-pencil"></i>
                       </button>
                     </td>
@@ -90,28 +90,20 @@
         @if (totalPages > 1) {
           <div class="pagination-container">
             <span class="pagination-info">
-              Mostrando {{ paginationStart }}â€“{{ paginationEnd }} de {{ filtrados.length }} funcionÃ¡rio(s)
+              Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} funcionário(s)
             </span>
             <nav>
               <ul class="pagination">
                 <li class="page-item" [class.disabled]="page === 1">
-                  <a class="page-link" (click)="setPage(page - 1)">â€¹</a>
+                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
                 </li>
-                @if (visiblePages[0] > 1) {
-                  <li class="page-item"><a class="page-link" (click)="setPage(1)">1</a></li>
-                  @if (visiblePages[0] > 2) { <li class="page-item disabled"><span class="page-link">â€¦</span></li> }
-                }
                 @for (p of visiblePages; track p) {
                   <li class="page-item" [class.active]="p === page">
                     <a class="page-link" (click)="setPage(p)">{{ p }}</a>
                   </li>
                 }
-                @if (visiblePages[visiblePages.length - 1] < totalPages) {
-                  @if (visiblePages[visiblePages.length - 1] < totalPages - 1) { <li class="page-item disabled"><span class="page-link">â€¦</span></li> }
-                  <li class="page-item"><a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a></li>
-                }
                 <li class="page-item" [class.disabled]="page === totalPages">
-                  <a class="page-link" (click)="setPage(page + 1)">â€º</a>
+                  <a class="page-link" (click)="setPage(page + 1)">›</a>
                 </li>
               </ul>
             </nav>
@@ -125,101 +117,460 @@
 
 <app-footer />
 
-<div class="modal fade" #funcionarioModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal fade" #admissaoModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
     <div class="modal-content">
+
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">Novo FuncionÃ¡rio</h5>
-      </div>
-      <div class="modal-body p-4">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label fw-semibold">MatrÃ­cula <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.matricula" placeholder="Ex: 00123"
-              [class.is-invalid]="submitted && !form.matricula.trim()">
-            <div class="invalid-feedback">MatrÃ­cula Ã© obrigatÃ³ria.</div>
-          </div>
-          <div class="col-md-8">
-            <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome do funcionÃ¡rio"
-              [class.is-invalid]="submitted && !form.nome.trim()">
-            <div class="invalid-feedback">Nome Ã© obrigatÃ³rio.</div>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Cargo <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.cargo" placeholder="Ex: Operador de ProduÃ§Ã£o"
-              [class.is-invalid]="submitted && !form.cargo.trim()">
-            <div class="invalid-feedback">Cargo Ã© obrigatÃ³rio.</div>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Setor <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.setor" placeholder="Ex: ProduÃ§Ã£o"
-              [class.is-invalid]="submitted && !form.setor.trim()">
-            <div class="invalid-feedback">Setor Ã© obrigatÃ³rio.</div>
-          </div>
-          <div class="col-md-7">
-            <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
-            <input type="email" class="form-control" [(ngModel)]="form.email" placeholder="email@empresa.com"
-              [class.is-invalid]="submitted && (!form.email.trim() || !isValidEmail(form.email))">
-            <div class="invalid-feedback">Informe um e-mail vÃ¡lido.</div>
-          </div>
-          <div class="col-md-5">
-            <label class="form-label fw-semibold">Telefone</label>
-            <input type="text" class="form-control" [value]="form.telefone"
-              (input)="applyPhoneMask($event)" placeholder="(XX) XXXXX-XXXX">
-          </div>
+        <div>
+          <h5 class="modal-title fw-bold mb-0">Admissão de Funcionário</h5>
+          <small class="opacity-75">Etapa {{ activeTab + 1 }} de 5</small>
         </div>
       </div>
-      <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="save()">
-          <i class="bi bi-check-circle me-1"></i>Salvar
+
+      <div class="admissao-stepper px-4 pt-3 pb-2">
+        <button class="step-btn" [class.active]="activeTab === 0" [class.has-error]="tabHasError(0)"
+                (click)="goToTab(0)">
+          <span class="step-num">1</span><span class="step-label">Dados Pessoais</span>
+        </button>
+        <div class="step-divider"></div>
+        <button class="step-btn" [class.active]="activeTab === 1" [class.has-error]="tabHasError(1)"
+                (click)="goToTab(1)">
+          <span class="step-num">2</span><span class="step-label">Endereço</span>
+        </button>
+        <div class="step-divider"></div>
+        <button class="step-btn" [class.active]="activeTab === 2" [class.has-error]="tabHasError(2)"
+                (click)="goToTab(2)">
+          <span class="step-num">3</span><span class="step-label">Contrato</span>
+        </button>
+        <div class="step-divider"></div>
+        <button class="step-btn" [class.active]="activeTab === 3" [class.has-error]="tabHasError(3)"
+                (click)="goToTab(3)">
+          <span class="step-num">4</span><span class="step-label">Dados Bancários</span>
+        </button>
+        <div class="step-divider"></div>
+        <button class="step-btn" [class.active]="activeTab === 4" [class.has-error]="tabHasError(4)"
+                (click)="goToTab(4)">
+          <span class="step-num">5</span><span class="step-label">Documentos</span>
         </button>
       </div>
+
+      <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+
+        @if (activeTab === 0) {
+          <div class="p-3">
+            <p class="section-title">Identificação</p>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Matrícula <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.matricula"
+                  [class.is-invalid]="inv(0, !form.matricula.trim())" placeholder="Ex: 00123">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-9">
+                <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.nome"
+                  [class.is-invalid]="inv(0, !form.nome.trim())" placeholder="Nome completo do colaborador">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">CPF <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [value]="form.cpf"
+                  (input)="applyCpfMask($event)"
+                  [class.is-invalid]="inv(0, !form.cpf.trim())" placeholder="000.000.000-00">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">RG</label>
+                <input type="text" class="form-control" [value]="form.rg"
+                  (input)="applyRgMask($event)" placeholder="00.000.000-0">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">PIS / NIT / NIS</label>
+                <input type="text" class="form-control" [value]="form.pis"
+                  (input)="applyPisMask($event)" placeholder="000.00000.00-0">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Data de Nascimento <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" [(ngModel)]="form.dataNascimento"
+                  [class.is-invalid]="inv(0, !form.dataNascimento)">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Sexo <span class="text-danger">*</span></label>
+                <select class="form-select" [(ngModel)]="form.sexo"
+                  [class.is-invalid]="inv(0, !form.sexo)">
+                  <option value="">Selecione...</option>
+                  <option value="M">Masculino</option>
+                  <option value="F">Feminino</option>
+                  <option value="O">Outro</option>
+                </select>
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Estado Civil</label>
+                <select class="form-select" [(ngModel)]="form.estadoCivil">
+                  <option value="">Selecione...</option>
+                  @for (ec of estadosCivis; track ec) {
+                    <option [value]="ec">{{ ec }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <p class="section-title mt-4">Filiação</p>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nome da Mãe <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.nomeMae"
+                  [class.is-invalid]="inv(0, !form.nomeMae.trim())" placeholder="Nome completo da mãe">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nome do Pai</label>
+                <input type="text" class="form-control" [(ngModel)]="form.nomePai"
+                  placeholder="Nome completo do pai (opcional)">
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (activeTab === 1) {
+          <div class="p-3">
+            <p class="section-title">Endereço</p>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">CEP <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [value]="form.cep"
+                  (input)="applyCepMask($event)"
+                  [class.is-invalid]="inv(1, !form.cep.trim())" placeholder="00000-000">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-7">
+                <label class="form-label fw-semibold">Logradouro <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.logradouro"
+                  [class.is-invalid]="inv(1, !form.logradouro.trim())" placeholder="Rua, Av., etc.">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label fw-semibold">Número <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.numero"
+                  [class.is-invalid]="inv(1, !form.numero.trim())" placeholder="Nº">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Complemento</label>
+                <input type="text" class="form-control" [(ngModel)]="form.complemento"
+                  placeholder="Apto, Bloco...">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Bairro <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.bairro"
+                  [class.is-invalid]="inv(1, !form.bairro.trim())" placeholder="Bairro">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Cidade <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.cidade"
+                  [class.is-invalid]="inv(1, !form.cidade.trim())" placeholder="Cidade">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label fw-semibold">UF <span class="text-danger">*</span></label>
+                <select class="form-select" [(ngModel)]="form.uf"
+                  [class.is-invalid]="inv(1, !form.uf)">
+                  <option value="">--</option>
+                  @for (uf of ufs; track uf) {
+                    <option [value]="uf">{{ uf }}</option>
+                  }
+                </select>
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+            </div>
+
+            <p class="section-title mt-4">Contato</p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Telefone Fixo</label>
+                <input type="text" class="form-control" [value]="form.telefone"
+                  (input)="applyPhoneMask($event, 'telefone')" placeholder="(XX) XXXX-XXXX">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Celular / WhatsApp</label>
+                <input type="text" class="form-control" [value]="form.celular"
+                  (input)="applyPhoneMask($event, 'celular')" placeholder="(XX) XXXXX-XXXX">
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (activeTab === 2) {
+          <div class="p-3">
+            <p class="section-title">Dados Contratuais</p>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Data de Admissão <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" [(ngModel)]="form.dataAdmissao"
+                  [class.is-invalid]="inv(2, !form.dataAdmissao)">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Tipo de Contrato <span class="text-danger">*</span></label>
+                <select class="form-select" [(ngModel)]="form.tipoContrato"
+                  [class.is-invalid]="inv(2, !form.tipoContrato)">
+                  <option value="">Selecione...</option>
+                  @for (t of tiposContrato; track t) {
+                    <option [value]="t">{{ t }}</option>
+                  }
+                </select>
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Jornada Semanal (h)</label>
+                <input type="number" class="form-control" [(ngModel)]="form.jornadaHoras"
+                  placeholder="Ex: 44" min="1" max="60">
+              </div>
+              <div class="col-md-5">
+                <label class="form-label fw-semibold">Cargo <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.cargo"
+                  [class.is-invalid]="inv(2, !form.cargo.trim())" placeholder="Ex: Operador de Produção">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Setor <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.setor"
+                  [class.is-invalid]="inv(2, !form.setor.trim())" placeholder="Ex: Produção">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Salário (R$) <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [value]="form.salario"
+                  (input)="applySalarioMask($event)"
+                  [class.is-invalid]="inv(2, !form.salario.trim())" placeholder="0,00">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">E-mail Corporativo <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" [(ngModel)]="form.email"
+                  [class.is-invalid]="inv(2, !form.email.trim() || !isValidEmail(form.email))"
+                  placeholder="colaborador@empresa.com">
+                <div class="invalid-feedback">Informe um e-mail válido.</div>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (activeTab === 3) {
+          <div class="p-3">
+            <p class="section-title">Dados Bancários</p>
+            <div class="row g-3">
+              <div class="col-md-5">
+                <label class="form-label fw-semibold">Banco <span class="text-danger">*</span></label>
+                <select class="form-select" [(ngModel)]="form.banco"
+                  [class.is-invalid]="inv(3, !form.banco)">
+                  <option value="">Selecione...</option>
+                  @for (b of bancos; track b) {
+                    <option [value]="b">{{ b }}</option>
+                  }
+                </select>
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Agência <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.agencia"
+                  [class.is-invalid]="inv(3, !form.agencia.trim())" placeholder="0000-0">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Conta <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" [(ngModel)]="form.conta"
+                  [class.is-invalid]="inv(3, !form.conta.trim())" placeholder="00000-0">
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Tipo de Conta <span class="text-danger">*</span></label>
+                <select class="form-select" [(ngModel)]="form.tipoConta"
+                  [class.is-invalid]="inv(3, !form.tipoConta)">
+                  <option value="">Selecione...</option>
+                  <option value="corrente">Corrente</option>
+                  <option value="poupanca">Poupança</option>
+                </select>
+                <div class="invalid-feedback">Obrigatório.</div>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label fw-semibold">Chave PIX</label>
+                <input type="text" class="form-control" [(ngModel)]="form.pix"
+                  placeholder="CPF, e-mail, celular ou chave aleatória">
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (activeTab === 4) {
+          <div class="p-3">
+            <p class="section-title">Documentos Obrigatórios</p>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  RG / CNH <span class="text-danger">*</span>
+                </label>
+                <div class="doc-upload-area" [class.preenchido]="!!arquivos.rg"
+                     [class.invalido]="inv(4, !arquivos.rg)">
+                  <i class="bi" [class.bi-file-earmark-check]="arquivos.rg"
+                              [class.bi-file-earmark-arrow-up]="!arquivos.rg"></i>
+                  <span>{{ arquivos.rg ? nomeArquivo('rg') : 'Clique para enviar RG ou CNH' }}</span>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                    (change)="onFileChange($event, 'rg')">
+                </div>
+                @if (inv(4, !arquivos.rg)) {
+                  <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>Obrigatório.</div>
+                }
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  CTPS (Carteira de Trabalho) <span class="text-danger">*</span>
+                </label>
+                <div class="doc-upload-area" [class.preenchido]="!!arquivos.ctps"
+                     [class.invalido]="inv(4, !arquivos.ctps)">
+                  <i class="bi" [class.bi-file-earmark-check]="arquivos.ctps"
+                              [class.bi-file-earmark-arrow-up]="!arquivos.ctps"></i>
+                  <span>{{ arquivos.ctps ? nomeArquivo('ctps') : 'Clique para enviar CTPS' }}</span>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                    (change)="onFileChange($event, 'ctps')">
+                </div>
+                @if (inv(4, !arquivos.ctps)) {
+                  <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>Obrigatório.</div>
+                }
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  ASO – Atestado de Saúde Ocupacional <span class="text-danger">*</span>
+                </label>
+                <div class="doc-upload-area" [class.preenchido]="!!arquivos.aso"
+                     [class.invalido]="inv(4, !arquivos.aso)">
+                  <i class="bi" [class.bi-file-earmark-check]="arquivos.aso"
+                              [class.bi-file-earmark-arrow-up]="!arquivos.aso"></i>
+                  <span>{{ arquivos.aso ? nomeArquivo('aso') : 'Clique para enviar ASO' }}</span>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                    (change)="onFileChange($event, 'aso')">
+                </div>
+                @if (inv(4, !arquivos.aso)) {
+                  <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>Obrigatório.</div>
+                }
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  Comprovante de Residência <span class="text-danger">*</span>
+                </label>
+                <div class="doc-upload-area" [class.preenchido]="!!arquivos.compResidencia"
+                     [class.invalido]="inv(4, !arquivos.compResidencia)">
+                  <i class="bi" [class.bi-file-earmark-check]="arquivos.compResidencia"
+                              [class.bi-file-earmark-arrow-up]="!arquivos.compResidencia"></i>
+                  <span>{{ arquivos.compResidencia ? nomeArquivo('compResidencia') : 'Clique para enviar comprovante' }}</span>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                    (change)="onFileChange($event, 'compResidencia')">
+                </div>
+                @if (inv(4, !arquivos.compResidencia)) {
+                  <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>Obrigatório.</div>
+                }
+              </div>
+            </div>
+
+            <p class="section-title">Documentos Opcionais</p>
+            <div class="row g-2">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small">Foto 3×4</label>
+                <div class="doc-upload-area doc-upload-sm" [class.preenchido]="!!arquivos.foto">
+                  <i class="bi" [class.bi-file-earmark-check]="arquivos.foto"
+                              [class.bi-camera]="!arquivos.foto"></i>
+                  <span>{{ arquivos.foto ? nomeArquivo('foto') : 'Foto 3×4' }}</span>
+                  <input type="file" accept=".jpg,.jpeg,.png" (change)="onFileChange($event, 'foto')">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small">Título de Eleitor</label>
+                <div class="doc-upload-area doc-upload-sm" [class.preenchido]="!!arquivos.tituloEleitor">
+                  <i class="bi" [class.bi-file-earmark-check]="arquivos.tituloEleitor"
+                              [class.bi-file-earmark-arrow-up]="!arquivos.tituloEleitor"></i>
+                  <span>{{ arquivos.tituloEleitor ? nomeArquivo('tituloEleitor') : 'Título de Eleitor' }}</span>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'tituloEleitor')">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small">Reservista</label>
+                <div class="doc-upload-area doc-upload-sm" [class.preenchido]="!!arquivos.reservista">
+                  <i class="bi" [class.bi-file-earmark-check]="arquivos.reservista"
+                              [class.bi-file-earmark-arrow-up]="!arquivos.reservista"></i>
+                  <span>{{ arquivos.reservista ? nomeArquivo('reservista') : 'Certificado de Reservista' }}</span>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'reservista')">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small">Diploma / Certificado</label>
+                <div class="doc-upload-area doc-upload-sm" [class.preenchido]="!!arquivos.diplomaEscolar">
+                  <i class="bi" [class.bi-file-earmark-check]="arquivos.diplomaEscolar"
+                              [class.bi-file-earmark-arrow-up]="!arquivos.diplomaEscolar"></i>
+                  <span>{{ arquivos.diplomaEscolar ? nomeArquivo('diplomaEscolar') : 'Diploma / Certificado' }}</span>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'diplomaEscolar')">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small">Certidão de Casamento</label>
+                <div class="doc-upload-area doc-upload-sm" [class.preenchido]="!!arquivos.certidaoCasamento">
+                  <i class="bi" [class.bi-file-earmark-check]="arquivos.certidaoCasamento"
+                              [class.bi-file-earmark-arrow-up]="!arquivos.certidaoCasamento"></i>
+                  <span>{{ arquivos.certidaoCasamento ? nomeArquivo('certidaoCasamento') : 'Certidão de Casamento' }}</span>
+                  <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'certidaoCasamento')">
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+      </div>
+
+      <div class="modal-footer border-0 bg-light">
+        @if (activeTab > 0) {
+          <button type="button" class="btn btn-outline-secondary me-auto" (click)="prevTab()">
+            <i class="bi bi-arrow-left me-1"></i>Anterior
+          </button>
+        }
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        @if (activeTab < 4) {
+          <button type="button" class="btn btn-danger" (click)="nextTab()">
+            Próximo <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        } @else {
+          <button type="button" class="btn btn-danger" (click)="save()">
+            <i class="bi bi-check-circle me-1"></i>Concluir Cadastro
+          </button>
+        }
+      </div>
+
     </div>
   </div>
 </div>
 
 <div class="modal fade" #viewModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">Dados do FuncionÃ¡rio</h5>
+        <h5 class="modal-title fw-bold">Dados do Funcionário</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       @if (funcionarioEmVisualizacao) {
         <div class="modal-body p-4">
           <div class="row g-3">
-            <div class="col-md-3">
-              <p class="text-muted small mb-1">MatrÃ­cula</p>
-              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.matricula }}</p>
-            </div>
-            <div class="col-md-9">
-              <p class="text-muted small mb-1">Nome</p>
-              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.nome }}</p>
-            </div>
-            <div class="col-md-6">
-              <p class="text-muted small mb-1">Cargo</p>
-              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.cargo }}</p>
-            </div>
-            <div class="col-md-6">
-              <p class="text-muted small mb-1">Setor</p>
-              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.setor }}</p>
-            </div>
-            <div class="col-md-7">
-              <p class="text-muted small mb-1">E-mail</p>
-              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.email }}</p>
-            </div>
-            <div class="col-md-5">
-              <p class="text-muted small mb-1">Telefone</p>
-              <p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.telefone || 'â€”' }}</p>
-            </div>
-            <div class="col-md-3">
+            <div class="col-4"><p class="text-muted small mb-1">Matrícula</p><p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.matricula }}</p></div>
+            <div class="col-8"><p class="text-muted small mb-1">Nome</p><p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.nome }}</p></div>
+            <div class="col-6"><p class="text-muted small mb-1">Cargo</p><p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.cargo }}</p></div>
+            <div class="col-6"><p class="text-muted small mb-1">Setor</p><p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.setor }}</p></div>
+            <div class="col-7"><p class="text-muted small mb-1">E-mail</p><p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.email }}</p></div>
+            <div class="col-5"><p class="text-muted small mb-1">Telefone</p><p class="fw-semibold mb-0">{{ funcionarioEmVisualizacao.telefone || '—' }}</p></div>
+            <div class="col-4">
               <p class="text-muted small mb-1">Status</p>
-              @if (funcionarioEmVisualizacao.ativo) {
-                <span class="badge bg-success">Ativo</span>
-              } @else {
-                <span class="badge bg-secondary">Inativo</span>
-              }
+              @if (funcionarioEmVisualizacao.ativo) { <span class="badge bg-success">Ativo</span> }
+              @else { <span class="badge bg-secondary">Inativo</span> }
             </div>
           </div>
         </div>
@@ -235,44 +586,45 @@
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">Editar FuncionÃ¡rio</h5>
+        <h5 class="modal-title fw-bold">Editar Funcionário</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-4">
         <div class="row g-3">
           <div class="col-md-4">
-            <label class="form-label fw-semibold">MatrÃ­cula <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">Matrícula <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="formEdit.matricula"
               [class.is-invalid]="submittedEdit && !formEdit.matricula.trim()">
-            <div class="invalid-feedback">MatrÃ­cula Ã© obrigatÃ³ria.</div>
+            <div class="invalid-feedback">Obrigatório.</div>
           </div>
           <div class="col-md-8">
             <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="formEdit.nome"
               [class.is-invalid]="submittedEdit && !formEdit.nome.trim()">
-            <div class="invalid-feedback">Nome Ã© obrigatÃ³rio.</div>
+            <div class="invalid-feedback">Obrigatório.</div>
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold">Cargo <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="formEdit.cargo"
               [class.is-invalid]="submittedEdit && !formEdit.cargo.trim()">
-            <div class="invalid-feedback">Cargo Ã© obrigatÃ³rio.</div>
+            <div class="invalid-feedback">Obrigatório.</div>
           </div>
           <div class="col-md-6">
             <label class="form-label fw-semibold">Setor <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="formEdit.setor"
               [class.is-invalid]="submittedEdit && !formEdit.setor.trim()">
-            <div class="invalid-feedback">Setor Ã© obrigatÃ³rio.</div>
+            <div class="invalid-feedback">Obrigatório.</div>
           </div>
           <div class="col-md-7">
             <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
             <input type="email" class="form-control" [(ngModel)]="formEdit.email"
               [class.is-invalid]="submittedEdit && (!formEdit.email.trim() || !isValidEmail(formEdit.email))">
-            <div class="invalid-feedback">Informe um e-mail vÃ¡lido.</div>
+            <div class="invalid-feedback">Informe um e-mail válido.</div>
           </div>
           <div class="col-md-5">
             <label class="form-label fw-semibold">Telefone</label>
             <input type="text" class="form-control" [value]="formEdit.telefone"
-              (input)="applyPhoneMask($event, true)" placeholder="(XX) XXXXX-XXXX">
+              (input)="applyPhoneEditMask($event)" placeholder="(XX) XXXXX-XXXX">
           </div>
         </div>
       </div>
