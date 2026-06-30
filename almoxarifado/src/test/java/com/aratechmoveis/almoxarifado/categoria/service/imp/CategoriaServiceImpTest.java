@@ -152,7 +152,7 @@ class CategoriaServiceImpTest {
         @Test
         @DisplayName("deve lançar RecursoJaExistenteException quando novo nome já pertence a outra categoria")
         void deveLancarExcecaoQuandoNovoNomeJaExiste() {
-            Categoria categoriaExistente = umaCategoria(); // nome atual: Madeira
+            Categoria categoriaExistente = umaCategoria();
             CategoriaDTO dto = new CategoriaDTO();
             dto.setNome("Metal");
 
@@ -168,7 +168,7 @@ class CategoriaServiceImpTest {
         @Test
         @DisplayName("deve permitir salvar quando o nome enviado é o mesmo da própria categoria")
         void devePermitirSalvarComMesmoNomeAtual() {
-            Categoria categoriaExistente = umaCategoria(); // nome: Madeira
+            Categoria categoriaExistente = umaCategoria();
             CategoriaDTO dto = new CategoriaDTO();
             dto.setNome("Madeira");
 

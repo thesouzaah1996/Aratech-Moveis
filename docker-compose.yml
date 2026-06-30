@@ -6,6 +6,8 @@ volumes:
   almoxarifado-db-prod-data:
   login-db-prod-data:
   portaria-db-prod-data:
+  recursoshumanos-db-prod-data:
+  administracao-db-prod-data:
 
 services:
 
@@ -61,6 +63,46 @@ services:
       POSTGRES_DB: portaria-prod
     volumes:
       - portaria-db-prod-data:/var/lib/postgresql/data
+    networks:
+      - aratech-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  recursoshumanos-db:
+    image: postgres:17.4
+    container_name: recursoshumanos-db-prod
+    restart: always
+    ports:
+      - "5578:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: recursoshumanos-prod
+    volumes:
+      - recursoshumanos-db-prod-data:/var/lib/postgresql/data
+    networks:
+      - aratech-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  administracao-db:
+    image: postgres:17.4
+    container_name: administracao-db-prod
+    restart: always
+    ports:
+      - "5579:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: administracao-prod
+    volumes:
+      - administracao-db-prod-data:/var/lib/postgresql/data
     networks:
       - aratech-network
     healthcheck:
@@ -141,6 +183,42 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       portaria-db:
+        condition: service_healthy
+    networks:
+      - aratech-network
+
+  recursoshumanos:
+    build: ./recursoshumanos
+    container_name: recursoshumanos
+    restart: always
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: producao
+      SPRING_DATASOURCE_URL: jdbc:postgresql://recursoshumanos-db:5432/recursoshumanos-prod
+      RH_DB_USER_PROD: postgres
+      RH_DB_PASSWORD_PROD: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      recursoshumanos-db:
+        condition: service_healthy
+    networks:
+      - aratech-network
+
+  administracao:
+    build: ./administracao
+    container_name: administracao
+    restart: always
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: producao
+      SPRING_DATASOURCE_URL: jdbc:postgresql://administracao-db:5432/administracao-prod
+      ADM_DB_USER_PROD: postgres
+      ADM_DB_PASSWORD_PROD: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      administracao-db:
         condition: service_healthy
     networks:
       - aratech-network

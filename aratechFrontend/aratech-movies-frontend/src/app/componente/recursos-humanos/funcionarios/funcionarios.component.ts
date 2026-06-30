@@ -8,7 +8,6 @@ declare const bootstrap: any;
 
 export interface Funcionario {
   id: number;
-  matricula: string;
   nome: string;
   cargo: string;
   setor: string;
@@ -18,7 +17,6 @@ export interface Funcionario {
 }
 
 interface FormFuncionario {
-  matricula: string;
   nome: string;
   cpf: string;
   rg: string;
@@ -39,6 +37,7 @@ interface FormFuncionario {
   celular: string;
   dataAdmissao: string;
   cargo: string;
+  tipoFuncionario: string;
   setor: string;
   tipoContrato: string;
   salario: string;
@@ -64,7 +63,6 @@ interface ArquivosAdmissao {
 }
 
 interface FormFuncionarioEdit {
-  matricula: string;
   nome: string;
   cargo: string;
   setor: string;
@@ -96,6 +94,7 @@ export class FuncionariosComponent implements AfterViewInit {
                      'Santander','Sicoob','Sicredi','Inter','C6 Bank','Outro'];
   readonly estadosCivis = ['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União Estável'];
   readonly tiposContrato = ['CLT','Temporário','Aprendiz','Estágio','PJ'];
+  tiposFuncionario: string[] = [];
 
   funcionarios: Funcionario[] = [];
   searchTerm = '';
@@ -131,7 +130,6 @@ export class FuncionariosComponent implements AfterViewInit {
     const term = this.searchTerm.trim().toLowerCase();
     if (term) lista = lista.filter(f =>
       f.nome.toLowerCase().includes(term) ||
-      f.matricula.toLowerCase().includes(term) ||
       f.setor.toLowerCase().includes(term)
     );
     return lista;
@@ -187,7 +185,6 @@ export class FuncionariosComponent implements AfterViewInit {
     const newId = this.funcionarios.length ? Math.max(...this.funcionarios.map(f => f.id)) + 1 : 1;
     this.funcionarios.push({
       id: newId,
-      matricula: this.form.matricula,
       nome: this.form.nome,
       cargo: this.form.cargo,
       setor: this.form.setor,
@@ -199,21 +196,8 @@ export class FuncionariosComponent implements AfterViewInit {
     this.showSuccess('Funcionário cadastrado com sucesso!');
   }
 
-  isTabValid(tab: number): boolean {
-    const f = this.form;
-    switch (tab) {
-      case 0: return !!(f.matricula.trim() && f.nome.trim() && f.cpf.trim() &&
-                        f.dataNascimento && f.sexo && f.nomeMae.trim());
-      case 1: return !!(f.cep.trim() && f.logradouro.trim() && f.numero.trim() &&
-                        f.bairro.trim() && f.cidade.trim() && f.uf);
-      case 2: return !!(f.dataAdmissao && f.cargo.trim() && f.setor.trim() &&
-                        f.tipoContrato && f.salario.trim() &&
-                        f.email.trim() && this.isValidEmail(f.email));
-      case 3: return !!(f.banco && f.agencia.trim() && f.conta.trim() && f.tipoConta);
-      case 4: return !!(this.arquivos.rg && this.arquivos.ctps &&
-                        this.arquivos.aso && this.arquivos.compResidencia);
-      default: return true;
-    }
+  isTabValid(_tab: number): boolean {
+    return true;
   }
 
   inv(tab: number, cond: boolean): boolean {
@@ -239,7 +223,7 @@ export class FuncionariosComponent implements AfterViewInit {
   openEdit(f: Funcionario): void {
     this.submittedEdit = false;
     this.editandoId = f.id;
-    this.formEdit = { matricula: f.matricula, nome: f.nome, cargo: f.cargo,
+    this.formEdit = { nome: f.nome, cargo: f.cargo,
                       setor: f.setor, email: f.email, telefone: f.telefone };
     this.editModal.show();
   }
@@ -247,7 +231,7 @@ export class FuncionariosComponent implements AfterViewInit {
   saveEdit(): void {
     this.submittedEdit = true;
     const fe = this.formEdit;
-    if (!fe.matricula.trim() || !fe.nome.trim() || !fe.cargo.trim() ||
+    if (!fe.nome.trim() || !fe.cargo.trim() ||
         !fe.setor.trim() || !fe.email.trim() || !this.isValidEmail(fe.email)) return;
     const idx = this.funcionarios.findIndex(f => f.id === this.editandoId);
     if (idx > -1) Object.assign(this.funcionarios[idx], fe);
@@ -331,12 +315,12 @@ export class FuncionariosComponent implements AfterViewInit {
 
   private emptyForm(): FormFuncionario {
     return {
-      matricula: '', nome: '', cpf: '', rg: '', pis: '', dataNascimento: '',
+      nome: '', cpf: '', rg: '', pis: '', dataNascimento: '',
       sexo: '', estadoCivil: '', nomeMae: '', nomePai: '',
       cep: '', logradouro: '', numero: '', complemento: '',
       bairro: '', cidade: '', uf: '', telefone: '', celular: '',
-      dataAdmissao: '', cargo: '', setor: '', tipoContrato: '',
-      salario: '', jornadaHoras: '', email: '',
+      dataAdmissao: '', cargo: '', tipoFuncionario: '',
+      setor: '', tipoContrato: '', salario: '', jornadaHoras: '', email: '',
       banco: '', agencia: '', conta: '', tipoConta: '', pix: ''
     };
   }
@@ -348,6 +332,6 @@ export class FuncionariosComponent implements AfterViewInit {
   }
 
   private emptyFormEdit(): FormFuncionarioEdit {
-    return { matricula: '', nome: '', cargo: '', setor: '', email: '', telefone: '' };
+    return { nome: '', cargo: '', setor: '', email: '', telefone: '' };
   }
 }

@@ -99,7 +99,7 @@ class FornecedorServiceImpTest {
         void deveSetarAtivoComoTrue() {
             FornecedorDTO dto = umFornecedorDTO();
             Fornecedor fornecedor = umFornecedor();
-            fornecedor.setAtivo(null); // simula ModelMapper não setando o campo
+            fornecedor.setAtivo(null);
 
             given(fornecedorRepository.existsByEmail(dto.getEmail())).willReturn(false);
             given(modelMapper.map(dto, Fornecedor.class)).willReturn(fornecedor);
@@ -158,7 +158,7 @@ class FornecedorServiceImpTest {
         @Test
         @DisplayName("deve lançar RecursoJaExistenteException quando novo e-mail já pertence a outro fornecedor")
         void deveLancarExcecaoQuandoNovoEmailJaExiste() {
-            Fornecedor fornecedorExistente = umFornecedor(); // email atual: teste@email.com
+            Fornecedor fornecedorExistente = umFornecedor();
             FornecedorDTO dto = new FornecedorDTO();
             dto.setEmail("outro@email.com");
 
