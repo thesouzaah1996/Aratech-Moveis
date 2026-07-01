@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.fornecedor.dto;
 
-import com.aratechmoveis.almoxarifado.fornecedor.model.Representante;
+import com.aratechmoveis.almoxarifado.fornecedor.entity.Representante;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

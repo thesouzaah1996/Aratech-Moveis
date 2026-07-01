@@ -1,6 +1,6 @@
 package com.aratechmoveis.almoxarifado.fornecedor.repository;
 
-import com.aratechmoveis.almoxarifado.fornecedor.model.Fornecedor;
+import com.aratechmoveis.almoxarifado.fornecedor.entity.Fornecedor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

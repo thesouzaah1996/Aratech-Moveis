@@ -32,6 +32,7 @@ import { PontoComponent } from './componente/recursos-humanos/ponto/ponto.compon
 import { FuncionariosComponent } from './componente/recursos-humanos/funcionarios/funcionarios.component';
 import { FeriasComponent } from './componente/recursos-humanos/ferias/ferias.component';
 import { SolicitacoesRhComponent } from './componente/recursos-humanos/solicitacoes/solicitacoes.component';
+import { UsuariosComponent } from './componente/recursos-humanos/usuarios/usuarios.component';
 
 import { PcpComponent } from './componente/pcp/pcp.component';
 import { OrdensProducaoComponent } from './componente/pcp/ordens/ordens.component';
@@ -52,7 +53,6 @@ import { FluxoCaixaComponent } from './componente/financeiro/fluxo-caixa/fluxo-c
 import { LotesComponent } from './componente/lotes/lotes.component';
 
 import { AdministracaoComponent } from './componente/administracao/administracao.component';
-import { UsuariosComponent } from './componente/administracao/usuarios/usuarios.component';
 import { AuditoriaComponent } from './componente/administracao/auditoria/auditoria.component';
 import { RelatoriosComponent } from './componente/administracao/relatorios/relatorios.component';
 import { ParametrosComponent } from './componente/administracao/parametros/parametros.component';
@@ -60,6 +60,8 @@ import { ParametrosComponent } from './componente/administracao/parametros/param
 import { SuporteComponent } from './componente/suporte/suporte.component';
 import { ChamadoTiComponent } from './componente/suporte/chamado-ti/chamado-ti.component';
 import { AcompanhamentoTiComponent } from './componente/suporte/acompanhamento/acompanhamento-ti.component';
+
+import { MeuPerfilComponent } from './componente/meu-perfil/meu-perfil.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -96,6 +98,7 @@ export const routes: Routes = [
   { path: 'recursos-humanos/funcionarios',          component: FuncionariosComponent },
   { path: 'recursos-humanos/ferias',                component: FeriasComponent },
   { path: 'recursos-humanos/solicitacoes',          component: SolicitacoesRhComponent },
+  { path: 'recursos-humanos/usuarios',              component: UsuariosComponent },
 
   { path: 'pcp',                                    component: PcpComponent },
   { path: 'pcp/ordens',                             component: OrdensProducaoComponent },
@@ -114,11 +117,12 @@ export const routes: Routes = [
   { path: 'financeiro/fluxo-caixa',                 component: FluxoCaixaComponent },
 
   { path: 'administracao',                          component: AdministracaoComponent },
-  { path: 'administracao/usuarios',                 component: UsuariosComponent },
   { path: 'administracao/auditoria',                component: AuditoriaComponent },
   { path: 'administracao/relatorios',               component: RelatoriosComponent },
   { path: 'administracao/parametros',               component: ParametrosComponent },
   { path: 'administracao/lotes',                    component: LotesComponent },
+
+  { path: 'meu-perfil',                             component: MeuPerfilComponent },
 
   { path: 'suporte',                                component: SuporteComponent },
   { path: 'suporte/chamado-ti',                     component: ChamadoTiComponent },

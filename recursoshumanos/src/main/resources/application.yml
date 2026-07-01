@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:producao}
+  application:
+    name: aratech-recursoshumanos
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+
+server:
+  port: 8083
+
+jwt:
+  secret: ${JWT_SECRET_RH}

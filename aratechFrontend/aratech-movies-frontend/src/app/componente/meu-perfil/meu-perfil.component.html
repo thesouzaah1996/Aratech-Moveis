@@ -1,0 +1,123 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    <div class="perfil-hero card shadow-sm mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-4 flex-wrap">
+          <div class="perfil-avatar">{{ inicial }}</div>
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+              <h3 class="fw-bold mb-0">{{ dados.nome || '——' }}</h3>
+              @if (dados.ativo) {
+                <span class="badge bg-success-subtle text-success border border-success-subtle">Ativo</span>
+              } @else {
+                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inativo</span>
+              }
+            </div>
+            <p class="text-muted mb-1">{{ dados.cargo || '——' }}</p>
+            <p class="text-muted small mb-0">
+              <i class="bi bi-building me-1"></i>{{ dados.setor || '——' }}
+            </p>
+          </div>
+          @if (dados.perfil) {
+            <span class="badge {{ perfilBadgeClass }} fs-6 px-3 py-2">
+              <i class="bi bi-shield-check me-1"></i>{{ dados.perfil }}
+            </span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <div class="col-lg-4">
+        <div class="info-card card shadow-sm h-100">
+          <div class="info-card-header">
+            <i class="bi bi-person-vcard"></i>
+            <span>Dados Pessoais</span>
+          </div>
+          <div class="card-body p-4">
+            <div class="info-item">
+              <span class="info-label">Matrícula</span>
+              <span class="info-value">{{ dados.matricula || '——' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">E-mail</span>
+              <span class="info-value">{{ dados.email || '——' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Telefone</span>
+              <span class="info-value">{{ dados.telefone || '——' }}</span>
+            </div>
+            <div class="info-item mb-0">
+              <span class="info-label">Celular / WhatsApp</span>
+              <span class="info-value">{{ dados.celular || '——' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="info-card card shadow-sm h-100">
+          <div class="info-card-header">
+            <i class="bi bi-briefcase"></i>
+            <span>Vínculo Empregatício</span>
+          </div>
+          <div class="card-body p-4">
+            <div class="info-item">
+              <span class="info-label">Cargo / Função</span>
+              <span class="info-value">{{ dados.cargo || '——' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Setor</span>
+              <span class="info-value">{{ dados.setor || '——' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Gestor Direto</span>
+              <span class="info-value">{{ dados.gestor || '——' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Data de Admissão</span>
+              <span class="info-value">{{ dados.dataAdmissao || '——' }}</span>
+            </div>
+            <div class="info-item mb-0">
+              <span class="info-label">Tipo de Contrato</span>
+              <span class="info-value">{{ dados.tipoContrato || '——' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="info-card card shadow-sm h-100">
+          <div class="info-card-header">
+            <i class="bi bi-shield-lock"></i>
+            <span>Acesso ao Sistema</span>
+          </div>
+          <div class="card-body p-4">
+            <div class="info-item">
+              <span class="info-label">Perfil de Acesso</span>
+              <span class="info-value">
+                @if (dados.perfil) {
+                  <span class="badge {{ perfilBadgeClass }}">{{ dados.perfil }}</span>
+                } @else {
+                  ——
+                }
+              </span>
+            </div>
+            <div class="info-item mb-0">
+              <span class="info-label">Último Acesso</span>
+              <span class="info-value">{{ dados.ultimoAcesso || '——' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<app-footer />

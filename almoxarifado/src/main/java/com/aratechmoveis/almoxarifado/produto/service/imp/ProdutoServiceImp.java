@@ -1,14 +1,14 @@
 package com.aratechmoveis.almoxarifado.produto.service.imp;
 
 import com.aratechmoveis.almoxarifado.Response;
-import com.aratechmoveis.almoxarifado.categoria.modelo.Categoria;
+import com.aratechmoveis.almoxarifado.categoria.entity.Categoria;
 import com.aratechmoveis.almoxarifado.categoria.repository.CategoriaRepository;
-import com.aratechmoveis.almoxarifado.fornecedor.model.Fornecedor;
+import com.aratechmoveis.almoxarifado.fornecedor.entity.Fornecedor;
 import com.aratechmoveis.almoxarifado.fornecedor.repository.FornecedorRepository;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.produto.dto.ProdutoDTO;
-import com.aratechmoveis.almoxarifado.produto.modelo.Produto;
+import com.aratechmoveis.almoxarifado.produto.entity.Produto;
 import com.aratechmoveis.almoxarifado.produto.repository.ProdutoRepository;
 import com.aratechmoveis.almoxarifado.produto.service.ProdutoService;
 import jakarta.transaction.Transactional;

@@ -4,7 +4,7 @@ import com.aratechmoveis.almoxarifado.Response;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;
-import com.aratechmoveis.almoxarifado.fornecedor.model.Fornecedor;
+import com.aratechmoveis.almoxarifado.fornecedor.entity.Fornecedor;
 import com.aratechmoveis.almoxarifado.fornecedor.repository.FornecedorRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -99,7 +99,7 @@ class FornecedorServiceImpTest {
         void deveSetarAtivoComoTrue() {
             FornecedorDTO dto = umFornecedorDTO();
             Fornecedor fornecedor = umFornecedor();
-            fornecedor.setAtivo(null); // simula ModelMapper não setando o campo
+            fornecedor.setAtivo(null);
 
             given(fornecedorRepository.existsByEmail(dto.getEmail())).willReturn(false);
             given(modelMapper.map(dto, Fornecedor.class)).willReturn(fornecedor);
@@ -158,7 +158,7 @@ class FornecedorServiceImpTest {
         @Test
         @DisplayName("deve lançar RecursoJaExistenteException quando novo e-mail já pertence a outro fornecedor")
         void deveLancarExcecaoQuandoNovoEmailJaExiste() {
-            Fornecedor fornecedorExistente = umFornecedor(); // email atual: teste@email.com
+            Fornecedor fornecedorExistente = umFornecedor();
             FornecedorDTO dto = new FornecedorDTO();
             dto.setEmail("outro@email.com");
 
