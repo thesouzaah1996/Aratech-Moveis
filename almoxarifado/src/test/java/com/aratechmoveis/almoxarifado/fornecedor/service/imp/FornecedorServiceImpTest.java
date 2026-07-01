@@ -4,7 +4,7 @@ import com.aratechmoveis.almoxarifado.Response;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;
-import com.aratechmoveis.almoxarifado.fornecedor.model.Fornecedor;
+import com.aratechmoveis.almoxarifado.fornecedor.entity.Fornecedor;
 import com.aratechmoveis.almoxarifado.fornecedor.repository.FornecedorRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

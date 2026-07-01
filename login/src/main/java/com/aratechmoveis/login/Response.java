@@ -1,6 +1,5 @@
 package com.aratechmoveis.login;
 
-import com.aratechmoveis.login.perfil.dto.PerfilDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -18,9 +17,6 @@ public class Response {
 
     private String token;
     private String expirationTime;
-
-    private PerfilDTO perfil;
-    private List<PerfilDTO> perfis;
 
     private final LocalDateTime timestamp = LocalDateTime.now();
 }

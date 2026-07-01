@@ -4,7 +4,7 @@ import com.aratechmoveis.almoxarifado.Response;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;
-import com.aratechmoveis.almoxarifado.fornecedor.model.Fornecedor;
+import com.aratechmoveis.almoxarifado.fornecedor.entity.Fornecedor;
 import com.aratechmoveis.almoxarifado.fornecedor.repository.FornecedorRepository;
 import com.aratechmoveis.almoxarifado.fornecedor.service.FornecedorService;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorLookupDTO;

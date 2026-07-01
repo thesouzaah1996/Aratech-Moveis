@@ -1,5 +1,6 @@
 package com.aratechmoveis.recursoshumanos.funcionarios.dto;
 
+import com.aratechmoveis.recursoshumanos.funcionarios.entity.TipoFuncionario;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -102,8 +103,8 @@ public class FuncionarioDTO {
     @Size(max = 100, message = "O cargo deve ter no máximo 100 caracteres.")
     private String cargo;
 
-    @NotBlank(message = "Tipo funcionário é obrigatório")
-    private String tipoFuncionario;
+    @NotNull(message = "Tipo funcionário é obrigatório")
+    private TipoFuncionario tipoFuncionario;
 
     @NotBlank(message = "O setor é obrigatório.")
     @Size(max = 100, message = "O setor deve ter no máximo 100 caracteres.")

@@ -2,7 +2,7 @@ package com.aratechmoveis.portaria.controle_acesso.service.imp;
 
 import com.aratechmoveis.portaria.Response;
 import com.aratechmoveis.portaria.controle_acesso.dto.RegistroChegadaDTO;
-import com.aratechmoveis.portaria.controle_acesso.model.RegistroChegada;
+import com.aratechmoveis.portaria.controle_acesso.entity.RegistroChegada;
 import com.aratechmoveis.portaria.controle_acesso.repository.RegistroChegadaRepository;
 import com.aratechmoveis.portaria.controle_acesso.service.RegistroChegadaService;
 import lombok.RequiredArgsConstructor;

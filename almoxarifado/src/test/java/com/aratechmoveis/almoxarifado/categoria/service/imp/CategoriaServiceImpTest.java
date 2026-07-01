@@ -3,7 +3,7 @@ package com.aratechmoveis.almoxarifado.categoria.service.imp;
 import com.aratechmoveis.almoxarifado.Response;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaLookupDTO;
-import com.aratechmoveis.almoxarifado.categoria.modelo.Categoria;
+import com.aratechmoveis.almoxarifado.categoria.entity.Categoria;
 import com.aratechmoveis.almoxarifado.categoria.repository.CategoriaRepository;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
@@ -231,7 +231,7 @@ class CategoriaServiceImpTest {
         @DisplayName("deve lançar RecursoJaExistenteException quando categoria possui produtos vinculados")
         void deveLancarExcecaoQuandoCategoriaPossuiProdutos() {
             Categoria categoria = umaCategoria();
-            categoria.setProdutos(List.of(new com.aratechmoveis.almoxarifado.produto.modelo.Produto()));
+            categoria.setProdutos(List.of(new com.aratechmoveis.almoxarifado.produto.entity.Produto()));
 
             given(categoriaRepository.findById(1L)).willReturn(Optional.of(categoria));
 

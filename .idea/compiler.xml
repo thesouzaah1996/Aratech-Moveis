@@ -20,15 +20,15 @@
         <module name="portaria" />
         <module name="almoxarifado" />
       </profile>
-      <profile name="Annotation profile for administracao" enabled="true">
+      <profile name="Annotation profile for recursoshumanos" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
-        <module name="administracao" />
         <module name="recursoshumanos" />
+        <module name="administracao" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

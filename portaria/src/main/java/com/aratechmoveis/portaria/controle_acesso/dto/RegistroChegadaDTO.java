@@ -1,6 +1,6 @@
 package com.aratechmoveis.portaria.controle_acesso.dto;
 
-import com.aratechmoveis.portaria.controle_acesso.model.SetorResponsavel;
+import com.aratechmoveis.portaria.controle_acesso.entity.SetorResponsavel;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
