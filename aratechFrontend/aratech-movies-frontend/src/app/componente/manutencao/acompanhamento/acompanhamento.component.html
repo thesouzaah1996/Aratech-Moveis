@@ -4,6 +4,13 @@
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-4">
 
+    @if (errorMessage) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>{{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+    }
+
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
       <h3 class="fw-bold mb-0 flex-shrink-0">Ordens de Manutenção</h3>
 
@@ -18,10 +25,10 @@
       </div>
 
       <div class="filtro-status flex-shrink-0">
-        <button type="button" [class.ativo]="filtroStatus === 'Todos'"        (click)="setFiltro('Todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Aberta'"       (click)="setFiltro('Aberta')">Abertas</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Em Manutenção'" (click)="setFiltro('Em Manutenção')">Em Manutenção</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Concluída'"    (click)="setFiltro('Concluída')">Concluídas</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'"         (click)="setFiltro('Todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ABERTA'"        (click)="setFiltro('ABERTA')">Abertas</button>
+        <button type="button" [class.ativo]="filtroStatus === 'EM_MANUTENCAO'" (click)="setFiltro('EM_MANUTENCAO')">Em Manutenção</button>
+        <button type="button" [class.ativo]="filtroStatus === 'CONCLUIDA'"     (click)="setFiltro('CONCLUIDA')">Concluídas</button>
       </div>
     </div>
 
@@ -53,18 +60,18 @@
                 </tr>
               } @else {
                 @for (ordem of paged; track ordem.id) {
-                  <tr [class.row-em-manutencao]="ordem.status === 'Em Manutenção'">
+                  <tr [class.row-em-manutencao]="ordem.status === 'EM_MANUTENCAO'">
                     <td><span class="badge-id">#{{ ordem.id }}</span></td>
                     <td class="fw-semibold">{{ ordem.equipamento }}</td>
-                    <td class="text-muted">{{ ordem.tipo }}</td>
-                    <td><span [class]="prioridadeClass(ordem.prioridade)">{{ ordem.prioridade }}</span></td>
+                    <td class="text-muted">{{ tipoLabels[ordem.tipo] }}</td>
+                    <td><span [class]="prioridadeClass(ordem.prioridade)">{{ prioridadeLabels[ordem.prioridade] }}</span></td>
                     <td>
                       <span class="fw-semibold">{{ ordem.solicitante }}</span>
                       <br><span class="text-muted small">{{ ordem.setor }}</span>
                     </td>
-                    <td>{{ ordem.mecanico }}</td>
-                    <td><span class="badge" [class]="statusBadge(ordem.status)">{{ ordem.status }}</span></td>
-                    <td class="text-muted small">{{ ordem.data }}</td>
+                    <td>{{ ordem.mecanico || '—' }}</td>
+                    <td><span class="badge" [class]="statusBadge(ordem.status)">{{ statusLabels[ordem.status] }}</span></td>
+                    <td class="text-muted small">{{ ordem.dataAbertura | date:'dd/MM/yyyy HH:mm' }}</td>
                   </tr>
                 }
               }

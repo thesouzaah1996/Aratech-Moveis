@@ -4,6 +4,20 @@
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-4">
 
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+    }
+
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h3 class="fw-bold mb-0">Controle de Acesso</h3>
       <button class="btn btn-danger px-4" (click)="abrirHistorico()">
@@ -19,27 +33,38 @@
         <div class="row g-3">
           <div class="col-md-3">
             <label class="form-label fw-semibold">Nota Fiscal</label>
-            <input type="text" class="form-control" [(ngModel)]="form.notaFiscal" placeholder="Número da NF">
+            <input type="text" class="form-control" [(ngModel)]="form.notaFiscal" placeholder="Número da NF"
+              [class.is-invalid]="submitted && !form.notaFiscal.trim()">
+            <div class="invalid-feedback">Nota fiscal é obrigatória.</div>
           </div>
           <div class="col-md-3">
             <label class="form-label fw-semibold">Empresa</label>
-            <input type="text" class="form-control" [(ngModel)]="form.empresa" placeholder="Nome da empresa">
+            <input type="text" class="form-control" [(ngModel)]="form.empresa" placeholder="Nome da empresa"
+              [class.is-invalid]="submitted && !form.empresa.trim()">
+            <div class="invalid-feedback">Empresa é obrigatória.</div>
           </div>
           <div class="col-md-2">
             <label class="form-label fw-semibold">Motorista</label>
-            <input type="text" class="form-control" [(ngModel)]="form.motorista" placeholder="Nome do motorista">
+            <input type="text" class="form-control" [(ngModel)]="form.nomeMotorista" placeholder="Nome do motorista"
+              [class.is-invalid]="submitted && !form.nomeMotorista.trim()">
+            <div class="invalid-feedback">Motorista é obrigatório.</div>
           </div>
           <div class="col-md-2">
             <label class="form-label fw-semibold">Placa</label>
-            <input type="text" class="form-control" [(ngModel)]="form.placa" placeholder="Ex: ABC-1234">
+            <input type="text" class="form-control" [(ngModel)]="form.placa" placeholder="Ex: ABC-1234"
+              [class.is-invalid]="submitted && !form.placa.trim()">
+            <div class="invalid-feedback">Placa é obrigatória.</div>
           </div>
           <div class="col-md-2">
             <label class="form-label fw-semibold">Setor Responsável</label>
-            <select class="form-select" [(ngModel)]="form.setor">
+            <select class="form-select" [(ngModel)]="form.setorResponsavel"
+              [class.is-invalid]="submitted && !form.setorResponsavel">
               <option value="" disabled>Selecione</option>
-              <option value="Almoxarifado">Almoxarifado</option>
-              <option value="Carregamento">Carregamento</option>
+              <option value="ALMOXARIFADO">Almoxarifado</option>
+              <option value="CARREGAMENTO">Carregamento</option>
+              <option value="PCP">PCP</option>
             </select>
+            <div class="invalid-feedback">Setor é obrigatório.</div>
           </div>
           <div class="col-12 d-flex justify-content-end">
             <button class="btn btn-danger px-4" (click)="registrarChegada()">
@@ -84,24 +109,18 @@
                   <tr>
                     <td class="fw-semibold"><code>{{ item.notaFiscal }}</code></td>
                     <td>{{ item.empresa }}</td>
-                    <td>{{ item.motorista }}</td>
+                    <td>{{ item.nomeMotorista }}</td>
                     <td>{{ item.placa }}</td>
-                    <td>{{ item.setor }}</td>
+                    <td>{{ setorLabels[item.setorResponsavel] }}</td>
                     <td>{{ formatWaitTime(item.dataEntrada) }}</td>
                     <td>
-                      <span class="badge {{ badgeClass(item.status) }}">{{ item.status }}</span>
+                      <span class="badge {{ badgeClass(item.status) }}">{{ statusLabels[item.status] }}</span>
                     </td>
                     <td class="text-end action-buttons">
                       <button class="btn-action btn-action-edit"
                               title="Confirmar entrada"
-                              [class.disabled]="item.status !== 'AUTORIZADO'"
-                              (click)="item.status === 'AUTORIZADO' && abrirConfirmacaoEntrada(item.id)">
+                              (click)="abrirConfirmacaoEntrada(item.id)">
                         <i class="bi bi-check-circle"></i>
-                      </button>
-                      <button class="btn-action btn-action-delete"
-                              title="Remover da fila"
-                              (click)="abrirRemocao(item.id)">
-                        <i class="bi bi-x-circle"></i>
                       </button>
                     </td>
                   </tr>
@@ -170,12 +189,12 @@
                   <tr>
                     <td><code>{{ item.notaFiscal }}</code></td>
                     <td class="fw-semibold">{{ item.empresa }}</td>
-                    <td>{{ item.motorista }}</td>
+                    <td>{{ item.nomeMotorista }}</td>
                     <td>{{ item.placa }}</td>
-                    <td>{{ item.setor }}</td>
+                    <td>{{ setorLabels[item.setorResponsavel] }}</td>
                     <td>{{ item.dataEntrada }}</td>
                     <td>
-                      <span class="badge {{ badgeClass(item.status) }}">{{ item.status }}</span>
+                      <span class="badge {{ badgeClass(item.status) }}">{{ statusLabels[item.status] }}</span>
                     </td>
                   </tr>
                 }
@@ -186,32 +205,6 @@
       </div>
       <div class="modal-footer border-0 bg-light">
         <button class="btn btn-cancelar" data-bs-dismiss="modal">Fechar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" #removeModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Remoção
-        </h5>
-      </div>
-      <div class="modal-body text-center p-4">
-        <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
-        <h5 class="mt-3">Deseja remover este caminhão da fila?</h5>
-        <div class="delete-warning mt-3">
-          <i class="bi bi-info-circle-fill text-danger me-2"></i>
-          <span>Esta ação não poderá ser desfeita.</span>
-        </div>
-      </div>
-      <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirmarRemocao()">
-          <i class="bi bi-trash me-1"></i>Remover Permanentemente
-        </button>
       </div>
     </div>
   </div>

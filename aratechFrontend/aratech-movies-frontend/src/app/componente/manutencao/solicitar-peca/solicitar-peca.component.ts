@@ -3,22 +3,10 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
+import { SolicitacaoPecaService } from '../../../core/services/solicitacao-peca.service';
+import { SolicitacaoPeca, SolicitacaoPecaForm } from '../../../core/models/solicitacao-peca.model';
 
 declare const bootstrap: any;
-
-interface FormSolicitacaoPeca {
-  nomePeca: string;
-  codigo: string;
-  quantidade: number | null;
-  unidade: string;
-  equipamento: string;
-  finalidade: string;
-  prioridade: string;
-  solicitante: string;
-  setor: string;
-  telefone: string;
-  observacoes: string;
-}
 
 @Component({
   selector: 'app-solicitar-peca',
@@ -36,11 +24,15 @@ export class SolicitarPecaComponent implements AfterViewInit {
     { label: 'Solicitar Peça' }
   ];
 
-  form: FormSolicitacaoPeca = this.emptyForm();
+  form: SolicitacaoPecaForm = this.emptyForm();
   submitted = false;
   resultadoSucesso = false;
+  solicitacaoCriada: SolicitacaoPeca | null = null;
+  errorMessage = '';
 
   private resultModal?: any;
+
+  constructor(private solicitacaoPecaService: SolicitacaoPecaService) {}
 
   ngAfterViewInit(): void {
     this.resultModal = new bootstrap.Modal(this.resultModalEl.nativeElement);
@@ -50,8 +42,18 @@ export class SolicitarPecaComponent implements AfterViewInit {
     this.submitted = true;
     if (!this.isFormValid()) return;
 
-    this.resultadoSucesso = true;
-    this.resultModal.show();
+    this.solicitacaoPecaService.add(this.form).subscribe({
+      next: solicitacao => {
+        this.solicitacaoCriada = solicitacao;
+        this.resultadoSucesso = true;
+        this.resultModal.show();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message ?? '';
+        this.resultadoSucesso = false;
+        this.resultModal.show();
+      }
+    });
   }
 
   fecharResultado(): void {
@@ -63,6 +65,8 @@ export class SolicitarPecaComponent implements AfterViewInit {
 
   resetForm(): void {
     this.submitted = false;
+    this.solicitacaoCriada = null;
+    this.errorMessage = '';
     this.form = this.emptyForm();
   }
 
@@ -94,7 +98,7 @@ export class SolicitarPecaComponent implements AfterViewInit {
     );
   }
 
-  private emptyForm(): FormSolicitacaoPeca {
+  private emptyForm(): SolicitacaoPecaForm {
     return {
       nomePeca: '', codigo: '', quantidade: null, unidade: '',
       equipamento: '', finalidade: '', prioridade: '',

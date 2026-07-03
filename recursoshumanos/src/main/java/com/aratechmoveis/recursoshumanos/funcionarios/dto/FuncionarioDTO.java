@@ -1,6 +1,7 @@
 package com.aratechmoveis.recursoshumanos.funcionarios.dto;
 
 import com.aratechmoveis.recursoshumanos.funcionarios.entity.TipoFuncionario;
+import com.aratechmoveis.recursoshumanos.perfil.dto.PerfilDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -141,4 +143,7 @@ public class FuncionarioDTO {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean ativo;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private List<PerfilDTO> perfis;
 }

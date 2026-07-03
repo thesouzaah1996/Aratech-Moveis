@@ -143,14 +143,14 @@
             <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="form.nome"
               placeholder="Nome da peça"
-              [class.is-invalid]="submitted && !form.nome?.trim()">
+              [class.is-invalid]="submitted && !form.nome.trim()">
             <div class="invalid-feedback">Nome é obrigatório.</div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Código <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="form.codigo"
               placeholder="Ex: MNT-0001"
-              [class.is-invalid]="submitted && !form.codigo?.trim()">
+              [class.is-invalid]="submitted && !form.codigo.trim()">
             <div class="invalid-feedback">Código é obrigatório.</div>
           </div>
           <div class="col-md-4">
@@ -160,7 +160,7 @@
           <div class="col-md-4">
             <label class="form-label fw-semibold">Unidade <span class="text-danger">*</span></label>
             <select class="form-select" [(ngModel)]="form.unidade"
-              [class.is-invalid]="submitted && !form.unidade?.trim()">
+              [class.is-invalid]="submitted && !form.unidade.trim()">
               <option value="un">un (unidade)</option>
               <option value="kg">kg</option>
               <option value="L">L (litro)</option>
@@ -174,7 +174,7 @@
             <label class="form-label fw-semibold">Localização <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [(ngModel)]="form.localizacao"
               placeholder="Ex: Prateleira A2"
-              [class.is-invalid]="submitted && !form.localizacao?.trim()">
+              [class.is-invalid]="submitted && !form.localizacao.trim()">
             <div class="invalid-feedback">Localização é obrigatória.</div>
           </div>
           <div class="col-12">

@@ -8,6 +8,7 @@ volumes:
   portaria-db-prod-data:
   recursoshumanos-db-prod-data:
   administracao-db-prod-data:
+  manutencao-db-prod-data:
 
 services:
 
@@ -103,6 +104,26 @@ services:
       POSTGRES_DB: administracao-prod
     volumes:
       - administracao-db-prod-data:/var/lib/postgresql/data
+    networks:
+      - aratech-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  manutencao-db:
+    image: postgres:17.4
+    container_name: manutencao-db-prod
+    restart: always
+    ports:
+      - "5580:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: manutencao-prod
+    volumes:
+      - manutencao-db-prod-data:/var/lib/postgresql/data
     networks:
       - aratech-network
     healthcheck:
@@ -219,6 +240,23 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       administracao-db:
+        condition: service_healthy
+    networks:
+      - aratech-network
+
+  manutencao:
+    build: ./manutencao
+    container_name: manutencao
+    restart: always
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: producao
+      SPRING_DATASOURCE_URL: jdbc:postgresql://manutencao-db:5432/manutencao-prod
+      MANUTENCAO_DB_USER_PROD: postgres
+      MANUTENCAO_DB_PASSWORD_PROD: postgres
+    depends_on:
+      manutencao-db:
         condition: service_healthy
     networks:
       - aratech-network

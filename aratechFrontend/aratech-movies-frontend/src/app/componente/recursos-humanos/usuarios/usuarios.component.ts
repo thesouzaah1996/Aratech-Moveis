@@ -1,56 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
-
-export type PerfilUsuario = 'Administrador' | 'Gerente' | 'Operador' | 'Visualizador';
-
-export interface Usuario {
-  id: number;
-  nome: string;
-  email: string;
-  perfil: PerfilUsuario;
-  modulos: string;
-  ativo: boolean;
-  ultimoAcesso: string;
-}
-
-interface Permissao {
-  id: string;
-  modulo: string;
-  acao: string;
-}
-
-const PERMISSOES_DISPONIVEIS: Permissao[] = [
-  { id: 'alm.view',   modulo: 'Almoxarifado',     acao: 'Visualizar'   },
-  { id: 'alm.create', modulo: 'Almoxarifado',     acao: 'Criar'        },
-  { id: 'alm.edit',   modulo: 'Almoxarifado',     acao: 'Editar'       },
-  { id: 'alm.delete', modulo: 'Almoxarifado',     acao: 'Excluir'      },
-  { id: 'rh.view',    modulo: 'Recursos Humanos', acao: 'Visualizar'   },
-  { id: 'rh.create',  modulo: 'Recursos Humanos', acao: 'Criar'        },
-  { id: 'rh.edit',    modulo: 'Recursos Humanos', acao: 'Editar'       },
-  { id: 'rh.delete',  modulo: 'Recursos Humanos', acao: 'Excluir'      },
-  { id: 'fin.view',   modulo: 'Financeiro',       acao: 'Visualizar'   },
-  { id: 'fin.create', modulo: 'Financeiro',       acao: 'Criar'        },
-  { id: 'fin.edit',   modulo: 'Financeiro',       acao: 'Editar'       },
-  { id: 'fin.delete', modulo: 'Financeiro',       acao: 'Excluir'      },
-  { id: 'pcp.view',   modulo: 'PCP',              acao: 'Visualizar'   },
-  { id: 'pcp.edit',   modulo: 'PCP',              acao: 'Editar'       },
-  { id: 'comp.view',  modulo: 'Compras',          acao: 'Visualizar'   },
-  { id: 'comp.edit',  modulo: 'Compras',          acao: 'Editar'       },
-  { id: 'comp.aprov', modulo: 'Compras',          acao: 'Aprovar'      },
-  { id: 'mnt.view',   modulo: 'Manutenção',       acao: 'Visualizar'   },
-  { id: 'mnt.edit',   modulo: 'Manutenção',       acao: 'Editar'       },
-  { id: 'port.view',  modulo: 'Portaria',         acao: 'Visualizar'   },
-  { id: 'port.edit',  modulo: 'Portaria',         acao: 'Editar'       },
-  { id: 'car.view',   modulo: 'Carregamento',     acao: 'Visualizar'   },
-  { id: 'car.edit',   modulo: 'Carregamento',     acao: 'Editar'       },
-  { id: 'ast.view',   modulo: 'Assistência',      acao: 'Visualizar'   },
-  { id: 'ast.edit',   modulo: 'Assistência',      acao: 'Editar'       },
-  { id: 'adm.view',   modulo: 'Administração',    acao: 'Visualizar'   },
-  { id: 'adm.full',   modulo: 'Administração',    acao: 'Acesso Total' },
-];
+import { FuncionarioService } from '../../../core/services/funcionario.service';
+import { PerfilService } from '../../../core/services/perfil.service';
+import { Funcionario } from '../../../core/models/funcionario.model';
+import { Perfil } from '../../../core/models/perfil.model';
 
 @Component({
   selector: 'app-usuarios',
@@ -59,101 +15,122 @@ const PERMISSOES_DISPONIVEIS: Permissao[] = [
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
-export class UsuariosComponent {
+export class UsuariosComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
     { label: 'Recursos Humanos', route: '/recursos-humanos' },
     { label: 'Permissões de Usuário' }
   ];
 
-  usuarios: Usuario[] = [];
-
   searchQuery = '';
   buscando = false;
   naoEncontrado = false;
-  usuarioEncontrado: Usuario | null = null;
+  resultados: Funcionario[] = [];
+  usuarioEncontrado: Funcionario | null = null;
 
-  permissoesDisponiveis: Permissao[] = PERMISSOES_DISPONIVEIS;
-  permissoesSelecionadas = new Set<string>();
+  perfisDisponiveis: Perfil[] = [];
+  perfisSelecionados = new Set<number>();
   dropdownAberto = false;
+  perfilSearchTerm = '';
   salvando = false;
 
   successMessage = '';
+  errorMessage = '';
+
+  constructor(
+    private readonly funcionarioService: FuncionarioService,
+    private readonly perfilService: PerfilService
+  ) {}
+
+  ngOnInit(): void {
+    this.perfilService.getAll().subscribe({
+      next: perfis => (this.perfisDisponiveis = perfis.filter(p => p.ativo)),
+      error: () => (this.errorMessage = 'Não foi possível carregar os perfis disponíveis.')
+    });
+  }
 
   buscar(): void {
-    const q = this.searchQuery.trim().toLowerCase();
+    const q = this.searchQuery.trim();
     if (!q) return;
+
     this.buscando = true;
     this.naoEncontrado = false;
     this.usuarioEncontrado = null;
+    this.resultados = [];
     this.dropdownAberto = false;
+    this.errorMessage = '';
 
-    setTimeout(() => {
-      const found = this.usuarios.find(u =>
-        u.email.toLowerCase().includes(q) ||
-        u.nome.toLowerCase().includes(q)
-      ) ?? null;
-      this.usuarioEncontrado = found;
-      this.naoEncontrado = !found;
-      this.buscando = false;
-      if (found) this.permissoesSelecionadas = new Set();
-    }, 400);
+    this.funcionarioService.search(q).subscribe({
+      next: funcionarios => {
+        this.buscando = false;
+        if (funcionarios.length === 0) {
+          this.naoEncontrado = true;
+        } else if (funcionarios.length === 1) {
+          this.selecionarUsuario(funcionarios[0]);
+        } else {
+          this.resultados = funcionarios;
+        }
+      },
+      error: () => {
+        this.naoEncontrado = true;
+        this.buscando = false;
+      }
+    });
+  }
+
+  selecionarUsuario(f: Funcionario): void {
+    this.usuarioEncontrado = f;
+    this.resultados = [];
+    this.perfisSelecionados = new Set(f.perfis.map(p => p.id));
   }
 
   limparBusca(): void {
     this.searchQuery = '';
     this.usuarioEncontrado = null;
     this.naoEncontrado = false;
+    this.resultados = [];
     this.dropdownAberto = false;
   }
 
-  get modulosUnicos(): string[] {
-    return [...new Set(this.permissoesDisponiveis.map(p => p.modulo))];
+  toggleDropdown(): void {
+    this.dropdownAberto = !this.dropdownAberto;
+    this.perfilSearchTerm = '';
   }
 
-  permissoesPorModulo(modulo: string): Permissao[] {
-    return this.permissoesDisponiveis.filter(p => p.modulo === modulo);
+  get perfisFiltrados(): Perfil[] {
+    const term = this.perfilSearchTerm.trim().toLowerCase();
+    if (!term) return this.perfisDisponiveis;
+    return this.perfisDisponiveis.filter(p => p.nome.toLowerCase().includes(term));
   }
 
-  toggleDropdown(): void { this.dropdownAberto = !this.dropdownAberto; }
+  temPerfil(id: number): boolean { return this.perfisSelecionados.has(id); }
 
-  temPermissao(id: string): boolean { return this.permissoesSelecionadas.has(id); }
-
-  togglePermissao(id: string): void {
-    const s = new Set(this.permissoesSelecionadas);
+  togglePerfil(id: number): void {
+    const s = new Set(this.perfisSelecionados);
     s.has(id) ? s.delete(id) : s.add(id);
-    this.permissoesSelecionadas = s;
-  }
-
-  toggleModulo(modulo: string): void {
-    const perms = this.permissoesPorModulo(modulo);
-    const todas = perms.every(p => this.permissoesSelecionadas.has(p.id));
-    const s = new Set(this.permissoesSelecionadas);
-    perms.forEach(p => todas ? s.delete(p.id) : s.add(p.id));
-    this.permissoesSelecionadas = s;
-  }
-
-  moduloSelecionado(modulo: string): boolean {
-    return this.permissoesPorModulo(modulo).every(p => this.permissoesSelecionadas.has(p.id));
-  }
-
-  moduloParcial(modulo: string): boolean {
-    const perms = this.permissoesPorModulo(modulo);
-    const count = perms.filter(p => this.permissoesSelecionadas.has(p.id)).length;
-    return count > 0 && count < perms.length;
+    this.perfisSelecionados = s;
   }
 
   salvarPermissoes(): void {
-    this.salvando = true;
-    setTimeout(() => {
-      this.salvando = false;
-      this.dropdownAberto = false;
-      this.showSuccess(`Permissões de ${this.usuarioEncontrado?.nome} atualizadas com sucesso!`);
-    }, 600);
-  }
+    if (!this.usuarioEncontrado || this.perfisSelecionados.size === 0) return;
 
-  perfilBadge(perfil: PerfilUsuario): string {
-    return ({ Administrador: 'bg-danger', Gerente: 'bg-warning text-dark', Operador: 'bg-primary', Visualizador: 'bg-secondary' } as Record<string,string>)[perfil] ?? 'bg-secondary';
+    this.salvando = true;
+    this.errorMessage = '';
+
+    this.funcionarioService
+      .atribuirPerfis(this.usuarioEncontrado.id, [...this.perfisSelecionados])
+      .subscribe({
+        next: funcionario => {
+          this.usuarioEncontrado = funcionario;
+          this.salvando = false;
+          this.dropdownAberto = false;
+          this.showSuccess(`Permissões de ${funcionario.nome} atualizadas com sucesso!`);
+        },
+        error: err => {
+          this.salvando = false;
+          this.errorMessage = err.error?.mensagem ?? 'Não foi possível salvar as permissões.';
+        }
+      });
   }
 
   private showSuccess(msg: string): void {

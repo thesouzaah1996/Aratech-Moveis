@@ -3,22 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
+import { RegistroChegadaService } from '../../../core/services/registro-chegada.service';
+import {
+  RegistroChegada,
+  RegistroChegadaForm,
+  StatusCaminhao,
+  SETOR_LABELS,
+  STATUS_CAMINHAO_LABELS
+} from '../../../core/models/registro-chegada.model';
 
 declare const bootstrap: any;
-
-export type StatusCaminhao = 'AGUARDANDO' | 'AUTORIZADO' | 'FINALIZADO';
-export type SetorPortaria = 'Almoxarifado' | 'Carregamento';
-
-export interface RegistroPortaria {
-  id: number;
-  notaFiscal: string;
-  empresa: string;
-  motorista: string;
-  placa: string;
-  setor: SetorPortaria;
-  status: StatusCaminhao;
-  dataEntrada: string;
-}
 
 @Component({
   selector: 'app-controle-acesso',
@@ -29,7 +23,6 @@ export interface RegistroPortaria {
 })
 export class ControleAcessoComponent implements OnInit, AfterViewInit {
   @ViewChild('historicoModal') historicoModalEl!: ElementRef;
-  @ViewChild('removeModal') removeModalEl!: ElementRef;
   @ViewChild('confirmEntradaModal') confirmEntradaModalEl!: ElementRef;
 
   breadcrumb: BreadcrumbItem[] = [
@@ -38,36 +31,50 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
     { label: 'Controle de Acesso' }
   ];
 
-  fila: RegistroPortaria[] = [];
-  historico: RegistroPortaria[] = [];
+  readonly setorLabels = SETOR_LABELS;
+  readonly statusLabels = STATUS_CAMINHAO_LABELS;
 
-  form = {
-    notaFiscal: '',
-    empresa: '',
-    motorista: '',
-    placa: '',
-    setor: '' as SetorPortaria | ''
-  };
+  fila: RegistroChegada[] = [];
+  historico: RegistroChegada[] = [];
+
+  form: RegistroChegadaForm = this.emptyForm();
+  submitted = false;
+  successMessage = '';
+  errorMessage = '';
 
   filtroNF = '';
   filtroData = '';
-  idParaRemover: number | null = null;
   idParaConfirmar: number | null = null;
 
   private historicoModal?: any;
-  private removeModal?: any;
   private confirmEntradaModal?: any;
 
+  constructor(private readonly registroChegadaService: RegistroChegadaService) {}
+
   ngOnInit(): void {
+    this.carregarFila();
   }
 
   ngAfterViewInit(): void {
     this.historicoModal = new bootstrap.Modal(this.historicoModalEl.nativeElement);
-    this.removeModal = new bootstrap.Modal(this.removeModalEl.nativeElement);
     this.confirmEntradaModal = new bootstrap.Modal(this.confirmEntradaModalEl.nativeElement);
   }
 
-  get historicoFiltrado(): RegistroPortaria[] {
+  private carregarFila(): void {
+    this.registroChegadaService.getFila().subscribe({
+      next: fila => (this.fila = fila),
+      error: () => this.showError('Erro ao carregar a fila de espera.')
+    });
+  }
+
+  private carregarHistorico(): void {
+    this.registroChegadaService.getHistorico().subscribe({
+      next: historico => (this.historico = historico),
+      error: () => this.showError('Erro ao carregar o histórico de entregas.')
+    });
+  }
+
+  get historicoFiltrado(): RegistroChegada[] {
     return this.historico.filter(h => {
       const nfOk = !this.filtroNF || h.notaFiscal.toLowerCase().includes(this.filtroNF.toLowerCase());
       const dataOk = !this.filtroData || h.dataEntrada.startsWith(this.filtroData);
@@ -76,23 +83,22 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
   }
 
   registrarChegada(): void {
-    if (!this.form.notaFiscal || !this.form.empresa || !this.form.motorista || !this.form.placa || !this.form.setor) return;
-    this.resetForm();
+    this.submitted = true;
+    if (!this.isFormValid()) return;
+
+    this.registroChegadaService.add(this.form).subscribe({
+      next: registro => {
+        this.fila.push(registro);
+        this.resetForm();
+        this.showSuccess('Chegada registrada com sucesso!');
+      },
+      error: err => this.showError(err.error?.message ?? 'Erro ao registrar chegada.')
+    });
   }
 
   abrirHistorico(): void {
+    this.carregarHistorico();
     this.historicoModal.show();
-  }
-
-  abrirRemocao(id: number): void {
-    this.idParaRemover = id;
-    this.removeModal.show();
-  }
-
-  confirmarRemocao(): void {
-    this.fila = this.fila.filter(i => i.id !== this.idParaRemover);
-    this.idParaRemover = null;
-    this.removeModal.hide();
   }
 
   abrirConfirmacaoEntrada(id: number): void {
@@ -101,14 +107,20 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
   }
 
   confirmarEntrada(): void {
-    const item = this.fila.find(i => i.id === this.idParaConfirmar);
-    if (item) {
-      item.status = 'FINALIZADO';
-      this.historico.unshift({ ...item });
-      this.fila = this.fila.filter(i => i.id !== this.idParaConfirmar);
-    }
-    this.idParaConfirmar = null;
-    this.confirmEntradaModal.hide();
+    if (!this.idParaConfirmar) return;
+
+    this.registroChegadaService.finalizar(this.idParaConfirmar).subscribe({
+      next: () => {
+        this.fila = this.fila.filter(i => i.id !== this.idParaConfirmar);
+        this.idParaConfirmar = null;
+        this.confirmEntradaModal.hide();
+        this.showSuccess('Entrada confirmada com sucesso!');
+      },
+      error: err => {
+        this.confirmEntradaModal.hide();
+        this.showError(err.error?.message ?? 'Erro ao confirmar entrada.');
+      }
+    });
   }
 
   formatWaitTime(dataEntrada: string): string {
@@ -122,8 +134,8 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
   badgeClass(status: StatusCaminhao): string {
     const map: Record<StatusCaminhao, string> = {
       AGUARDANDO: 'bg-warning text-dark',
-      AUTORIZADO:  'bg-primary',
-      FINALIZADO:  'bg-success',
+      AUTORIZADO: 'bg-primary',
+      FINALIZADO: 'bg-success'
     };
     return map[status] ?? 'bg-secondary';
   }
@@ -133,7 +145,33 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
     this.filtroData = '';
   }
 
+  private isFormValid(): boolean {
+    return !!(
+      this.form.notaFiscal.trim() &&
+      this.form.empresa.trim() &&
+      this.form.nomeMotorista.trim() &&
+      this.form.placa.trim() &&
+      this.form.setorResponsavel
+    );
+  }
+
   private resetForm(): void {
-    this.form = { notaFiscal: '', empresa: '', motorista: '', placa: '', setor: '' };
+    this.submitted = false;
+    this.form = this.emptyForm();
+  }
+
+  private emptyForm(): RegistroChegadaForm {
+    return { notaFiscal: '', empresa: '', nomeMotorista: '', placa: '', setorResponsavel: '' };
+  }
+
+  private showSuccess(msg: string): void {
+    this.successMessage = msg;
+    this.errorMessage = '';
+    setTimeout(() => (this.successMessage = ''), 3000);
+  }
+
+  private showError(msg: string): void {
+    this.errorMessage = msg;
+    this.successMessage = '';
   }
 }

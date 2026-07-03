@@ -3,18 +3,10 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
+import { ChamadoService } from '../../../core/services/chamado.service';
+import { Chamado, ChamadoForm } from '../../../core/models/chamado.model';
 
 declare const bootstrap: any;
-
-interface FormSolicitacao {
-  equipamento: string;
-  tipo: string;
-  prioridade: string;
-  solicitante: string;
-  setor: string;
-  telefone: string;
-  descricao: string;
-}
 
 @Component({
   selector: 'app-solicitar-manutencao',
@@ -32,11 +24,15 @@ export class SolicitarManutencaoComponent implements AfterViewInit {
     { label: 'Solicitar Manutenção' }
   ];
 
-  form: FormSolicitacao = this.emptyForm();
+  form: ChamadoForm = this.emptyForm();
   submitted = false;
   resultadoSucesso = false;
+  chamadoCriado: Chamado | null = null;
+  errorMessage = '';
 
   private resultModal?: any;
+
+  constructor(private chamadoService: ChamadoService) {}
 
   ngAfterViewInit(): void {
     this.resultModal = new bootstrap.Modal(this.resultModalEl.nativeElement);
@@ -46,8 +42,18 @@ export class SolicitarManutencaoComponent implements AfterViewInit {
     this.submitted = true;
     if (!this.isFormValid()) return;
 
-    this.resultadoSucesso = true;
-    this.resultModal.show();
+    this.chamadoService.add(this.form).subscribe({
+      next: chamado => {
+        this.chamadoCriado = chamado;
+        this.resultadoSucesso = true;
+        this.resultModal.show();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message ?? '';
+        this.resultadoSucesso = false;
+        this.resultModal.show();
+      }
+    });
   }
 
   fecharResultado(): void {
@@ -59,6 +65,8 @@ export class SolicitarManutencaoComponent implements AfterViewInit {
 
   resetForm(): void {
     this.submitted = false;
+    this.chamadoCriado = null;
+    this.errorMessage = '';
     this.form = this.emptyForm();
   }
 
@@ -86,7 +94,7 @@ export class SolicitarManutencaoComponent implements AfterViewInit {
     );
   }
 
-  private emptyForm(): FormSolicitacao {
+  private emptyForm(): ChamadoForm {
     return { equipamento: '', tipo: '', prioridade: '', solicitante: '', setor: '', telefone: '', descricao: '' };
   }
 }
