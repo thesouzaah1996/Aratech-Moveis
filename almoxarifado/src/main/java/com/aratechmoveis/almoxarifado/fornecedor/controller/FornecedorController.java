@@ -30,12 +30,12 @@ public class FornecedorController {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.getFornecedores());
     }
 
-    @PostMapping("/disable/{id}")
+    @PatchMapping("/disable/{id}")
     public ResponseEntity<Response> disableFornecedor(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.disableFornecedor(id));
     }
 
-    @PostMapping("/enable/{id}")
+    @PatchMapping("/enable/{id}")
     public ResponseEntity<Response> enableFornecedor(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.enableFornecedor(id));
     }

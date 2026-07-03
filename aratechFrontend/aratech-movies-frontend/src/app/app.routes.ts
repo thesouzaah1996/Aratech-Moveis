@@ -33,6 +33,7 @@ import { FuncionariosComponent } from './componente/recursos-humanos/funcionario
 import { FeriasComponent } from './componente/recursos-humanos/ferias/ferias.component';
 import { SolicitacoesRhComponent } from './componente/recursos-humanos/solicitacoes/solicitacoes.component';
 import { UsuariosComponent } from './componente/recursos-humanos/usuarios/usuarios.component';
+import { PerfilComponent } from './componente/recursos-humanos/perfil/perfil.component';
 
 import { PcpComponent } from './componente/pcp/pcp.component';
 import { OrdensProducaoComponent } from './componente/pcp/ordens/ordens.component';
@@ -99,6 +100,7 @@ export const routes: Routes = [
   { path: 'recursos-humanos/ferias',                component: FeriasComponent },
   { path: 'recursos-humanos/solicitacoes',          component: SolicitacoesRhComponent },
   { path: 'recursos-humanos/usuarios',              component: UsuariosComponent },
+  { path: 'recursos-humanos/perfil',                component: PerfilComponent },
 
   { path: 'pcp',                                    component: PcpComponent },
   { path: 'pcp/ordens',                             component: OrdensProducaoComponent },

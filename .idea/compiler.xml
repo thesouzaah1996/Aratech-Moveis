@@ -18,7 +18,6 @@
         </processorPath>
         <module name="login" />
         <module name="portaria" />
-        <module name="almoxarifado" />
       </profile>
       <profile name="Annotation profile for recursoshumanos" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -29,6 +28,7 @@
         </processorPath>
         <module name="recursoshumanos" />
         <module name="administracao" />
+        <module name="almoxarifado" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

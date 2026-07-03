@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5555/almoxarifado-homologacao}
-    username: ${ALMOXARIFADO_DB_USER_HOMOLOGACAO}
-    password: ${ALMOXARIFADO_DB_PASSWORD_HOMOLOGACAO}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${MANUTENCAO_DB_USER_PROD}
+    password: ${MANUTENCAO_DB_PASSWORD_PROD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      pool-name: almoxarifado-pool-homologacao
-      maximum-pool-size: 10
-      minimum-idle: 2
+      pool-name: manutencao-pool-prod
+      maximum-pool-size: 20
+      minimum-idle: 5
       idle-timeout: 30000
       connection-timeout: 20000
       max-lifetime: 1800000

@@ -1,48 +1,56 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
+import { ChamadoService } from '../../../core/services/chamado.service';
+import {
+  Chamado,
+  StatusChamado,
+  PRIORIDADE_LABELS,
+  STATUS_CHAMADO_LABELS,
+  TIPO_MANUTENCAO_LABELS
+} from '../../../core/models/chamado.model';
 
-export type StatusOrdem = 'Aberta' | 'Em Manutenção' | 'Concluída';
-export type Prioridade   = 'Alta'  | 'Média'          | 'Baixa';
-
-export interface OrdemAcompanhamento {
-  id: number;
-  equipamento: string;
-  tipo: string;
-  prioridade: Prioridade;
-  solicitante: string;
-  setor: string;
-  mecanico: string;
-  status: StatusOrdem;
-  data: string;
-}
-
-const PRIORIDADE_ORDEM: Record<Prioridade, number> = { Alta: 0, Média: 1, Baixa: 2 };
+const PRIORIDADE_ORDEM: Record<string, number> = { ALTA: 0, MEDIA: 1, BAIXA: 2 };
 
 @Component({
   selector: 'app-acompanhamento',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
   templateUrl: './acompanhamento.component.html',
   styleUrl: './acompanhamento.component.scss'
 })
-export class AcompanhamentoComponent {
+export class AcompanhamentoComponent implements OnInit {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
     { label: 'Manutenção', route: '/manutencao' },
     { label: 'Acompanhamento' }
   ];
 
-  filtroStatus: StatusOrdem | 'Todos' = 'Todos';
+  readonly tipoLabels = TIPO_MANUTENCAO_LABELS;
+  readonly prioridadeLabels = PRIORIDADE_LABELS;
+  readonly statusLabels = STATUS_CHAMADO_LABELS;
+
+  filtroStatus: StatusChamado | 'Todos' = 'Todos';
   searchTerm = '';
   page = 1;
   pageSize = 8;
+  errorMessage = '';
 
-  ordens: OrdemAcompanhamento[] = [];
+  ordens: Chamado[] = [];
 
-  get filtradas(): OrdemAcompanhamento[] {
+  constructor(private chamadoService: ChamadoService) {}
+
+  ngOnInit(): void {
+    this.chamadoService.getAll().subscribe({
+      next: ordens => this.ordens = ordens,
+      error: () => this.errorMessage = 'Erro ao carregar as ordens de manutenção.'
+    });
+  }
+
+  get filtradas(): Chamado[] {
     let lista = [...this.ordens].sort((a, b) =>
       PRIORIDADE_ORDEM[a.prioridade] - PRIORIDADE_ORDEM[b.prioridade]
     );
@@ -63,7 +71,7 @@ export class AcompanhamentoComponent {
     return lista;
   }
 
-  get paged(): OrdemAcompanhamento[] {
+  get paged(): Chamado[] {
     const start = (this.page - 1) * this.pageSize;
     return this.filtradas.slice(start, start + this.pageSize);
   }
@@ -91,20 +99,20 @@ export class AcompanhamentoComponent {
     this.page = p;
   }
 
-  setFiltro(status: StatusOrdem | 'Todos'): void {
+  setFiltro(status: StatusChamado | 'Todos'): void {
     this.filtroStatus = status;
     this.page = 1;
   }
 
-  statusBadge(status: StatusOrdem): string {
-    if (status === 'Concluída')      return 'bg-success';
-    if (status === 'Em Manutenção')  return 'bg-warning text-dark';
+  statusBadge(status: StatusChamado): string {
+    if (status === 'CONCLUIDA')     return 'bg-success';
+    if (status === 'EM_MANUTENCAO') return 'bg-warning text-dark';
     return 'bg-secondary';
   }
 
-  prioridadeClass(p: Prioridade): string {
-    if (p === 'Alta')  return 'badge-prioridade alta';
-    if (p === 'Média') return 'badge-prioridade media';
+  prioridadeClass(p: Chamado['prioridade']): string {
+    if (p === 'ALTA')  return 'badge-prioridade alta';
+    if (p === 'MEDIA') return 'badge-prioridade media';
     return 'badge-prioridade baixa';
   }
 

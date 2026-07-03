@@ -1,4 +1,4 @@
-package com.aratechmoveis.portaria;
+package com.aratechmoveis.portaria.response;
 
 import com.aratechmoveis.portaria.controle_acesso.dto.RegistroChegadaDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,5 +16,6 @@ public class Response {
     private String message;
 
     private RegistroChegadaDTO registroChegada;
-    private List<RegistroChegadaDTO> registrosChegada;
+    private List<RegistroChegadaDTO> filaRegistroChegada;
+    private List<RegistroChegadaDTO> historicoRegistroChegada;
 }

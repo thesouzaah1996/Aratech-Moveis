@@ -1,20 +1,14 @@
-import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
+import { FuncionarioService } from '../../../core/services/funcionario.service';
+import { Funcionario, FuncionarioForm } from '../../../core/models/funcionario.model';
 
 declare const bootstrap: any;
 
-export interface Funcionario {
-  id: number;
-  nome: string;
-  cargo: string;
-  setor: string;
-  email: string;
-  telefone: string;
-  ativo: boolean;
-}
+const TIPOS_FUNCIONARIO = ['GERENTE', 'ENCARREGADO', 'PRODUCAO', 'ADMINISTRATIVO', 'TERCEIRIZADO', 'PRESTADOR_PJ'];
 
 interface FormFuncionario {
   nome: string;
@@ -77,7 +71,7 @@ interface FormFuncionarioEdit {
   templateUrl: './funcionarios.component.html',
   styleUrl: './funcionarios.component.scss'
 })
-export class FuncionariosComponent implements AfterViewInit {
+export class FuncionariosComponent implements OnInit, AfterViewInit {
   @ViewChild('admissaoModal') admissaoModalEl!: ElementRef;
   @ViewChild('viewModal')     viewModalEl!: ElementRef;
   @ViewChild('editModal')     editModalEl!: ElementRef;
@@ -94,20 +88,23 @@ export class FuncionariosComponent implements AfterViewInit {
                      'Santander','Sicoob','Sicredi','Inter','C6 Bank','Outro'];
   readonly estadosCivis = ['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União Estável'];
   readonly tiposContrato = ['CLT','Temporário','Aprendiz','Estágio','PJ'];
-  tiposFuncionario: string[] = [];
+  readonly tiposFuncionario = TIPOS_FUNCIONARIO;
 
   funcionarios: Funcionario[] = [];
+  loading = false;
   searchTerm = '';
   filtroStatus: 'todos' | 'ativos' | 'inativos' = 'todos';
   page = 1;
   pageSize = 8;
   successMessage = '';
+  errorMessage = '';
   funcionarioEmVisualizacao: Funcionario | null = null;
 
   activeTab = 0;
   tabSubmitted = [false, false, false, false, false];
   form: FormFuncionario = this.emptyForm();
   arquivos: ArquivosAdmissao = this.emptyArquivos();
+  salvandoCadastro = false;
 
   submittedEdit = false;
   formEdit: FormFuncionarioEdit = this.emptyFormEdit();
@@ -116,6 +113,22 @@ export class FuncionariosComponent implements AfterViewInit {
   private admissaoModal?: any;
   private viewModal?: any;
   private editModal?: any;
+
+  constructor(private funcionarioService: FuncionarioService) {}
+
+  ngOnInit(): void {
+    this.loading = true;
+    this.funcionarioService.getAll().subscribe({
+      next: funcionarios => {
+        this.funcionarios = funcionarios;
+        this.loading = false;
+      },
+      error: () => {
+        this.showError('Erro ao carregar os funcionários.');
+        this.loading = false;
+      }
+    });
+  }
 
   ngAfterViewInit(): void {
     this.admissaoModal = new bootstrap.Modal(this.admissaoModalEl.nativeElement);
@@ -182,18 +195,33 @@ export class FuncionariosComponent implements AfterViewInit {
   save(): void {
     this.tabSubmitted[4] = true;
     if (!this.isTabValid(4)) return;
-    const newId = this.funcionarios.length ? Math.max(...this.funcionarios.map(f => f.id)) + 1 : 1;
-    this.funcionarios.push({
-      id: newId,
-      nome: this.form.nome,
-      cargo: this.form.cargo,
-      setor: this.form.setor,
-      email: this.form.email,
-      telefone: this.form.celular || this.form.telefone,
-      ativo: true
+
+    this.salvandoCadastro = true;
+    this.funcionarioService.add(this.montarPayloadCadastro()).subscribe({
+      next: novo => {
+        this.funcionarios.unshift(novo);
+        this.salvandoCadastro = false;
+        this.admissaoModal.hide();
+        this.showSuccess('Funcionário cadastrado com sucesso!');
+      },
+      error: (err) => {
+        this.salvandoCadastro = false;
+        this.showError(err.error?.mensagem ?? 'Erro ao cadastrar funcionário.');
+      }
     });
-    this.admissaoModal.hide();
-    this.showSuccess('Funcionário cadastrado com sucesso!');
+  }
+
+  private montarPayloadCadastro(): FuncionarioForm {
+    const f = this.form;
+    return {
+      ...f,
+      jornadaHoras: f.jornadaHoras ? Number(f.jornadaHoras) : null,
+      salario: this.parseMoeda(f.salario)
+    };
+  }
+
+  private parseMoeda(valor: string): number {
+    return Number(valor.replace(/\./g, '').replace(',', '.')) || 0;
   }
 
   isTabValid(_tab: number): boolean {
@@ -224,7 +252,7 @@ export class FuncionariosComponent implements AfterViewInit {
     this.submittedEdit = false;
     this.editandoId = f.id;
     this.formEdit = { nome: f.nome, cargo: f.cargo,
-                      setor: f.setor, email: f.email, telefone: f.telefone };
+                      setor: f.setor, email: f.email, telefone: f.telefone ?? '' };
     this.editModal.show();
   }
 
@@ -240,8 +268,17 @@ export class FuncionariosComponent implements AfterViewInit {
   }
 
   toggleAtivo(f: Funcionario): void {
-    f.ativo = !f.ativo;
-    this.showSuccess(`Funcionário ${f.ativo ? 'ativado' : 'desativado'} com sucesso!`);
+    const acao = f.ativo
+      ? this.funcionarioService.disable(f.id)
+      : this.funcionarioService.enable(f.id);
+
+    acao.subscribe({
+      next: atualizado => {
+        f.ativo = atualizado.ativo;
+        this.showSuccess(`Funcionário ${f.ativo ? 'ativado' : 'desativado'} com sucesso!`);
+      },
+      error: (err) => this.showError(err.error?.mensagem ?? 'Erro ao alterar o status do funcionário.')
+    });
   }
 
   applyCpfMask(event: Event): void {
@@ -310,7 +347,13 @@ export class FuncionariosComponent implements AfterViewInit {
 
   private showSuccess(msg: string): void {
     this.successMessage = msg;
+    this.errorMessage = '';
     setTimeout(() => (this.successMessage = ''), 3000);
+  }
+
+  private showError(msg: string): void {
+    this.errorMessage = msg;
+    this.successMessage = '';
   }
 
   private emptyForm(): FormFuncionario {

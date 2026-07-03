@@ -1,20 +1,12 @@
-import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
+import { PecaEstoqueService } from '../../../core/services/peca-estoque.service';
+import { PecaEstoque, PecaEstoqueForm } from '../../../core/models/peca-estoque.model';
 
 declare const bootstrap: any;
-
-export interface PecaEstoque {
-  id: number;
-  nome: string;
-  codigo: string;
-  quantidade: number;
-  unidade: string;
-  localizacao: string;
-  descricao: string;
-}
 
 @Component({
   selector: 'app-estoque-manutencao',
@@ -23,7 +15,7 @@ export interface PecaEstoque {
   templateUrl: './estoque.component.html',
   styleUrl: './estoque.component.scss'
 })
-export class EstoqueManutencaoComponent implements AfterViewInit {
+export class EstoqueManutencaoComponent implements OnInit, AfterViewInit {
   @ViewChild('pecaModal') pecaModalEl!: ElementRef;
   @ViewChild('deleteModal') deleteModalEl!: ElementRef;
 
@@ -34,6 +26,7 @@ export class EstoqueManutencaoComponent implements AfterViewInit {
   ];
 
   pecas: PecaEstoque[] = [];
+  loading = false;
   searchTerm = '';
   isEditing = false;
   page = 1;
@@ -42,11 +35,27 @@ export class EstoqueManutencaoComponent implements AfterViewInit {
   successMessage = '';
   errorMessage = '';
 
-  form: Partial<PecaEstoque> = this.emptyForm();
+  form: PecaEstoqueForm = this.emptyForm();
   pecaParaExcluir: PecaEstoque | null = null;
 
   private pecaModal?: any;
   private deleteModal?: any;
+
+  constructor(private pecaEstoqueService: PecaEstoqueService) {}
+
+  ngOnInit(): void {
+    this.loading = true;
+    this.pecaEstoqueService.getAll().subscribe({
+      next: pecas => {
+        this.pecas = pecas;
+        this.loading = false;
+      },
+      error: () => {
+        this.showError('Erro ao carregar o estoque de peças.');
+        this.loading = false;
+      }
+    });
+  }
 
   ngAfterViewInit(): void {
     this.pecaModal   = new bootstrap.Modal(this.pecaModalEl.nativeElement);
@@ -102,7 +111,15 @@ export class EstoqueManutencaoComponent implements AfterViewInit {
   openEdit(peca: PecaEstoque): void {
     this.isEditing = true;
     this.submitted = false;
-    this.form = { ...peca };
+    this.form = {
+      id: peca.id,
+      nome: peca.nome,
+      codigo: peca.codigo,
+      quantidade: peca.quantidade,
+      unidade: peca.unidade,
+      localizacao: peca.localizacao,
+      descricao: peca.descricao ?? ''
+    };
     this.pecaModal.show();
   }
 
@@ -115,25 +132,43 @@ export class EstoqueManutencaoComponent implements AfterViewInit {
     this.submitted = true;
     if (!this.isFormValid()) return;
 
-    if (this.isEditing) {
-      const idx = this.pecas.findIndex(p => p.id === this.form.id);
-      if (idx > -1) this.pecas[idx] = { ...this.form } as PecaEstoque;
-      this.showSuccess('Peça atualizada com sucesso!');
+    if (this.isEditing && this.form.id) {
+      this.pecaEstoqueService.update(this.form.id, this.form).subscribe({
+        next: atualizada => {
+          const idx = this.pecas.findIndex(p => p.id === atualizada.id);
+          if (idx > -1) this.pecas[idx] = atualizada;
+          this.pecaModal.hide();
+          this.showSuccess('Peça atualizada com sucesso!');
+        },
+        error: (err) => this.showError(err.error?.message ?? 'Erro ao atualizar peça.')
+      });
     } else {
-      const newId = this.pecas.length ? Math.max(...this.pecas.map(p => p.id)) + 1 : 1;
-      this.pecas.push({ ...this.form, id: newId } as PecaEstoque);
-      this.showSuccess('Peça adicionada com sucesso!');
+      this.pecaEstoqueService.add(this.form).subscribe({
+        next: nova => {
+          this.pecas.unshift(nova);
+          this.pecaModal.hide();
+          this.showSuccess('Peça adicionada com sucesso!');
+        },
+        error: (err) => this.showError(err.error?.message ?? 'Erro ao adicionar peça.')
+      });
     }
-
-    this.pecaModal.hide();
   }
 
   confirmDelete(): void {
     if (!this.pecaParaExcluir) return;
-    this.pecas = this.pecas.filter(p => p.id !== this.pecaParaExcluir!.id);
-    this.pecaParaExcluir = null;
-    this.deleteModal.hide();
-    this.showSuccess('Peça removida com sucesso!');
+    const id = this.pecaParaExcluir.id;
+    this.pecaEstoqueService.delete(id).subscribe({
+      next: () => {
+        this.pecas = this.pecas.filter(p => p.id !== id);
+        this.pecaParaExcluir = null;
+        this.deleteModal.hide();
+        this.showSuccess('Peça removida com sucesso!');
+      },
+      error: (err) => {
+        this.deleteModal.hide();
+        this.showError(err.error?.message ?? 'Erro ao remover peça.');
+      }
+    });
   }
 
   estoqueClass(quantidade: number): string {
@@ -157,7 +192,12 @@ export class EstoqueManutencaoComponent implements AfterViewInit {
     setTimeout(() => (this.successMessage = ''), 3000);
   }
 
-  private emptyForm(): Partial<PecaEstoque> {
+  private showError(msg: string): void {
+    this.errorMessage = msg;
+    this.successMessage = '';
+  }
+
+  private emptyForm(): PecaEstoqueForm {
     return { nome: '', codigo: '', quantidade: 0, unidade: 'un', localizacao: '', descricao: '' };
   }
 }

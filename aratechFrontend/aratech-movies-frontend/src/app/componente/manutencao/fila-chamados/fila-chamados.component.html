@@ -11,6 +11,13 @@
       </div>
     }
 
+    @if (errorMessage) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>{{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+    }
+
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
       <h3 class="fw-bold mb-0 flex-shrink-0">Fila de Chamados</h3>
 
@@ -26,9 +33,9 @@
 
       <div class="filtro-status flex-shrink-0">
         <button type="button" [class.ativo]="filtroStatus === 'Todos'"         (click)="setFiltro('Todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Aguardando'"    (click)="setFiltro('Aguardando')">Aguardando</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Em Manutenção'" (click)="setFiltro('Em Manutenção')">Em Manutenção</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Concluída'"     (click)="setFiltro('Concluída')">Concluídos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ABERTA'"        (click)="setFiltro('ABERTA')">Aguardando</button>
+        <button type="button" [class.ativo]="filtroStatus === 'EM_MANUTENCAO'" (click)="setFiltro('EM_MANUTENCAO')">Em Manutenção</button>
+        <button type="button" [class.ativo]="filtroStatus === 'CONCLUIDA'"     (click)="setFiltro('CONCLUIDA')">Concluídos</button>
       </div>
     </div>
 
@@ -60,11 +67,11 @@
                 </tr>
               } @else {
                 @for (chamado of paged; track chamado.id) {
-                  <tr [class.row-aguardando]="chamado.status === 'Aguardando'">
+                  <tr [class.row-aguardando]="chamado.status === 'ABERTA'">
                     <td><span class="badge-id">#{{ chamado.id }}</span></td>
                     <td class="fw-semibold">{{ chamado.equipamento }}</td>
-                    <td class="text-muted">{{ chamado.tipo }}</td>
-                    <td><span [class]="prioridadeClass(chamado.prioridade)">{{ chamado.prioridade }}</span></td>
+                    <td class="text-muted">{{ tipoLabels[chamado.tipo] }}</td>
+                    <td><span [class]="prioridadeClass(chamado.prioridade)">{{ prioridadeLabels[chamado.prioridade] }}</span></td>
                     <td>
                       <span class="fw-semibold">{{ chamado.solicitante }}</span>
                       <br><span class="text-muted small">{{ chamado.setor }}</span>
@@ -76,12 +83,12 @@
                         <span class="text-muted fst-italic">Não atribuído</span>
                       }
                     </td>
-                    <td><span class="badge" [class]="statusBadge(chamado.status)">{{ chamado.status }}</span></td>
+                    <td><span class="badge" [class]="statusBadge(chamado.status)">{{ statusLabels[chamado.status] }}</span></td>
                     <td class="text-end action-buttons">
                       <button class="btn-action btn-action-edit" title="Ver detalhes" (click)="openDetalhes(chamado)">
                         <i class="bi bi-eye"></i>
                       </button>
-                      @if (chamado.status === 'Aguardando' || chamado.status === 'Em Manutenção') {
+                      @if (chamado.status === 'ABERTA' || chamado.status === 'EM_MANUTENCAO') {
                         <button class="btn-action btn-action-edit ms-1" title="Atribuir mecânico" (click)="openAtribuir(chamado)">
                           <i class="bi bi-person-check"></i>
                         </button>
@@ -153,7 +160,7 @@
           <div class="delete-warning mb-4">
             <p class="mb-1"><strong>Chamado:</strong> #{{ chamadoSelecionado.id }}</p>
             <p class="mb-1"><strong>Equipamento:</strong> {{ chamadoSelecionado.equipamento }}</p>
-            <p class="mb-0"><strong>Prioridade:</strong> {{ chamadoSelecionado.prioridade }}</p>
+            <p class="mb-0"><strong>Prioridade:</strong> {{ prioridadeLabels[chamadoSelecionado.prioridade] }}</p>
           </div>
         }
         <div>
@@ -198,11 +205,11 @@
             </div>
             <div class="col-md-3">
               <p class="text-muted small mb-1">Tipo</p>
-              <p class="fw-semibold mb-0">{{ chamadoSelecionado.tipo }}</p>
+              <p class="fw-semibold mb-0">{{ tipoLabels[chamadoSelecionado.tipo] }}</p>
             </div>
             <div class="col-md-3">
               <p class="text-muted small mb-1">Prioridade</p>
-              <span [class]="prioridadeClass(chamadoSelecionado.prioridade)">{{ chamadoSelecionado.prioridade }}</span>
+              <span [class]="prioridadeClass(chamadoSelecionado.prioridade)">{{ prioridadeLabels[chamadoSelecionado.prioridade] }}</span>
             </div>
           </div>
 
@@ -219,11 +226,11 @@
             </div>
             <div class="col-md-6">
               <p class="text-muted small mb-1">Data da Solicitação</p>
-              <p class="fw-semibold mb-0">{{ chamadoSelecionado.data }}</p>
+              <p class="fw-semibold mb-0">{{ chamadoSelecionado.dataAbertura | date:'dd/MM/yyyy HH:mm' }}</p>
             </div>
             <div class="col-md-6">
               <p class="text-muted small mb-1">Status</p>
-              <span class="badge" [class]="statusBadge(chamadoSelecionado.status)">{{ chamadoSelecionado.status }}</span>
+              <span class="badge" [class]="statusBadge(chamadoSelecionado.status)">{{ statusLabels[chamadoSelecionado.status] }}</span>
             </div>
           </div>
 
@@ -243,7 +250,7 @@
       }
       <div class="modal-footer border-0 bg-light">
         <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Fechar</button>
-        @if (chamadoSelecionado && (chamadoSelecionado.status === 'Aguardando' || chamadoSelecionado.status === 'Em Manutenção')) {
+        @if (chamadoSelecionado && (chamadoSelecionado.status === 'ABERTA' || chamadoSelecionado.status === 'EM_MANUTENCAO')) {
           <button type="button" class="btn btn-danger" (click)="abrirAtribuirDoDetalhes(chamadoSelecionado!)">
             <i class="bi bi-person-check me-1"></i>Atribuir Mecânico
           </button>

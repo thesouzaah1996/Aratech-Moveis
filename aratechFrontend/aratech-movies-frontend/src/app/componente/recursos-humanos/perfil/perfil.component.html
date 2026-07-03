@@ -1,0 +1,151 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>{{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+      <h3 class="fw-bold mb-0 flex-shrink-0">Perfis de Acesso</h3>
+
+      <div class="input-group" style="max-width: 300px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+          placeholder="Buscar por nome…"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="page = 1">
+      </div>
+
+      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+        <i class="bi bi-plus-circle me-2"></i>Novo Perfil
+      </button>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        @if (loading) {
+          <div class="text-center py-5 text-muted">
+            <div class="spinner-border spinner-border-sm me-2"></div>
+            Carregando perfis...
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Status</th>
+                  <th class="text-end" style="width: 1%">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (paged.length === 0) {
+                  <tr>
+                    <td colspan="3">
+                      <div class="empty-state">
+                        <i class="bi bi-shield-lock"></i>
+                        <p>{{ searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhum perfil cadastrado.' }}</p>
+                      </div>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (perfil of paged; track perfil.id) {
+                    <tr>
+                      <td class="fw-semibold">{{ perfil.nome }}</td>
+                      <td>
+                        @if (perfil.ativo) {
+                          <span class="badge bg-success-subtle text-success border border-success-subtle">Ativo</span>
+                        } @else {
+                          <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inativo</span>
+                        }
+                      </td>
+                      <td>
+                        <div class="d-flex justify-content-end align-items-center gap-1">
+                          <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(perfil)">
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          <button class="btn-action" [class.btn-action-delete]="perfil.ativo"
+                            [title]="perfil.ativo ? 'Desativar' : 'Ativar'"
+                            (click)="alternarStatus(perfil)">
+                            <i class="bi" [class.bi-toggle-on]="perfil.ativo" [class.bi-toggle-off]="!perfil.ativo"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (totalPages > 1) {
+            <div class="pagination-container">
+              <span class="pagination-info">
+                Mostrando {{ (page - 1) * pageSize + 1 }}–{{ page * pageSize > filtered.length ? filtered.length : page * pageSize }}
+                de {{ filtered.length }}
+              </span>
+              <nav>
+                <ul class="pagination">
+                  <li class="page-item" [class.disabled]="page === 1">
+                    <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                  </li>
+                  @for (p of pages; track p) {
+                    <li class="page-item" [class.active]="p === page">
+                      <a class="page-link" (click)="setPage(p)">{{ p }}</a>
+                    </li>
+                  }
+                  <li class="page-item" [class.disabled]="page === totalPages">
+                    <a class="page-link" (click)="setPage(page + 1)">›</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<app-footer />
+
+<div class="modal fade" #perfilModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">{{ isEditing ? 'Editar Perfil' : 'Novo Perfil' }}</h5>
+      </div>
+      <div class="modal-body p-4">
+        <label class="form-label fw-semibold">Nome</label>
+        <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome do perfil" maxlength="100">
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="save()" [disabled]="salvando || !form.nome?.trim()">
+          @if (salvando) {
+            <span class="spinner-border spinner-border-sm me-1"></span>
+          } @else {
+            <i class="bi bi-check-circle me-1"></i>
+          }
+          Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
