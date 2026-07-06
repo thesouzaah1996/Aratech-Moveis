@@ -12,33 +12,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("login/perfil")
+@RequestMapping("recursoshumanos/perfil")
 @RequiredArgsConstructor
 public class PerfilController {
 
     private final PerfilService perfilService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Response> addPerfil(@RequestBody @Valid PerfilDTO perfilDTO) {
+    @PostMapping("/adicionar")
+    public ResponseEntity<Response> adicionarPerfil(@RequestBody @Valid PerfilDTO perfilDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(perfilService.criarPerfil(perfilDTO));
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<Response> getPerfis() {
-        return ResponseEntity.status(HttpStatus.OK).body(perfilService.getPerfis());
+    @GetMapping("/todos")
+    public ResponseEntity<Response> listarPerfis() {
+        return ResponseEntity.status(HttpStatus.OK).body(perfilService.listarPerfis());
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Response> updatePerfil(@PathVariable @Min(1) Long id, @RequestBody @Valid PerfilDTO perfilDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(perfilService.updatePerfil(id, perfilDTO));
+    @PutMapping("/atualizar/{id}")
+    public ResponseEntity<Response> atualizarPerfil(@PathVariable @Min(1) Long id, @RequestBody @Valid PerfilDTO perfilDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(perfilService.atualizarPerfil(id, perfilDTO));
     }
 
-    @PatchMapping("/enable/{id}")
+    @PatchMapping("/ativar/{id}")
     public ResponseEntity<Response> ativarPerfil(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(perfilService.ativarPerfil(id));
     }
 
-    @PatchMapping("/disable/{id}")
+    @PatchMapping("/desativar/{id}")
     public ResponseEntity<Response> desativarPerfil(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(perfilService.desativarPerfil(id));
     }

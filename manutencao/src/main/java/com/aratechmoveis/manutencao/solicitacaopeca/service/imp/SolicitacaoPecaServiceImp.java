@@ -26,7 +26,7 @@ public class SolicitacaoPecaServiceImp implements SolicitacaoPecaService {
 
     @Override
     @Transactional
-    public Response addSolicitacaoPeca(SolicitacaoPecaDTO solicitacaoPecaDTO) {
+    public Response adicionarSolicitacaoPeca(SolicitacaoPecaDTO solicitacaoPecaDTO) {
 
         SolicitacaoPeca solicitacaoParaSalvar = modelMapper.map(solicitacaoPecaDTO, SolicitacaoPeca.class);
         solicitacaoParaSalvar.setId(null);
@@ -45,7 +45,7 @@ public class SolicitacaoPecaServiceImp implements SolicitacaoPecaService {
     }
 
     @Override
-    public Response getSolicitacoesPeca() {
+    public Response listarSolicitacoesPeca() {
         List<SolicitacaoPeca> solicitacoes = solicitacaoPecaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         List<SolicitacaoPecaDTO> solicitacoesDTO = modelMapper.map(
                 solicitacoes, new TypeToken<List<SolicitacaoPecaDTO>>() {}.getType());
@@ -58,7 +58,7 @@ public class SolicitacaoPecaServiceImp implements SolicitacaoPecaService {
     }
 
     @Override
-    public Response getSolicitacaoPecaById(Long id) {
+    public Response buscarSolicitacaoPecaPorId(Long id) {
         SolicitacaoPeca solicitacao = solicitacaoPecaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Solicitação de peça não encontrada, confira se o id está correto"));
 
@@ -71,7 +71,7 @@ public class SolicitacaoPecaServiceImp implements SolicitacaoPecaService {
 
     @Override
     @Transactional
-    public Response deleteSolicitacaoPeca(Long id) {
+    public Response removerSolicitacaoPeca(Long id) {
         solicitacaoPecaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Solicitação de peça não encontrada, para deletar, confira se o id está correto"));
 

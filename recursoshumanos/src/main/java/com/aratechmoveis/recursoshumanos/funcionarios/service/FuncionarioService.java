@@ -2,21 +2,24 @@ package com.aratechmoveis.recursoshumanos.funcionarios.service;
 
 import com.aratechmoveis.recursoshumanos.funcionarios.dto.AtribuirPerfisDTO;
 import com.aratechmoveis.recursoshumanos.funcionarios.dto.FuncionarioDTO;
+import com.aratechmoveis.recursoshumanos.funcionarios.dto.LoginFuncionarioDTO;
 import com.aratechmoveis.recursoshumanos.response.Response;
 
 public interface FuncionarioService {
 
-    Response addFuncionario(FuncionarioDTO funcionario);
+    Response adicionarFuncionario(FuncionarioDTO funcionario);
 
-    Response getFuncionarios();
+    Response listarFuncionarios();
 
-    Response getFuncionariosPorNome(String nome);
+    Response buscarFuncionariosPorNome(String nome);
 
-    Response updateFuncionario(Long id, FuncionarioDTO funcionarioDTO);
+    Response atualizarFuncionario(Long id, FuncionarioDTO funcionarioDTO);
 
-    Response enableFuncionario(Long id);
+    Response ativarFuncionario(Long id);
 
-    Response disableFuncionario(Long id);
+    Response desativarFuncionario(Long id);
 
     Response atribuirPerfis(Long id, AtribuirPerfisDTO atribuirPerfisDTO);
+
+    Response atribuirEmailCorporativo(LoginFuncionarioDTO loginFuncionarioDTO);
 }

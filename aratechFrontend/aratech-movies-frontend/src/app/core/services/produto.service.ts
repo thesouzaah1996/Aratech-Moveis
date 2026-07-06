@@ -19,23 +19,23 @@ export class ProdutoService {
 
   getAll(): Observable<Produto[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/all`)
+      .get<ApiResponse>(`${this.api}/todos`)
       .pipe(map(res => res.produtos ?? []));
   }
 
   add(form: ProdutoForm): Observable<Produto> {
     return this.http
-      .post<ApiResponse>(`${this.api}/add`, form)
+      .post<ApiResponse>(`${this.api}/adicionar`, form)
       .pipe(map(res => res.produto!));
   }
 
   update(id: number, form: ProdutoForm): Observable<Produto> {
     return this.http
-      .put<ApiResponse>(`${this.api}/update/${id}`, form)
+      .put<ApiResponse>(`${this.api}/atualizar/${id}`, form)
       .pipe(map(res => res.produto!));
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/delete/${id}`);
+    return this.http.delete<void>(`${this.api}/remover/${id}`);
   }
 }

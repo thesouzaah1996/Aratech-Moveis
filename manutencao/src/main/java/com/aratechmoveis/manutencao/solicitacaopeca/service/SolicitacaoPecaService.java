@@ -4,8 +4,8 @@ import com.aratechmoveis.manutencao.Response;
 import com.aratechmoveis.manutencao.solicitacaopeca.dto.SolicitacaoPecaDTO;
 
 public interface SolicitacaoPecaService {
-    Response addSolicitacaoPeca(SolicitacaoPecaDTO solicitacaoPecaDTO);
-    Response getSolicitacoesPeca();
-    Response getSolicitacaoPecaById(Long id);
-    Response deleteSolicitacaoPeca(Long id);
+    Response adicionarSolicitacaoPeca(SolicitacaoPecaDTO solicitacaoPecaDTO);
+    Response listarSolicitacoesPeca();
+    Response buscarSolicitacaoPecaPorId(Long id);
+    Response removerSolicitacaoPeca(Long id);
 }

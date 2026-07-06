@@ -73,7 +73,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.save(peca)).willReturn(peca);
             given(modelMapper.map(peca, PecaEstoqueDTO.class)).willReturn(dto);
 
-            Response response = pecaEstoqueService.addPecaEstoque(dto);
+            Response response = pecaEstoqueService.adicionarPecaEstoque(dto);
 
             assertThat(response.getStatus()).isEqualTo(201);
             assertThat(response.getMessage()).isEqualTo("Peça cadastrada com sucesso");
@@ -87,7 +87,7 @@ class PecaEstoqueServiceImpTest {
 
             given(pecaEstoqueRepository.existsByCodigoIgnoreCase(dto.getCodigo())).willReturn(true);
 
-            assertThatThrownBy(() -> pecaEstoqueService.addPecaEstoque(dto))
+            assertThatThrownBy(() -> pecaEstoqueService.adicionarPecaEstoque(dto))
                     .isInstanceOf(RecursoJaExistenteException.class)
                     .hasMessageContaining(dto.getCodigo());
 
@@ -110,7 +110,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.save(pecaExistente)).willReturn(pecaExistente);
             given(modelMapper.map(pecaExistente, PecaEstoqueDTO.class)).willReturn(dto);
 
-            Response response = pecaEstoqueService.updatePecaEstoque(1L, dto);
+            Response response = pecaEstoqueService.atualizarPecaEstoque(1L, dto);
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(pecaExistente.getNome()).isEqualTo("Rolamento 6204 Reforçado");
@@ -122,7 +122,7 @@ class PecaEstoqueServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrada() {
             given(pecaEstoqueRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> pecaEstoqueService.updatePecaEstoque(99L, new PecaEstoqueDTO()))
+            assertThatThrownBy(() -> pecaEstoqueService.atualizarPecaEstoque(99L, new PecaEstoqueDTO()))
                     .isInstanceOf(NotFoundException.class);
 
             then(pecaEstoqueRepository).should(never()).save(any());
@@ -140,7 +140,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.save(pecaExistente)).willReturn(pecaExistente);
             given(modelMapper.map(pecaExistente, PecaEstoqueDTO.class)).willReturn(dto);
 
-            pecaEstoqueService.updatePecaEstoque(1L, dto);
+            pecaEstoqueService.atualizarPecaEstoque(1L, dto);
 
             assertThat(pecaExistente.getCodigo()).isEqualTo("ROL-6205");
         }
@@ -155,7 +155,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.findById(1L)).willReturn(Optional.of(pecaExistente));
             given(pecaEstoqueRepository.existsByCodigoIgnoreCaseAndIdNot("ROL-9999", 1L)).willReturn(true);
 
-            assertThatThrownBy(() -> pecaEstoqueService.updatePecaEstoque(1L, dto))
+            assertThatThrownBy(() -> pecaEstoqueService.atualizarPecaEstoque(1L, dto))
                     .isInstanceOf(RecursoJaExistenteException.class);
 
             then(pecaEstoqueRepository).should(never()).save(any());
@@ -172,7 +172,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.save(pecaExistente)).willReturn(pecaExistente);
             given(modelMapper.map(pecaExistente, PecaEstoqueDTO.class)).willReturn(dto);
 
-            pecaEstoqueService.updatePecaEstoque(1L, dto);
+            pecaEstoqueService.atualizarPecaEstoque(1L, dto);
 
             assertThat(pecaExistente.getQuantidade()).isEqualTo(30);
         }
@@ -188,7 +188,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.save(pecaExistente)).willReturn(pecaExistente);
             given(modelMapper.map(pecaExistente, PecaEstoqueDTO.class)).willReturn(dto);
 
-            pecaEstoqueService.updatePecaEstoque(1L, dto);
+            pecaEstoqueService.atualizarPecaEstoque(1L, dto);
 
             assertThat(pecaExistente.getQuantidade()).isEqualTo(15);
         }
@@ -204,7 +204,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.save(pecaExistente)).willReturn(pecaExistente);
             given(modelMapper.map(pecaExistente, PecaEstoqueDTO.class)).willReturn(dto);
 
-            pecaEstoqueService.updatePecaEstoque(1L, dto);
+            pecaEstoqueService.atualizarPecaEstoque(1L, dto);
 
             assertThat(pecaExistente.getNome()).isEqualTo("Rolamento 6204");
         }
@@ -223,7 +223,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.findAll(any(Sort.class))).willReturn(pecas);
             given(modelMapper.<List<PecaEstoqueDTO>>map(eq(pecas), any(Type.class))).willReturn(pecasDTO);
 
-            Response response = pecaEstoqueService.getPecasEstoque();
+            Response response = pecaEstoqueService.listarPecasEstoque();
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getPecasEstoque()).hasSize(1);
@@ -235,7 +235,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.findAll(any(Sort.class))).willReturn(List.of());
             given(modelMapper.<List<PecaEstoqueDTO>>map(any(), any(Type.class))).willReturn(List.of());
 
-            Response response = pecaEstoqueService.getPecasEstoque();
+            Response response = pecaEstoqueService.listarPecasEstoque();
 
             assertThat(response.getPecasEstoque()).isEmpty();
         }
@@ -254,7 +254,7 @@ class PecaEstoqueServiceImpTest {
             given(pecaEstoqueRepository.findById(1L)).willReturn(Optional.of(peca));
             given(modelMapper.map(peca, PecaEstoqueDTO.class)).willReturn(dto);
 
-            Response response = pecaEstoqueService.getPecaEstoqueById(1L);
+            Response response = pecaEstoqueService.buscarPecaEstoquePorId(1L);
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getPecaEstoque()).isEqualTo(dto);
@@ -265,7 +265,7 @@ class PecaEstoqueServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrada() {
             given(pecaEstoqueRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> pecaEstoqueService.getPecaEstoqueById(99L))
+            assertThatThrownBy(() -> pecaEstoqueService.buscarPecaEstoquePorId(99L))
                     .isInstanceOf(NotFoundException.class);
         }
     }
@@ -281,7 +281,7 @@ class PecaEstoqueServiceImpTest {
 
             given(pecaEstoqueRepository.findById(1L)).willReturn(Optional.of(peca));
 
-            Response response = pecaEstoqueService.deletePecaEstoque(1L);
+            Response response = pecaEstoqueService.removerPecaEstoque(1L);
 
             assertThat(response.getStatus()).isEqualTo(204);
             then(pecaEstoqueRepository).should().deleteById(1L);
@@ -292,7 +292,7 @@ class PecaEstoqueServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrada() {
             given(pecaEstoqueRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> pecaEstoqueService.deletePecaEstoque(99L))
+            assertThatThrownBy(() -> pecaEstoqueService.removerPecaEstoque(99L))
                     .isInstanceOf(NotFoundException.class);
 
             then(pecaEstoqueRepository).should(never()).deleteById(any());

@@ -180,6 +180,4 @@ public class Funcionario {
     private List<Perfil> perfis;
 
     private String emailCorporativo;
-
-    private String password;
 }

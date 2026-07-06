@@ -19,28 +19,28 @@ public class PecaEstoqueController {
 
     private final PecaEstoqueService pecaEstoqueService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Response> addPecaEstoque(@RequestBody @Valid PecaEstoqueDTO pecaEstoqueDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(pecaEstoqueService.addPecaEstoque(pecaEstoqueDTO));
+    @PostMapping("/adicionar")
+    public ResponseEntity<Response> adicionarPecaEstoque(@RequestBody @Valid PecaEstoqueDTO pecaEstoqueDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(pecaEstoqueService.adicionarPecaEstoque(pecaEstoqueDTO));
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Response> updatePecaEstoque(@PathVariable @Min(1) Long id, @RequestBody PecaEstoqueDTO pecaEstoqueDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(pecaEstoqueService.updatePecaEstoque(id, pecaEstoqueDTO));
+    @PutMapping("/atualizar/{id}")
+    public ResponseEntity<Response> atualizarPecaEstoque(@PathVariable @Min(1) Long id, @RequestBody PecaEstoqueDTO pecaEstoqueDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(pecaEstoqueService.atualizarPecaEstoque(id, pecaEstoqueDTO));
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<Response> getPecasEstoque() {
-        return ResponseEntity.status(HttpStatus.OK).body(pecaEstoqueService.getPecasEstoque());
+    @GetMapping("/todos")
+    public ResponseEntity<Response> listarPecasEstoque() {
+        return ResponseEntity.status(HttpStatus.OK).body(pecaEstoqueService.listarPecasEstoque());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getPecaEstoqueById(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(pecaEstoqueService.getPecaEstoqueById(id));
+    public ResponseEntity<Response> buscarPecaEstoquePorId(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(pecaEstoqueService.buscarPecaEstoquePorId(id));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Response> deletePecaEstoque(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(pecaEstoqueService.deletePecaEstoque(id));
+    @DeleteMapping("/remover/{id}")
+    public ResponseEntity<Response> removerPecaEstoque(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(pecaEstoqueService.removerPecaEstoque(id));
     }
 }

@@ -21,19 +21,19 @@ public class ChamadoController {
 
     private final ChamadoService chamadoService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Response> addChamado(@RequestBody @Valid ChamadoDTO chamadoDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(chamadoService.addChamado(chamadoDTO));
+    @PostMapping("/adicionar")
+    public ResponseEntity<Response> adicionarChamado(@RequestBody @Valid ChamadoDTO chamadoDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(chamadoService.adicionarChamado(chamadoDTO));
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<Response> getChamados(@RequestParam(required = false) StatusChamado status) {
-        return ResponseEntity.status(HttpStatus.OK).body(chamadoService.getChamados(status));
+    @GetMapping("/todos")
+    public ResponseEntity<Response> listarChamados(@RequestParam(required = false) StatusChamado status) {
+        return ResponseEntity.status(HttpStatus.OK).body(chamadoService.listarChamados(status));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getChamadoById(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(chamadoService.getChamadoById(id));
+    public ResponseEntity<Response> buscarChamadoPorId(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(chamadoService.buscarChamadoPorId(id));
     }
 
     @PutMapping("/atribuir/{id}")
@@ -47,8 +47,8 @@ public class ChamadoController {
         return ResponseEntity.status(HttpStatus.OK).body(chamadoService.concluirChamado(id));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Response> deleteChamado(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(chamadoService.deleteChamado(id));
+    @DeleteMapping("/remover/{id}")
+    public ResponseEntity<Response> removerChamado(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(chamadoService.removerChamado(id));
     }
 }

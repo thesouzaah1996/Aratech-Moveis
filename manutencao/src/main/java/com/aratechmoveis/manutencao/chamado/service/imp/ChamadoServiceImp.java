@@ -29,7 +29,7 @@ public class ChamadoServiceImp implements ChamadoService {
 
     @Override
     @Transactional
-    public Response addChamado(ChamadoDTO chamadoDTO) {
+    public Response adicionarChamado(ChamadoDTO chamadoDTO) {
 
         Chamado chamadoParaSalvar = modelMapper.map(chamadoDTO, Chamado.class);
         chamadoParaSalvar.setId(null);
@@ -49,7 +49,7 @@ public class ChamadoServiceImp implements ChamadoService {
     }
 
     @Override
-    public Response getChamados(StatusChamado status) {
+    public Response listarChamados(StatusChamado status) {
         List<Chamado> chamados = status != null
                 ? chamadoRepository.findByStatus(status, Sort.by(Sort.Direction.DESC, "dataAbertura"))
                 : chamadoRepository.findAll(Sort.by(Sort.Direction.DESC, "dataAbertura"));
@@ -64,7 +64,7 @@ public class ChamadoServiceImp implements ChamadoService {
     }
 
     @Override
-    public Response getChamadoById(Long id) {
+    public Response buscarChamadoPorId(Long id) {
         Chamado chamado = chamadoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Chamado não encontrado, confira se o id está correto"));
 
@@ -120,7 +120,7 @@ public class ChamadoServiceImp implements ChamadoService {
 
     @Override
     @Transactional
-    public Response deleteChamado(Long id) {
+    public Response removerChamado(Long id) {
         chamadoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Chamado não encontrado, para deletar, confira se o id está correto"));
 

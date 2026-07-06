@@ -33,7 +33,7 @@ public class ProdutoServiceImp implements ProdutoService {
 
     @Override
     @Transactional
-    public Response addProduto(ProdutoDTO produtoDTO) {
+    public Response adicionarProduto(ProdutoDTO produtoDTO) {
 
         if (produtoRepository.existsBySku(produtoDTO.getSku())) {
             throw new RecursoJaExistenteException(
@@ -72,7 +72,7 @@ public class ProdutoServiceImp implements ProdutoService {
     }
 
     @Override
-    public Response updateProduto(Long id, ProdutoDTO produtoDTO) {
+    public Response atualizarProduto(Long id, ProdutoDTO produtoDTO) {
         Produto produtoExistente = produtoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
 
@@ -122,7 +122,7 @@ public class ProdutoServiceImp implements ProdutoService {
 
     @Override
     @Transactional
-    public Response getProdutos() {
+    public Response listarProdutos() {
         List<Produto> produtos = produtoRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         List<ProdutoDTO> produtoDTOS = modelMapper.map(produtos, new TypeToken<List<ProdutoDTO>>() {
         }.getType());
@@ -136,7 +136,7 @@ public class ProdutoServiceImp implements ProdutoService {
 
     @Override
     @Transactional
-    public Response getProdutoById(Long id) {
+    public Response buscarProdutoPorId(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado, confira se o id está correto"));
 
@@ -150,7 +150,7 @@ public class ProdutoServiceImp implements ProdutoService {
     }
 
     @Override
-    public Response deleteProduto(Long id) {
+    public Response removerProduto(Long id) {
         produtoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado, para deletar, confira se o id está correto"));
 

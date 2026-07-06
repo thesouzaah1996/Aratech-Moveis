@@ -4,9 +4,9 @@ import com.aratechmoveis.manutencao.Response;
 import com.aratechmoveis.manutencao.pecaestoque.dto.PecaEstoqueDTO;
 
 public interface PecaEstoqueService {
-    Response addPecaEstoque(PecaEstoqueDTO pecaEstoqueDTO);
-    Response updatePecaEstoque(Long id, PecaEstoqueDTO pecaEstoqueDTO);
-    Response getPecasEstoque();
-    Response getPecaEstoqueById(Long id);
-    Response deletePecaEstoque(Long id);
+    Response adicionarPecaEstoque(PecaEstoqueDTO pecaEstoqueDTO);
+    Response atualizarPecaEstoque(Long id, PecaEstoqueDTO pecaEstoqueDTO);
+    Response listarPecasEstoque();
+    Response buscarPecaEstoquePorId(Long id);
+    Response removerPecaEstoque(Long id);
 }

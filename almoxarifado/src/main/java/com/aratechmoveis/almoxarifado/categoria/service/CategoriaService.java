@@ -5,8 +5,8 @@ import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
 
 public interface CategoriaService {
     Response criarCategoria(CategoriaDTO categoriaDTO);
-    Response getCategorias();
-    Response updateCategoria(Long id, CategoriaDTO categoriaDTO);
-    Response deleteCategoria(Long id);
-    Response lookupCategoria();
+    Response listarCategorias();
+    Response atualizarCategoria(Long id, CategoriaDTO categoriaDTO);
+    Response removerCategoria(Long id);
+    Response buscarOpcoesCategoria();
 }

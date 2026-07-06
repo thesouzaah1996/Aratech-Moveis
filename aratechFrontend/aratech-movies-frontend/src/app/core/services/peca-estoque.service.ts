@@ -19,23 +19,23 @@ export class PecaEstoqueService {
 
   getAll(): Observable<PecaEstoque[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/all`)
+      .get<ApiResponse>(`${this.api}/todos`)
       .pipe(map(res => res.pecasEstoque ?? []));
   }
 
   add(form: PecaEstoqueForm): Observable<PecaEstoque> {
     return this.http
-      .post<ApiResponse>(`${this.api}/add`, form)
+      .post<ApiResponse>(`${this.api}/adicionar`, form)
       .pipe(map(res => res.pecaEstoque!));
   }
 
   update(id: number, form: PecaEstoqueForm): Observable<PecaEstoque> {
     return this.http
-      .put<ApiResponse>(`${this.api}/update/${id}`, form)
+      .put<ApiResponse>(`${this.api}/atualizar/${id}`, form)
       .pipe(map(res => res.pecaEstoque!));
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/delete/${id}`);
+    return this.http.delete<void>(`${this.api}/remover/${id}`);
   }
 }

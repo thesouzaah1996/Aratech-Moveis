@@ -19,31 +19,31 @@ export class FuncionarioService {
 
   getAll(): Observable<Funcionario[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/all`)
+      .get<ApiResponse>(`${this.api}/todos`)
       .pipe(map(res => res.funcionarios ?? []));
   }
 
   search(nome: string): Observable<Funcionario[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/search`, { params: { nome } })
+      .get<ApiResponse>(`${this.api}/buscar`, { params: { nome } })
       .pipe(map(res => res.funcionarios ?? []));
   }
 
   add(form: FuncionarioForm): Observable<Funcionario> {
     return this.http
-      .post<ApiResponse>(`${this.api}/add`, form)
+      .post<ApiResponse>(`${this.api}/adicionar`, form)
       .pipe(map(res => res.funcionario!));
   }
 
   enable(id: number): Observable<Funcionario> {
     return this.http
-      .patch<ApiResponse>(`${this.api}/enable/${id}`, {})
+      .patch<ApiResponse>(`${this.api}/ativar/${id}`, {})
       .pipe(map(res => res.funcionario!));
   }
 
   disable(id: number): Observable<Funcionario> {
     return this.http
-      .patch<ApiResponse>(`${this.api}/disable/${id}`, {})
+      .patch<ApiResponse>(`${this.api}/desativar/${id}`, {})
       .pipe(map(res => res.funcionario!));
   }
 

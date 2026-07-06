@@ -19,23 +19,23 @@ public class SolicitacaoPecaController {
 
     private final SolicitacaoPecaService solicitacaoPecaService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Response> addSolicitacaoPeca(@RequestBody @Valid SolicitacaoPecaDTO solicitacaoPecaDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(solicitacaoPecaService.addSolicitacaoPeca(solicitacaoPecaDTO));
+    @PostMapping("/adicionar")
+    public ResponseEntity<Response> adicionarSolicitacaoPeca(@RequestBody @Valid SolicitacaoPecaDTO solicitacaoPecaDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(solicitacaoPecaService.adicionarSolicitacaoPeca(solicitacaoPecaDTO));
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<Response> getSolicitacoesPeca() {
-        return ResponseEntity.status(HttpStatus.OK).body(solicitacaoPecaService.getSolicitacoesPeca());
+    @GetMapping("/todos")
+    public ResponseEntity<Response> listarSolicitacoesPeca() {
+        return ResponseEntity.status(HttpStatus.OK).body(solicitacaoPecaService.listarSolicitacoesPeca());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Response> getSolicitacaoPecaById(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(solicitacaoPecaService.getSolicitacaoPecaById(id));
+    public ResponseEntity<Response> buscarSolicitacaoPecaPorId(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(solicitacaoPecaService.buscarSolicitacaoPecaPorId(id));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Response> deleteSolicitacaoPeca(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(solicitacaoPecaService.deleteSolicitacaoPeca(id));
+    @DeleteMapping("/remover/{id}")
+    public ResponseEntity<Response> removerSolicitacaoPeca(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(solicitacaoPecaService.removerSolicitacaoPeca(id));
     }
 }

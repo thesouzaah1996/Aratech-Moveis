@@ -2,14 +2,17 @@ package com.aratechmoveis.recursoshumanos.exception;
 
 import com.aratechmoveis.recursoshumanos.response.Response;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -24,6 +27,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Response> handleConflict(RecursoJaExistenteException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 Response.builder().status(409).mensagem(ex.getMessage()).build()
+        );
+    }
+
+    @ExceptionHandler(FuncionarioNaoAtivoException.class)
+    public ResponseEntity<Response> handleFuncionarioNaoAtivo(FuncionarioNaoAtivoException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                Response.builder().status(409).mensagem(ex.getMessage()).build()
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<Response> handleMissingParam(MissingServletRequestParameterException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                Response.builder().status(400).mensagem("Parâmetro obrigatório ausente: " + ex.getParameterName()).build()
         );
     }
 
@@ -56,6 +73,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response> handleGeneric(Exception ex) {
+        log.error("Erro não tratado", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 Response.builder().status(500).mensagem("Erro interno no servidor").build()
         );

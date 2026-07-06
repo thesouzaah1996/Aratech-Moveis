@@ -28,7 +28,7 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
 
     @Override
     @Transactional
-    public Response addRegistroChegada(RegistroChegadaDTO registroChegadaDTO) {
+    public Response adicionarRegistroChegada(RegistroChegadaDTO registroChegadaDTO) {
 
         if (registroChegadaRepository.existsByNotaFiscal(registroChegadaDTO.getNotaFiscal())) {
             throw new RecursoJaExistenteException(
@@ -54,7 +54,7 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
     }
 
     @Override
-    public Response getFila() {
+    public Response buscarFila() {
         List<RegistroChegada> fila = registroChegadaRepository.findByStatusNot(
                 StatusCaminhao.FINALIZADO, Sort.by(Sort.Direction.ASC, "dataEntrada"));
 
@@ -68,7 +68,7 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
     }
 
     @Override
-    public Response getHistorico() {
+    public Response buscarHistorico() {
         List<RegistroChegada> historico = registroChegadaRepository.findByStatus(
                 StatusCaminhao.FINALIZADO, Sort.by(Sort.Direction.DESC, "dataEntrada"));
 

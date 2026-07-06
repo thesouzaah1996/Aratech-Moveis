@@ -156,6 +156,21 @@ services:
     networks:
       - aratech-network
 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: always
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: aratech
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    depends_on:
+      - kafka
+    networks:
+      - aratech-network
+
   almoxarifado:
     build: ./almoxarifado
     container_name: almoxarifado
@@ -172,6 +187,12 @@ services:
         condition: service_healthy
     networks:
       - aratech-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
 
   login:
     build: ./login
@@ -184,11 +205,18 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5432/login-prod
       LOGIN_DB_USER_PROD: postgres
       LOGIN_DB_PASSWORD_PROD: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     depends_on:
       login-db:
         condition: service_healthy
     networks:
       - aratech-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
 
   portaria:
     build: ./portaria
@@ -207,6 +235,12 @@ services:
         condition: service_healthy
     networks:
       - aratech-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8082/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
 
   recursoshumanos:
     build: ./recursoshumanos
@@ -214,17 +248,25 @@ services:
     restart: always
     ports:
       - "8083:8083"
+      - "5005:5005"
     environment:
       SPRING_PROFILES_ACTIVE: producao
       SPRING_DATASOURCE_URL: jdbc:postgresql://recursoshumanos-db:5432/recursoshumanos-prod
       RH_DB_USER_PROD: postgres
       RH_DB_PASSWORD_PROD: postgres
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     depends_on:
       recursoshumanos-db:
         condition: service_healthy
     networks:
       - aratech-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8083/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
 
   administracao:
     build: ./administracao
@@ -243,6 +285,12 @@ services:
         condition: service_healthy
     networks:
       - aratech-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8084/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
 
   manutencao:
     build: ./manutencao
@@ -260,6 +308,12 @@ services:
         condition: service_healthy
     networks:
       - aratech-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8085/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
 
   aratech-frontend:
     build: ./aratechFrontend/aratech-movies-frontend
@@ -267,5 +321,18 @@ services:
     restart: always
     ports:
       - "80:80"
+    depends_on:
+      almoxarifado:
+        condition: service_healthy
+      login:
+        condition: service_healthy
+      portaria:
+        condition: service_healthy
+      recursoshumanos:
+        condition: service_healthy
+      administracao:
+        condition: service_healthy
+      manutencao:
+        condition: service_healthy
     networks:
       - aratech-network

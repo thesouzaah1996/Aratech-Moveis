@@ -83,7 +83,7 @@ class SolicitacaoPecaServiceImpTest {
             given(solicitacaoPecaRepository.save(solicitacao)).willReturn(solicitacao);
             given(modelMapper.map(solicitacao, SolicitacaoPecaDTO.class)).willReturn(dto);
 
-            Response response = solicitacaoPecaService.addSolicitacaoPeca(dto);
+            Response response = solicitacaoPecaService.adicionarSolicitacaoPeca(dto);
 
             assertThat(response.getStatus()).isEqualTo(201);
             assertThat(response.getMessage()).isEqualTo("Solicitação de peça criada com sucesso");
@@ -102,7 +102,7 @@ class SolicitacaoPecaServiceImpTest {
             given(solicitacaoPecaRepository.save(solicitacao)).willReturn(solicitacao);
             given(modelMapper.map(solicitacao, SolicitacaoPecaDTO.class)).willReturn(dto);
 
-            solicitacaoPecaService.addSolicitacaoPeca(dto);
+            solicitacaoPecaService.adicionarSolicitacaoPeca(dto);
 
             assertThat(solicitacao.getId()).isNull();
         }
@@ -121,7 +121,7 @@ class SolicitacaoPecaServiceImpTest {
             given(solicitacaoPecaRepository.findAll(any(Sort.class))).willReturn(solicitacoes);
             given(modelMapper.<List<SolicitacaoPecaDTO>>map(eq(solicitacoes), any(Type.class))).willReturn(solicitacoesDTO);
 
-            Response response = solicitacaoPecaService.getSolicitacoesPeca();
+            Response response = solicitacaoPecaService.listarSolicitacoesPeca();
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getSolicitacoesPeca()).hasSize(1);
@@ -133,7 +133,7 @@ class SolicitacaoPecaServiceImpTest {
             given(solicitacaoPecaRepository.findAll(any(Sort.class))).willReturn(List.of());
             given(modelMapper.<List<SolicitacaoPecaDTO>>map(any(), any(Type.class))).willReturn(List.of());
 
-            Response response = solicitacaoPecaService.getSolicitacoesPeca();
+            Response response = solicitacaoPecaService.listarSolicitacoesPeca();
 
             assertThat(response.getSolicitacoesPeca()).isEmpty();
         }
@@ -152,7 +152,7 @@ class SolicitacaoPecaServiceImpTest {
             given(solicitacaoPecaRepository.findById(1L)).willReturn(Optional.of(solicitacao));
             given(modelMapper.map(solicitacao, SolicitacaoPecaDTO.class)).willReturn(dto);
 
-            Response response = solicitacaoPecaService.getSolicitacaoPecaById(1L);
+            Response response = solicitacaoPecaService.buscarSolicitacaoPecaPorId(1L);
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getSolicitacaoPeca()).isEqualTo(dto);
@@ -163,7 +163,7 @@ class SolicitacaoPecaServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrada() {
             given(solicitacaoPecaRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> solicitacaoPecaService.getSolicitacaoPecaById(99L))
+            assertThatThrownBy(() -> solicitacaoPecaService.buscarSolicitacaoPecaPorId(99L))
                     .isInstanceOf(NotFoundException.class);
         }
     }
@@ -179,7 +179,7 @@ class SolicitacaoPecaServiceImpTest {
 
             given(solicitacaoPecaRepository.findById(1L)).willReturn(Optional.of(solicitacao));
 
-            Response response = solicitacaoPecaService.deleteSolicitacaoPeca(1L);
+            Response response = solicitacaoPecaService.removerSolicitacaoPeca(1L);
 
             assertThat(response.getStatus()).isEqualTo(204);
             then(solicitacaoPecaRepository).should().deleteById(1L);
@@ -190,7 +190,7 @@ class SolicitacaoPecaServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrada() {
             given(solicitacaoPecaRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> solicitacaoPecaService.deleteSolicitacaoPeca(99L))
+            assertThatThrownBy(() -> solicitacaoPecaService.removerSolicitacaoPeca(99L))
                     .isInstanceOf(NotFoundException.class);
 
             then(solicitacaoPecaRepository).should(never()).deleteById(any());

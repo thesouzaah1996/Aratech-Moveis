@@ -1,14 +1,17 @@
 package com.aratechmoveis.recursoshumanos.funcionarios.service.imp;
 
+import com.aratechmoveis.recursoshumanos.exception.FuncionarioNaoAtivoException;
 import com.aratechmoveis.recursoshumanos.exception.NotFoundException;
 import com.aratechmoveis.recursoshumanos.exception.RecursoJaExistenteException;
 import com.aratechmoveis.recursoshumanos.funcionarios.dto.AtribuirPerfisDTO;
 import com.aratechmoveis.recursoshumanos.funcionarios.dto.FuncionarioDTO;
+import com.aratechmoveis.recursoshumanos.funcionarios.dto.LoginFuncionarioDTO;
 import com.aratechmoveis.recursoshumanos.funcionarios.entity.Funcionario;
 import com.aratechmoveis.recursoshumanos.funcionarios.repository.FuncionarioRepository;
 import com.aratechmoveis.recursoshumanos.funcionarios.service.FuncionarioService;
 import com.aratechmoveis.recursoshumanos.perfil.entity.Perfil;
 import com.aratechmoveis.recursoshumanos.perfil.repository.PerfilRepository;
+import com.aratechmoveis.recursoshumanos.funcionarios.publisher.FuncionarioPublisher;
 import com.aratechmoveis.recursoshumanos.response.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +29,11 @@ public class FuncionarioServiceImp implements FuncionarioService {
     private final FuncionarioRepository funcionarioRepository;
     private final PerfilRepository perfilRepository;
     private final ModelMapper modelmapper;
+    private final FuncionarioPublisher funcionarioPublisher;
 
     @Override
     @Transactional
-    public Response addFuncionario(FuncionarioDTO funcionario) {
+    public Response adicionarFuncionario(FuncionarioDTO funcionario) {
 
         if (funcionarioRepository.existsByCpf(funcionario.getCpf())) {
             throw new RecursoJaExistenteException("Já existe um funcionário cadastrado com esse CPF");
@@ -52,7 +56,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
     }
 
     @Override
-    public Response getFuncionarios() {
+    public Response listarFuncionarios() {
         List<FuncionarioDTO> funcionarios = funcionarioRepository.findAll().stream()
                 .map(funcionario -> modelmapper.map(funcionario, FuncionarioDTO.class))
                 .toList();
@@ -65,7 +69,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
     }
 
     @Override
-    public Response getFuncionariosPorNome(String nome) {
+    public Response buscarFuncionariosPorNome(String nome) {
 
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("O nome para busca não pode estar vazio.");
@@ -84,7 +88,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
 
     @Override
     @Transactional
-    public Response updateFuncionario(Long id, FuncionarioDTO funcionarioDTO) {
+    public Response atualizarFuncionario(Long id, FuncionarioDTO funcionarioDTO) {
 
         Funcionario funcionarioExistente = funcionarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Funcionário não encontrado, para atualizar o funcionário, por favor verifique o id"));
@@ -141,7 +145,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
 
     @Override
     @Transactional
-    public Response enableFuncionario(Long id) {
+    public Response ativarFuncionario(Long id) {
         Funcionario funcionarioInativo = funcionarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Funcionário não encontrado, para ativar o funcionario, por favor verifique o id"));
 
@@ -162,7 +166,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
 
     @Override
     @Transactional
-    public Response disableFuncionario(Long id) {
+    public Response desativarFuncionario(Long id) {
         Funcionario funcionarioAtivo = funcionarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Funcionário não encontrado, para desativar o funcionario, por favor verifique o id"));
 
@@ -187,6 +191,10 @@ public class FuncionarioServiceImp implements FuncionarioService {
         Funcionario funcionario = funcionarioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Funcionário não encontrado, verifique o id informado"));
 
+        if (!funcionario.isAtivo()) {
+            throw new FuncionarioNaoAtivoException("Para atribuir um perfil de usuário ao funcionário, ele deve estar obrigatoriamente ativo.");
+        }
+
         List<Perfil> perfis = perfilRepository.findAllById(atribuirPerfisDTO.getPerfisIds());
 
         if (perfis.size() != atribuirPerfisDTO.getPerfisIds().size()) {
@@ -201,6 +209,40 @@ public class FuncionarioServiceImp implements FuncionarioService {
                 .status(200)
                 .mensagem("Permissões atualizadas com sucesso")
                 .funcionario(modelmapper.map(funcionario, FuncionarioDTO.class))
+                .build();
+    }
+
+    @Override
+    public Response atribuirEmailCorporativo(LoginFuncionarioDTO loginFuncionarioDTO) {
+
+        Funcionario funcionario = funcionarioRepository.findById(loginFuncionarioDTO.getId())
+                .orElseThrow(() -> new NotFoundException("Funcionário não encontrado, verifique o id informado."));
+
+        if (!funcionario.isAtivo()) {
+            throw new FuncionarioNaoAtivoException("Para atribuir um perfil de usuário ao funcionário, ele deve estar obrigatoriamente ativo.");
+        }
+
+        if (funcionarioRepository.existsByEmailCorporativoAndIdNot(loginFuncionarioDTO.getEmailCorporativo(), loginFuncionarioDTO.getId())) {
+            throw new RecursoJaExistenteException("Esse email corporativo já existe. Por favor, para prosseguir, escolha outro email. ");
+        }
+
+        funcionario.setEmailCorporativo(loginFuncionarioDTO.getEmailCorporativo());
+        funcionarioRepository.save(funcionario);
+
+        log.info("Publicando login funcionario.");
+
+        funcionarioPublisher.publicarLoginFuncionario(
+                funcionario.getId(),
+                funcionario.getNome(),
+                funcionario.getEmailCorporativo(),
+                funcionario.getPerfis(),
+                funcionario.isAtivo());
+
+        log.info("Login Funcionario publicado.");
+
+        return Response.builder()
+                .status(200)
+                .mensagem("Email corporativo atribuido com sucesso")
                 .build();
     }
 }

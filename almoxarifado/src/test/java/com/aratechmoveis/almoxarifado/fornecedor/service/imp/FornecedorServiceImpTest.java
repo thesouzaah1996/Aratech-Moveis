@@ -56,7 +56,7 @@ class FornecedorServiceImpTest {
     }
 
     @Nested
-    @DisplayName("addFornecedor")
+    @DisplayName("adicionarFornecedor")
     class AddFornecedor {
 
         @Test
@@ -70,7 +70,7 @@ class FornecedorServiceImpTest {
             given(fornecedorRepository.save(fornecedor)).willReturn(fornecedor);
             given(modelMapper.map(fornecedor, FornecedorDTO.class)).willReturn(dto);
 
-            Response response = fornecedorService.addFornecedor(dto);
+            Response response = fornecedorService.adicionarFornecedor(dto);
 
             assertThat(response.getStatus()).isEqualTo(201);
             assertThat(response.getMessage()).isEqualTo("Fornecedor adicionado com sucesso");
@@ -89,7 +89,7 @@ class FornecedorServiceImpTest {
             given(fornecedorRepository.save(fornecedor)).willReturn(fornecedor);
             given(modelMapper.map(fornecedor, FornecedorDTO.class)).willReturn(dto);
 
-            fornecedorService.addFornecedor(dto);
+            fornecedorService.adicionarFornecedor(dto);
 
             assertThat(dto.getEmail()).isEqualTo("teste@email.com");
         }
@@ -106,7 +106,7 @@ class FornecedorServiceImpTest {
             given(fornecedorRepository.save(any())).willReturn(fornecedor);
             given(modelMapper.map(fornecedor, FornecedorDTO.class)).willReturn(dto);
 
-            fornecedorService.addFornecedor(dto);
+            fornecedorService.adicionarFornecedor(dto);
 
             assertThat(fornecedor.getAtivo()).isTrue();
         }
@@ -118,7 +118,7 @@ class FornecedorServiceImpTest {
 
             given(fornecedorRepository.existsByEmail(dto.getEmail())).willReturn(true);
 
-            assertThatThrownBy(() -> fornecedorService.addFornecedor(dto))
+            assertThatThrownBy(() -> fornecedorService.adicionarFornecedor(dto))
                     .isInstanceOf(RecursoJaExistenteException.class);
 
             then(fornecedorRepository).should(never()).save(any());
@@ -126,7 +126,7 @@ class FornecedorServiceImpTest {
     }
 
     @Nested
-    @DisplayName("updateFornecedor")
+    @DisplayName("atualizarFornecedor")
     class UpdateFornecedor {
 
         @Test
@@ -140,7 +140,7 @@ class FornecedorServiceImpTest {
             given(fornecedorRepository.save(fornecedorExistente)).willReturn(fornecedorExistente);
             given(modelMapper.map(fornecedorExistente, FornecedorDTO.class)).willReturn(dto);
 
-            Response response = fornecedorService.updateFornecedor(1L, dto);
+            Response response = fornecedorService.atualizarFornecedor(1L, dto);
 
             assertThat(response.getStatus()).isEqualTo(200);
             then(fornecedorRepository).should().save(fornecedorExistente);
@@ -151,7 +151,7 @@ class FornecedorServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrado() {
             given(fornecedorRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> fornecedorService.updateFornecedor(99L, new FornecedorDTO()))
+            assertThatThrownBy(() -> fornecedorService.atualizarFornecedor(99L, new FornecedorDTO()))
                     .isInstanceOf(NotFoundException.class);
         }
 
@@ -165,7 +165,7 @@ class FornecedorServiceImpTest {
             given(fornecedorRepository.findById(1L)).willReturn(Optional.of(fornecedorExistente));
             given(fornecedorRepository.existsByEmail("outro@email.com")).willReturn(true);
 
-            assertThatThrownBy(() -> fornecedorService.updateFornecedor(1L, dto))
+            assertThatThrownBy(() -> fornecedorService.atualizarFornecedor(1L, dto))
                     .isInstanceOf(RecursoJaExistenteException.class);
 
             then(fornecedorRepository).should(never()).save(any());
@@ -182,13 +182,13 @@ class FornecedorServiceImpTest {
             given(fornecedorRepository.save(fornecedorExistente)).willReturn(fornecedorExistente);
             given(modelMapper.map(fornecedorExistente, FornecedorDTO.class)).willReturn(dto);
 
-            assertThatCode(() -> fornecedorService.updateFornecedor(1L, dto))
+            assertThatCode(() -> fornecedorService.atualizarFornecedor(1L, dto))
                     .doesNotThrowAnyException();
         }
     }
 
     @Nested
-    @DisplayName("getFornecedores")
+    @DisplayName("listarFornecedores")
     class GetFornecedores {
 
         @Test
@@ -200,7 +200,7 @@ class FornecedorServiceImpTest {
             given(fornecedorRepository.findAll(any(Sort.class))).willReturn(fornecedores);
             given(modelMapper.map(eq(fornecedores), any(Type.class))).willReturn(fornecedoresDTO);
 
-            Response response = fornecedorService.getFornecedores();
+            Response response = fornecedorService.listarFornecedores();
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getFornecedores()).hasSize(1);
@@ -212,14 +212,14 @@ class FornecedorServiceImpTest {
             given(fornecedorRepository.findAll(any(Sort.class))).willReturn(List.of());
             given(modelMapper.map(any(), any(Type.class))).willReturn(List.of());
 
-            Response response = fornecedorService.getFornecedores();
+            Response response = fornecedorService.listarFornecedores();
 
             assertThat(response.getFornecedores()).isEmpty();
         }
     }
 
     @Nested
-    @DisplayName("disableFornecedor")
+    @DisplayName("desativarFornecedor")
     class DisableFornecedor {
 
         @Test
@@ -229,7 +229,7 @@ class FornecedorServiceImpTest {
 
             given(fornecedorRepository.findById(1L)).willReturn(Optional.of(fornecedor));
 
-            Response response = fornecedorService.disableFornecedor(1L);
+            Response response = fornecedorService.desativarFornecedor(1L);
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(fornecedor.getAtivo()).isFalse();
@@ -241,13 +241,13 @@ class FornecedorServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrado() {
             given(fornecedorRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> fornecedorService.disableFornecedor(99L))
+            assertThatThrownBy(() -> fornecedorService.desativarFornecedor(99L))
                     .isInstanceOf(NotFoundException.class);
         }
     }
 
     @Nested
-    @DisplayName("enableFornecedor")
+    @DisplayName("ativarFornecedor")
     class EnableFornecedor {
 
         @Test
@@ -258,7 +258,7 @@ class FornecedorServiceImpTest {
 
             given(fornecedorRepository.findById(1L)).willReturn(Optional.of(fornecedor));
 
-            Response response = fornecedorService.enableFornecedor(1L);
+            Response response = fornecedorService.ativarFornecedor(1L);
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(fornecedor.getAtivo()).isTrue();
@@ -270,7 +270,7 @@ class FornecedorServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrado() {
             given(fornecedorRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> fornecedorService.enableFornecedor(99L))
+            assertThatThrownBy(() -> fornecedorService.ativarFornecedor(99L))
                     .isInstanceOf(NotFoundException.class);
         }
     }

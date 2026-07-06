@@ -1,11 +1,10 @@
-package com.aratechmoveis.login;
+package com.aratechmoveis.login.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
@@ -13,7 +12,7 @@ import java.util.List;
 public class Response {
 
     private int status;
-    private String message;
+    private String mensagem;
 
     private String token;
     private String expirationTime;

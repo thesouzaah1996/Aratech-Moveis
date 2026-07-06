@@ -8,18 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
       </profile>
-      <profile name="Annotation profile for portaria" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
-        <module name="login" />
-        <module name="portaria" />
-      </profile>
-      <profile name="Annotation profile for recursoshumanos" enabled="true">
+      <profile name="Annotation profile for login" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -28,6 +17,9 @@
         </processorPath>
         <module name="recursoshumanos" />
         <module name="administracao" />
+        <module name="portaria" />
+        <module name="login" />
+        <module name="manutencao" />
         <module name="almoxarifado" />
       </profile>
     </annotationProcessing>
@@ -40,6 +32,7 @@
       <module name="administracao" options="-parameters" />
       <module name="almoxarifado" options="-parameters" />
       <module name="login" options="-parameters" />
+      <module name="manutencao" options="-parameters" />
       <module name="portaria" options="-parameters" />
       <module name="recursoshumanos" options="-parameters" />
       <module name="servicos" options="-parameters" />

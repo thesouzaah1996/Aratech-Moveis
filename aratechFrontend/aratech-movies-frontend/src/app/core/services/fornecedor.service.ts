@@ -21,35 +21,35 @@ export class FornecedorService {
 
   getAll(): Observable<Fornecedor[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/all`)
+      .get<ApiResponse>(`${this.api}/todos`)
       .pipe(map(res => res.fornecedores ?? []));
   }
 
   lookup(): Observable<LookupItem[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/lookup-fornecedor`)
+      .get<ApiResponse>(`${this.api}/opcoes-fornecedor`)
       .pipe(map(res => res.fornecedorLookup ?? []));
   }
 
   add(form: FornecedorForm): Observable<Fornecedor> {
     return this.http
-      .post<ApiResponse>(`${this.api}/add`, form)
+      .post<ApiResponse>(`${this.api}/adicionar`, form)
       .pipe(map(res => res.fornecedorDTO!));
   }
 
   update(id: number, form: FornecedorForm): Observable<Fornecedor> {
     return this.http
-      .put<ApiResponse>(`${this.api}/update/${id}`, form)
+      .put<ApiResponse>(`${this.api}/atualizar/${id}`, form)
       .pipe(map(res => res.fornecedorDTO!));
   }
 
   enable(id: number): Observable<void> {
     return this.http
-      .post<void>(`${this.api}/enable/${id}`, {});
+      .patch<void>(`${this.api}/ativar/${id}`, {});
   }
 
   disable(id: number): Observable<void> {
     return this.http
-      .post<void>(`${this.api}/disable/${id}`, {});
+      .patch<void>(`${this.api}/desativar/${id}`, {});
   }
 }

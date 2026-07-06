@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
@@ -8,6 +8,8 @@ import { PerfilService } from '../../../core/services/perfil.service';
 import { Funcionario } from '../../../core/models/funcionario.model';
 import { Perfil } from '../../../core/models/perfil.model';
 
+declare const bootstrap: any;
+
 @Component({
   selector: 'app-usuarios',
   standalone: true,
@@ -15,7 +17,7 @@ import { Perfil } from '../../../core/models/perfil.model';
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
-export class UsuariosComponent implements OnInit {
+export class UsuariosComponent implements OnInit, AfterViewInit {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
     { label: 'Recursos Humanos', route: '/recursos-humanos' },
@@ -37,6 +39,12 @@ export class UsuariosComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
 
+  @ViewChild('emailModal') emailModalEl!: ElementRef;
+  private emailModal?: any;
+  private funcionariosCache: Funcionario[] = [];
+  emailForm = { email: '' };
+  emailSubmitted = false;
+
   constructor(
     private readonly funcionarioService: FuncionarioService,
     private readonly perfilService: PerfilService
@@ -47,6 +55,10 @@ export class UsuariosComponent implements OnInit {
       next: perfis => (this.perfisDisponiveis = perfis.filter(p => p.ativo)),
       error: () => (this.errorMessage = 'Não foi possível carregar os perfis disponíveis.')
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.emailModal = new bootstrap.Modal(this.emailModalEl.nativeElement);
   }
 
   buscar(): void {
@@ -136,5 +148,40 @@ export class UsuariosComponent implements OnInit {
   private showSuccess(msg: string): void {
     this.successMessage = msg;
     setTimeout(() => (this.successMessage = ''), 3500);
+  }
+
+  abrirModalEmail(): void {
+    if (!this.usuarioEncontrado) return;
+
+    this.emailForm = { email: '' };
+    this.emailSubmitted = false;
+    this.funcionarioService.getAll().subscribe({
+      next: funcionarios => (this.funcionariosCache = funcionarios)
+    });
+    this.emailModal.show();
+  }
+
+  isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  }
+
+  get emailErro(): string {
+    const email = this.emailForm.email.trim();
+    if (!email) return 'E-mail é obrigatório.';
+    if (!this.isValidEmail(email)) return 'Formato de e-mail inválido.';
+
+    const emEmUso = this.funcionariosCache.some(f =>
+      f.id !== this.usuarioEncontrado?.id && f.email?.toLowerCase() === email.toLowerCase()
+    );
+    return emEmUso ? 'Este e-mail já existe.' : '';
+  }
+
+  salvarEmail(): void {
+    this.emailSubmitted = true;
+    if (this.emailErro || !this.usuarioEncontrado) return;
+
+    this.usuarioEncontrado.email = this.emailForm.email.trim();
+    this.emailModal.hide();
+    this.showSuccess('E-mail corporativo atualizado com sucesso!');
   }
 }
