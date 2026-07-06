@@ -53,7 +53,7 @@ class SolicitacaoPecaControllerTest {
     }
 
     @Nested
-    @DisplayName("POST /manutencao/solicitacao-peca/add")
+    @DisplayName("POST /manutencao/solicitacao-peca/adicionar")
     class AddSolicitacaoPeca {
 
         @Test
@@ -62,9 +62,9 @@ class SolicitacaoPecaControllerTest {
             SolicitacaoPecaDTO dto = umaSolicitacaoPecaDTOValida();
             Response response = Response.builder().status(201).message("Solicitação de peça criada com sucesso").solicitacaoPeca(dto).build();
 
-            given(solicitacaoPecaService.addSolicitacaoPeca(any(SolicitacaoPecaDTO.class))).willReturn(response);
+            given(solicitacaoPecaService.adicionarSolicitacaoPeca(any(SolicitacaoPecaDTO.class))).willReturn(response);
 
-            mockMvc.perform(post("/manutencao/solicitacao-peca/add")
+            mockMvc.perform(post("/manutencao/solicitacao-peca/adicionar")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isCreated())
@@ -77,7 +77,7 @@ class SolicitacaoPecaControllerTest {
             SolicitacaoPecaDTO dto = umaSolicitacaoPecaDTOValida();
             dto.setObservacoes(null);
 
-            mockMvc.perform(post("/manutencao/solicitacao-peca/add")
+            mockMvc.perform(post("/manutencao/solicitacao-peca/adicionar")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isBadRequest());
@@ -89,7 +89,7 @@ class SolicitacaoPecaControllerTest {
             SolicitacaoPecaDTO dto = umaSolicitacaoPecaDTOValida();
             dto.setQuantidade(0);
 
-            mockMvc.perform(post("/manutencao/solicitacao-peca/add")
+            mockMvc.perform(post("/manutencao/solicitacao-peca/adicionar")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isBadRequest());
@@ -97,7 +97,7 @@ class SolicitacaoPecaControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /manutencao/solicitacao-peca/all")
+    @DisplayName("GET /manutencao/solicitacao-peca/todos")
     class GetSolicitacoesPeca {
 
         @Test
@@ -106,9 +106,9 @@ class SolicitacaoPecaControllerTest {
             Response response = Response.builder().status(200).message("Solicitações de peça listadas com sucesso")
                     .solicitacoesPeca(List.of(umaSolicitacaoPecaDTOValida())).build();
 
-            given(solicitacaoPecaService.getSolicitacoesPeca()).willReturn(response);
+            given(solicitacaoPecaService.listarSolicitacoesPeca()).willReturn(response);
 
-            mockMvc.perform(get("/manutencao/solicitacao-peca/all"))
+            mockMvc.perform(get("/manutencao/solicitacao-peca/todos"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.solicitacoesPeca", org.hamcrest.Matchers.hasSize(1)));
         }
@@ -124,7 +124,7 @@ class SolicitacaoPecaControllerTest {
             Response response = Response.builder().status(200).message("Solicitação de peça listada com sucesso")
                     .solicitacaoPeca(umaSolicitacaoPecaDTOValida()).build();
 
-            given(solicitacaoPecaService.getSolicitacaoPecaById(1L)).willReturn(response);
+            given(solicitacaoPecaService.buscarSolicitacaoPecaPorId(1L)).willReturn(response);
 
             mockMvc.perform(get("/manutencao/solicitacao-peca/1"))
                     .andExpect(status().isOk())
@@ -134,7 +134,7 @@ class SolicitacaoPecaControllerTest {
         @Test
         @DisplayName("deve retornar 404 quando a solicitação não existe")
         void deveRetornar404QuandoSolicitacaoNaoExiste() throws Exception {
-            given(solicitacaoPecaService.getSolicitacaoPecaById(99L))
+            given(solicitacaoPecaService.buscarSolicitacaoPecaPorId(99L))
                     .willThrow(new NotFoundException("Solicitação de peça não encontrada, confira se o id está correto"));
 
             mockMvc.perform(get("/manutencao/solicitacao-peca/99"))
@@ -150,7 +150,7 @@ class SolicitacaoPecaControllerTest {
     }
 
     @Nested
-    @DisplayName("DELETE /manutencao/solicitacao-peca/delete/{id}")
+    @DisplayName("DELETE /manutencao/solicitacao-peca/remover/{id}")
     class DeleteSolicitacaoPeca {
 
         @Test
@@ -158,19 +158,19 @@ class SolicitacaoPecaControllerTest {
         void deveRetornar204QuandoSolicitacaoDeletadaComSucesso() throws Exception {
             Response response = Response.builder().status(204).message("Solicitação de peça deletada com sucesso").build();
 
-            given(solicitacaoPecaService.deleteSolicitacaoPeca(1L)).willReturn(response);
+            given(solicitacaoPecaService.removerSolicitacaoPeca(1L)).willReturn(response);
 
-            mockMvc.perform(delete("/manutencao/solicitacao-peca/delete/1"))
+            mockMvc.perform(delete("/manutencao/solicitacao-peca/remover/1"))
                     .andExpect(status().isNoContent());
         }
 
         @Test
         @DisplayName("deve retornar 404 quando a solicitação não existe")
         void deveRetornar404QuandoSolicitacaoNaoExiste() throws Exception {
-            given(solicitacaoPecaService.deleteSolicitacaoPeca(99L))
+            given(solicitacaoPecaService.removerSolicitacaoPeca(99L))
                     .willThrow(new NotFoundException("Solicitação de peça não encontrada, para deletar, confira se o id está correto"));
 
-            mockMvc.perform(delete("/manutencao/solicitacao-peca/delete/99"))
+            mockMvc.perform(delete("/manutencao/solicitacao-peca/remover/99"))
                     .andExpect(status().isNotFound());
         }
     }

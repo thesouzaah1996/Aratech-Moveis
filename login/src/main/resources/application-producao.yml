@@ -17,3 +17,15 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: aratech-login
+      auto-offset-reset: earliest
+
+aratech:
+  config:
+    kafka:
+      topics:
+        login-funcionario: 'aratech.login-funcionario'

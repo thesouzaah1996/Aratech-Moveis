@@ -1,8 +1,11 @@
 package com.aratechmoveis.recursoshumanos.perfil.service.imp;
 
 
+import com.aratechmoveis.recursoshumanos.exception.FuncionarioNaoAtivoException;
 import com.aratechmoveis.recursoshumanos.exception.NotFoundException;
 import com.aratechmoveis.recursoshumanos.exception.RecursoJaExistenteException;
+import com.aratechmoveis.recursoshumanos.funcionarios.entity.Funcionario;
+import com.aratechmoveis.recursoshumanos.funcionarios.repository.FuncionarioRepository;
 import com.aratechmoveis.recursoshumanos.perfil.dto.PerfilDTO;
 import com.aratechmoveis.recursoshumanos.perfil.entity.Perfil;
 import com.aratechmoveis.recursoshumanos.perfil.repository.PerfilRepository;
@@ -24,6 +27,7 @@ import java.util.List;
 public class PerfilServiceImp implements PerfilService {
 
     private final PerfilRepository perfilRepository;
+    private final FuncionarioRepository funcionarioRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -47,7 +51,7 @@ public class PerfilServiceImp implements PerfilService {
     }
 
     @Override
-    public Response getPerfis() {
+    public Response listarPerfis() {
         List<Perfil> perfis = perfilRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         List<PerfilDTO> perfisDTO = modelMapper.map(perfis, new TypeToken<List<PerfilDTO>>() {}.getType());
 
@@ -60,7 +64,7 @@ public class PerfilServiceImp implements PerfilService {
 
     @Override
     @Transactional
-    public Response updatePerfil(Long id, PerfilDTO perfilDTO) {
+    public Response atualizarPerfil(Long id, PerfilDTO perfilDTO) {
         Perfil perfilExistente = perfilRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Perfil não encontrado, para prosseguir com a atualização, confira o id informado"));
 

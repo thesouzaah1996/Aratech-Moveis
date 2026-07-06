@@ -27,7 +27,7 @@ public class PecaEstoqueServiceImp implements PecaEstoqueService {
 
     @Override
     @Transactional
-    public Response addPecaEstoque(PecaEstoqueDTO pecaEstoqueDTO) {
+    public Response adicionarPecaEstoque(PecaEstoqueDTO pecaEstoqueDTO) {
 
         if (pecaEstoqueRepository.existsByCodigoIgnoreCase(pecaEstoqueDTO.getCodigo())) {
             throw new RecursoJaExistenteException(
@@ -50,7 +50,7 @@ public class PecaEstoqueServiceImp implements PecaEstoqueService {
 
     @Override
     @Transactional
-    public Response updatePecaEstoque(Long id, PecaEstoqueDTO pecaEstoqueDTO) {
+    public Response atualizarPecaEstoque(Long id, PecaEstoqueDTO pecaEstoqueDTO) {
         PecaEstoque pecaExistente = pecaEstoqueRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Peça não encontrada"));
 
@@ -94,7 +94,7 @@ public class PecaEstoqueServiceImp implements PecaEstoqueService {
     }
 
     @Override
-    public Response getPecasEstoque() {
+    public Response listarPecasEstoque() {
         List<PecaEstoque> pecas = pecaEstoqueRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         List<PecaEstoqueDTO> pecasDTO = modelMapper.map(pecas, new TypeToken<List<PecaEstoqueDTO>>() {}.getType());
 
@@ -106,7 +106,7 @@ public class PecaEstoqueServiceImp implements PecaEstoqueService {
     }
 
     @Override
-    public Response getPecaEstoqueById(Long id) {
+    public Response buscarPecaEstoquePorId(Long id) {
         PecaEstoque peca = pecaEstoqueRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Peça não encontrada, confira se o id está correto"));
 
@@ -119,7 +119,7 @@ public class PecaEstoqueServiceImp implements PecaEstoqueService {
 
     @Override
     @Transactional
-    public Response deletePecaEstoque(Long id) {
+    public Response removerPecaEstoque(Long id) {
         pecaEstoqueRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Peça não encontrada, para deletar, confira se o id está correto"));
 

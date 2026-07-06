@@ -48,7 +48,7 @@ public class CategoriaServiceImp implements CategoriaService {
     }
 
     @Override
-    public Response getCategorias() {
+    public Response listarCategorias() {
         List<Categoria> categorias = categoriaRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         List<CategoriaDTO> categoriasDTO = modelMapper.map(categorias, new TypeToken<List<CategoriaDTO>>(){}.getType());
 
@@ -61,7 +61,7 @@ public class CategoriaServiceImp implements CategoriaService {
 
     @Override
     @Transactional
-    public Response updateCategoria(Long id, CategoriaDTO categoriaDTO) {
+    public Response atualizarCategoria(Long id, CategoriaDTO categoriaDTO) {
         Categoria categoriaExistente = categoriaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Categoria não encontrada, para prosseguir com a atualização, confira o id informado"));
 
@@ -87,7 +87,7 @@ public class CategoriaServiceImp implements CategoriaService {
 
     @Override
     @Transactional
-    public Response deleteCategoria(Long id) {
+    public Response removerCategoria(Long id) {
         Categoria categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Categoria não encontrada, para prosseguir com a exclusão, verificar o id"));
 
@@ -105,7 +105,7 @@ public class CategoriaServiceImp implements CategoriaService {
     }
 
     @Override
-    public Response lookupCategoria() {
+    public Response buscarOpcoesCategoria() {
         List<CategoriaLookupDTO> lookup = categoriaRepository.findAll(Sort.by(Sort.Direction.ASC, "nome"))
                 .stream()
                 .map(categoria -> new CategoriaLookupDTO(categoria.getId(), categoria.getNome()))

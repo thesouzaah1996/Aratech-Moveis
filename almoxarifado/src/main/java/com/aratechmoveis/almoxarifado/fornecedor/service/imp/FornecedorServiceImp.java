@@ -28,7 +28,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
     @Override
     @Transactional
-    public Response addFornecedor(FornecedorDTO fornecedorDTO) {
+    public Response adicionarFornecedor(FornecedorDTO fornecedorDTO) {
         fornecedorDTO.setEmail(fornecedorDTO.getEmail().trim().toLowerCase());
 
         if (fornecedorRepository.existsByEmail(fornecedorDTO.getEmail())) {
@@ -51,7 +51,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
     @Override
     @Transactional
-    public Response updateFornecedor(Long id, FornecedorDTO fornecedorDTO) {
+    public Response atualizarFornecedor(Long id, FornecedorDTO fornecedorDTO) {
         Fornecedor fornecedorExistente = fornecedorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Fornecedor não encontrado. Se você quer prosseguir editando o fornecedor, verifique o id informado."));
 
@@ -89,7 +89,7 @@ public class FornecedorServiceImp implements FornecedorService {
     }
 
     @Override
-    public Response getFornecedores() {
+    public Response listarFornecedores() {
         List<Fornecedor> fornecedores = fornecedorRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
 
         List<FornecedorDTO> fornecedoresDTO = modelMapper.map(fornecedores, new TypeToken<List<FornecedorDTO>>()
@@ -104,7 +104,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
     @Override
     @Transactional
-    public Response disableFornecedor(Long id) {
+    public Response desativarFornecedor(Long id) {
         Fornecedor fornecedorAtivo = fornecedorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Fornecedor não encontrado. Por favor, para desativar confira o id."));
 
@@ -120,7 +120,7 @@ public class FornecedorServiceImp implements FornecedorService {
     }
 
     @Override
-    public Response lookupFornecedor() {
+    public Response buscarOpcoesFornecedor() {
         List<FornecedorLookupDTO> lookup = fornecedorRepository.findByAtivoTrue()
                 .stream()
                 .map(fornecedor -> new FornecedorLookupDTO(fornecedor.getId(), fornecedor.getNome()))
@@ -135,7 +135,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
     @Override
     @Transactional
-    public Response enableFornecedor(Long id) {
+    public Response ativarFornecedor(Long id) {
         Fornecedor fornecedorInativo = fornecedorRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Fornecedor inativo não encontrado. Por favor, para seguir, verifique o id informado"));
 

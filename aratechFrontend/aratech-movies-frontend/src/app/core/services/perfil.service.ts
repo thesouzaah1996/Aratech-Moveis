@@ -13,33 +13,33 @@ interface ApiResponse {
 
 @Injectable({ providedIn: 'root' })
 export class PerfilService {
-  private readonly api = `${environment.apiUrl}/login/perfil`;
+  private readonly api = `${environment.apiUrl}/recursoshumanos/perfil`;
 
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Perfil[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/all`)
+      .get<ApiResponse>(`${this.api}/todos`)
       .pipe(map(res => res.perfis ?? []));
   }
 
   add(nome: string): Observable<Perfil> {
     return this.http
-      .post<ApiResponse>(`${this.api}/add`, { nome })
+      .post<ApiResponse>(`${this.api}/adicionar`, { nome })
       .pipe(map(res => res.perfil!));
   }
 
   update(id: number, nome: string): Observable<Perfil> {
     return this.http
-      .put<ApiResponse>(`${this.api}/update/${id}`, { nome })
+      .put<ApiResponse>(`${this.api}/atualizar/${id}`, { nome })
       .pipe(map(res => res.perfil!));
   }
 
   ativar(id: number): Observable<void> {
-    return this.http.patch<void>(`${this.api}/enable/${id}`, {});
+    return this.http.patch<void>(`${this.api}/ativar/${id}`, {});
   }
 
   desativar(id: number): Observable<void> {
-    return this.http.patch<void>(`${this.api}/disable/${id}`, {});
+    return this.http.patch<void>(`${this.api}/desativar/${id}`, {});
   }
 }

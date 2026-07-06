@@ -53,7 +53,7 @@ class ChamadoControllerTest {
     }
 
     @Nested
-    @DisplayName("POST /manutencao/chamado/add")
+    @DisplayName("POST /manutencao/chamado/adicionar")
     class AddChamado {
 
         @Test
@@ -62,9 +62,9 @@ class ChamadoControllerTest {
             ChamadoDTO dto = umChamadoDTOValido();
             Response response = Response.builder().status(201).message("Chamado de manutenção criado com sucesso").chamado(dto).build();
 
-            given(chamadoService.addChamado(any(ChamadoDTO.class))).willReturn(response);
+            given(chamadoService.adicionarChamado(any(ChamadoDTO.class))).willReturn(response);
 
-            mockMvc.perform(post("/manutencao/chamado/add")
+            mockMvc.perform(post("/manutencao/chamado/adicionar")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isCreated())
@@ -77,7 +77,7 @@ class ChamadoControllerTest {
             ChamadoDTO dto = umChamadoDTOValido();
             dto.setEquipamento(null);
 
-            mockMvc.perform(post("/manutencao/chamado/add")
+            mockMvc.perform(post("/manutencao/chamado/adicionar")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isBadRequest());
@@ -89,7 +89,7 @@ class ChamadoControllerTest {
             ChamadoDTO dto = umChamadoDTOValido();
             dto.setTelefone("11999998888");
 
-            mockMvc.perform(post("/manutencao/chamado/add")
+            mockMvc.perform(post("/manutencao/chamado/adicionar")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isBadRequest());
@@ -97,7 +97,7 @@ class ChamadoControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /manutencao/chamado/all")
+    @DisplayName("GET /manutencao/chamado/todos")
     class GetChamados {
 
         @Test
@@ -106,9 +106,9 @@ class ChamadoControllerTest {
             Response response = Response.builder().status(200).message("Chamados listados com sucesso")
                     .chamados(List.of(umChamadoDTOValido())).build();
 
-            given(chamadoService.getChamados(null)).willReturn(response);
+            given(chamadoService.listarChamados(null)).willReturn(response);
 
-            mockMvc.perform(get("/manutencao/chamado/all"))
+            mockMvc.perform(get("/manutencao/chamado/todos"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.chamados", org.hamcrest.Matchers.hasSize(1)));
         }
@@ -119,9 +119,9 @@ class ChamadoControllerTest {
             Response response = Response.builder().status(200).message("Chamados listados com sucesso")
                     .chamados(List.of()).build();
 
-            given(chamadoService.getChamados(StatusChamado.EM_MANUTENCAO)).willReturn(response);
+            given(chamadoService.listarChamados(StatusChamado.EM_MANUTENCAO)).willReturn(response);
 
-            mockMvc.perform(get("/manutencao/chamado/all").param("status", "EM_MANUTENCAO"))
+            mockMvc.perform(get("/manutencao/chamado/todos").param("status", "EM_MANUTENCAO"))
                     .andExpect(status().isOk());
         }
     }
@@ -135,7 +135,7 @@ class ChamadoControllerTest {
         void deveRetornar200QuandoChamadoExiste() throws Exception {
             Response response = Response.builder().status(200).message("Chamado listado com sucesso").chamado(umChamadoDTOValido()).build();
 
-            given(chamadoService.getChamadoById(1L)).willReturn(response);
+            given(chamadoService.buscarChamadoPorId(1L)).willReturn(response);
 
             mockMvc.perform(get("/manutencao/chamado/1"))
                     .andExpect(status().isOk())
@@ -145,7 +145,7 @@ class ChamadoControllerTest {
         @Test
         @DisplayName("deve retornar 404 quando o chamado não existe")
         void deveRetornar404QuandoChamadoNaoExiste() throws Exception {
-            given(chamadoService.getChamadoById(99L))
+            given(chamadoService.buscarChamadoPorId(99L))
                     .willThrow(new NotFoundException("Chamado não encontrado, confira se o id está correto"));
 
             mockMvc.perform(get("/manutencao/chamado/99"))
@@ -237,7 +237,7 @@ class ChamadoControllerTest {
     }
 
     @Nested
-    @DisplayName("DELETE /manutencao/chamado/delete/{id}")
+    @DisplayName("DELETE /manutencao/chamado/remover/{id}")
     class DeleteChamado {
 
         @Test
@@ -245,19 +245,19 @@ class ChamadoControllerTest {
         void deveRetornar204QuandoDeletadoComSucesso() throws Exception {
             Response response = Response.builder().status(204).message("Chamado deletado com sucesso").build();
 
-            given(chamadoService.deleteChamado(1L)).willReturn(response);
+            given(chamadoService.removerChamado(1L)).willReturn(response);
 
-            mockMvc.perform(delete("/manutencao/chamado/delete/1"))
+            mockMvc.perform(delete("/manutencao/chamado/remover/1"))
                     .andExpect(status().isNoContent());
         }
 
         @Test
         @DisplayName("deve retornar 404 quando o chamado não existe")
         void deveRetornar404QuandoChamadoNaoExiste() throws Exception {
-            given(chamadoService.deleteChamado(99L))
+            given(chamadoService.removerChamado(99L))
                     .willThrow(new NotFoundException("Chamado não encontrado, para deletar, confira se o id está correto"));
 
-            mockMvc.perform(delete("/manutencao/chamado/delete/99"))
+            mockMvc.perform(delete("/manutencao/chamado/remover/99"))
                     .andExpect(status().isNotFound());
         }
     }

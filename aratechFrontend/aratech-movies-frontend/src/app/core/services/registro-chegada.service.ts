@@ -32,7 +32,7 @@ export class RegistroChegadaService {
 
   add(form: RegistroChegadaForm): Observable<RegistroChegada> {
     return this.http
-      .post<ApiResponse>(`${this.api}/add`, form)
+      .post<ApiResponse>(`${this.api}/adicionar`, form)
       .pipe(map(res => res.registroChegada!));
   }
 

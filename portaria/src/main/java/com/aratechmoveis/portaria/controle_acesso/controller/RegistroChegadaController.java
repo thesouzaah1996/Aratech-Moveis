@@ -19,19 +19,19 @@ public class RegistroChegadaController {
 
     private final RegistroChegadaService registroChegadaService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Response> addRegistroChegada(@RequestBody @Valid RegistroChegadaDTO registroChegadaDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(registroChegadaService.addRegistroChegada(registroChegadaDTO));
+    @PostMapping("/adicionar")
+    public ResponseEntity<Response> adicionarRegistroChegada(@RequestBody @Valid RegistroChegadaDTO registroChegadaDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(registroChegadaService.adicionarRegistroChegada(registroChegadaDTO));
     }
 
     @GetMapping("/fila")
-    public ResponseEntity<Response> getFila() {
-        return ResponseEntity.status(HttpStatus.OK).body(registroChegadaService.getFila());
+    public ResponseEntity<Response> buscarFila() {
+        return ResponseEntity.status(HttpStatus.OK).body(registroChegadaService.buscarFila());
     }
 
     @GetMapping("/historico")
-    public ResponseEntity<Response> getHistorico() {
-        return ResponseEntity.status(HttpStatus.OK).body(registroChegadaService.getHistorico());
+    public ResponseEntity<Response> buscarHistorico() {
+        return ResponseEntity.status(HttpStatus.OK).body(registroChegadaService.buscarHistorico());
     }
 
     @PutMapping("/finalizar/{id}")

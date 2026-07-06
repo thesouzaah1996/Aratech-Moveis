@@ -20,33 +20,33 @@ public class FornecedorController {
 
     private final FornecedorService fornecedorService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Response> addFornecedor(@RequestBody @Valid FornecedorDTO fornecedorDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(fornecedorService.addFornecedor(fornecedorDTO));
+    @PostMapping("/adicionar")
+    public ResponseEntity<Response> adicionarFornecedor(@RequestBody @Valid FornecedorDTO fornecedorDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(fornecedorService.adicionarFornecedor(fornecedorDTO));
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<Response> getAllFornecedores() {
-        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.getFornecedores());
+    @GetMapping("/todos")
+    public ResponseEntity<Response> listarFornecedores() {
+        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.listarFornecedores());
     }
 
-    @PatchMapping("/disable/{id}")
-    public ResponseEntity<Response> disableFornecedor(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.disableFornecedor(id));
+    @PatchMapping("/desativar/{id}")
+    public ResponseEntity<Response> desativarFornecedor(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.desativarFornecedor(id));
     }
 
-    @PatchMapping("/enable/{id}")
-    public ResponseEntity<Response> enableFornecedor(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.enableFornecedor(id));
+    @PatchMapping("/ativar/{id}")
+    public ResponseEntity<Response> ativarFornecedor(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.ativarFornecedor(id));
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Response> updateFornecedor(@PathVariable @Min(1) Long id, @RequestBody FornecedorDTO fornecedorDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.updateFornecedor(id, fornecedorDTO));
+    @PutMapping("/atualizar/{id}")
+    public ResponseEntity<Response> atualizarFornecedor(@PathVariable @Min(1) Long id, @RequestBody FornecedorDTO fornecedorDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.atualizarFornecedor(id, fornecedorDTO));
     }
 
-    @GetMapping("/lookup-fornecedor")
-    public ResponseEntity<Response> lookupFornecedores() {
-        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.lookupFornecedor());
+    @GetMapping("/opcoes-fornecedor")
+    public ResponseEntity<Response> buscarOpcoesFornecedor() {
+        return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.buscarOpcoesFornecedor());
     }
 }

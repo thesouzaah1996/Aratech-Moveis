@@ -17,28 +17,28 @@ public class CategoriaController {
 
     private final CategoriaService categoriaService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Response> addCategoria(@RequestBody @Valid CategoriaDTO categoriaDTO) {
+    @PostMapping("/adicionar")
+    public ResponseEntity<Response> adicionarCategoria(@RequestBody @Valid CategoriaDTO categoriaDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.criarCategoria(categoriaDTO));
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<Response> getCategorias() {
-        return ResponseEntity.status(HttpStatus.OK).body(categoriaService.getCategorias());
+    @GetMapping("/todos")
+    public ResponseEntity<Response> listarCategorias() {
+        return ResponseEntity.status(HttpStatus.OK).body(categoriaService.listarCategorias());
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Response> updateCategoria(@PathVariable @Min(1) Long id, @RequestBody @Valid CategoriaDTO categoriaDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(categoriaService.updateCategoria(id, categoriaDTO));
+    @PutMapping("/atualizar/{id}")
+    public ResponseEntity<Response> atualizarCategoria(@PathVariable @Min(1) Long id, @RequestBody @Valid CategoriaDTO categoriaDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(categoriaService.atualizarCategoria(id, categoriaDTO));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Response> deleteCategoria(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(categoriaService.deleteCategoria(id));
+    @DeleteMapping("/remover/{id}")
+    public ResponseEntity<Response> removerCategoria(@PathVariable @Min(1) Long id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(categoriaService.removerCategoria(id));
     }
 
-    @GetMapping("/lookup-categoria")
-    public ResponseEntity<Response> lookupCategoria() {
-        return ResponseEntity.status(HttpStatus.OK).body(categoriaService.lookupCategoria());
+    @GetMapping("/opcoes-categoria")
+    public ResponseEntity<Response> buscarOpcoesCategoria() {
+        return ResponseEntity.status(HttpStatus.OK).body(categoriaService.buscarOpcoesCategoria());
     }
 }

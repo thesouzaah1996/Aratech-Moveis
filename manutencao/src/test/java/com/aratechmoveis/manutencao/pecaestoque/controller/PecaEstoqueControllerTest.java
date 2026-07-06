@@ -48,7 +48,7 @@ class PecaEstoqueControllerTest {
     }
 
     @Nested
-    @DisplayName("POST /manutencao/peca-estoque/add")
+    @DisplayName("POST /manutencao/peca-estoque/adicionar")
     class AddPecaEstoque {
 
         @Test
@@ -57,9 +57,9 @@ class PecaEstoqueControllerTest {
             PecaEstoqueDTO dto = umaPecaEstoqueDTOValida();
             Response response = Response.builder().status(201).message("Peça cadastrada com sucesso").pecaEstoque(dto).build();
 
-            given(pecaEstoqueService.addPecaEstoque(any(PecaEstoqueDTO.class))).willReturn(response);
+            given(pecaEstoqueService.adicionarPecaEstoque(any(PecaEstoqueDTO.class))).willReturn(response);
 
-            mockMvc.perform(post("/manutencao/peca-estoque/add")
+            mockMvc.perform(post("/manutencao/peca-estoque/adicionar")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isCreated())
@@ -72,7 +72,7 @@ class PecaEstoqueControllerTest {
             PecaEstoqueDTO dto = umaPecaEstoqueDTOValida();
             dto.setNome(null);
 
-            mockMvc.perform(post("/manutencao/peca-estoque/add")
+            mockMvc.perform(post("/manutencao/peca-estoque/adicionar")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isBadRequest());
@@ -83,10 +83,10 @@ class PecaEstoqueControllerTest {
         void deveRetornar409QuandoCodigoDuplicado() throws Exception {
             PecaEstoqueDTO dto = umaPecaEstoqueDTOValida();
 
-            given(pecaEstoqueService.addPecaEstoque(any(PecaEstoqueDTO.class)))
+            given(pecaEstoqueService.adicionarPecaEstoque(any(PecaEstoqueDTO.class)))
                     .willThrow(new RecursoJaExistenteException("Já existe uma peça cadastrada com o código: " + dto.getCodigo()));
 
-            mockMvc.perform(post("/manutencao/peca-estoque/add")
+            mockMvc.perform(post("/manutencao/peca-estoque/adicionar")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isConflict());
@@ -94,7 +94,7 @@ class PecaEstoqueControllerTest {
     }
 
     @Nested
-    @DisplayName("PUT /manutencao/peca-estoque/update/{id}")
+    @DisplayName("PUT /manutencao/peca-estoque/atualizar/{id}")
     class UpdatePecaEstoque {
 
         @Test
@@ -104,9 +104,9 @@ class PecaEstoqueControllerTest {
             dto.setNome("Novo Nome");
             Response response = Response.builder().status(200).message("Peça atualizada com sucesso").pecaEstoque(dto).build();
 
-            given(pecaEstoqueService.updatePecaEstoque(eq(1L), any(PecaEstoqueDTO.class))).willReturn(response);
+            given(pecaEstoqueService.atualizarPecaEstoque(eq(1L), any(PecaEstoqueDTO.class))).willReturn(response);
 
-            mockMvc.perform(put("/manutencao/peca-estoque/update/1")
+            mockMvc.perform(put("/manutencao/peca-estoque/atualizar/1")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isOk());
@@ -115,7 +115,7 @@ class PecaEstoqueControllerTest {
         @Test
         @DisplayName("deve retornar 400 quando o id do path é menor que 1")
         void deveRetornar400QuandoIdInvalido() throws Exception {
-            mockMvc.perform(put("/manutencao/peca-estoque/update/0")
+            mockMvc.perform(put("/manutencao/peca-estoque/atualizar/0")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(new PecaEstoqueDTO())))
                     .andExpect(status().isBadRequest());
@@ -124,10 +124,10 @@ class PecaEstoqueControllerTest {
         @Test
         @DisplayName("deve retornar 404 quando a peça não é encontrada")
         void deveRetornar404QuandoPecaNaoEncontrada() throws Exception {
-            given(pecaEstoqueService.updatePecaEstoque(eq(99L), any(PecaEstoqueDTO.class)))
+            given(pecaEstoqueService.atualizarPecaEstoque(eq(99L), any(PecaEstoqueDTO.class)))
                     .willThrow(new NotFoundException("Peça não encontrada"));
 
-            mockMvc.perform(put("/manutencao/peca-estoque/update/99")
+            mockMvc.perform(put("/manutencao/peca-estoque/atualizar/99")
                             .contentType("application/json")
                             .content(objectMapper.writeValueAsString(new PecaEstoqueDTO())))
                     .andExpect(status().isNotFound());
@@ -135,7 +135,7 @@ class PecaEstoqueControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /manutencao/peca-estoque/all")
+    @DisplayName("GET /manutencao/peca-estoque/todos")
     class GetPecasEstoque {
 
         @Test
@@ -144,9 +144,9 @@ class PecaEstoqueControllerTest {
             Response response = Response.builder().status(200).message("Peças listadas com sucesso")
                     .pecasEstoque(List.of(umaPecaEstoqueDTOValida())).build();
 
-            given(pecaEstoqueService.getPecasEstoque()).willReturn(response);
+            given(pecaEstoqueService.listarPecasEstoque()).willReturn(response);
 
-            mockMvc.perform(get("/manutencao/peca-estoque/all"))
+            mockMvc.perform(get("/manutencao/peca-estoque/todos"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.pecasEstoque", org.hamcrest.Matchers.hasSize(1)));
         }
@@ -161,7 +161,7 @@ class PecaEstoqueControllerTest {
         void deveRetornar200QuandoPecaExiste() throws Exception {
             Response response = Response.builder().status(200).message("Peça listada com sucesso").pecaEstoque(umaPecaEstoqueDTOValida()).build();
 
-            given(pecaEstoqueService.getPecaEstoqueById(1L)).willReturn(response);
+            given(pecaEstoqueService.buscarPecaEstoquePorId(1L)).willReturn(response);
 
             mockMvc.perform(get("/manutencao/peca-estoque/1"))
                     .andExpect(status().isOk())
@@ -171,7 +171,7 @@ class PecaEstoqueControllerTest {
         @Test
         @DisplayName("deve retornar 404 quando a peça não existe")
         void deveRetornar404QuandoPecaNaoExiste() throws Exception {
-            given(pecaEstoqueService.getPecaEstoqueById(99L))
+            given(pecaEstoqueService.buscarPecaEstoquePorId(99L))
                     .willThrow(new NotFoundException("Peça não encontrada, confira se o id está correto"));
 
             mockMvc.perform(get("/manutencao/peca-estoque/99"))
@@ -187,7 +187,7 @@ class PecaEstoqueControllerTest {
     }
 
     @Nested
-    @DisplayName("DELETE /manutencao/peca-estoque/delete/{id}")
+    @DisplayName("DELETE /manutencao/peca-estoque/remover/{id}")
     class DeletePecaEstoque {
 
         @Test
@@ -195,19 +195,19 @@ class PecaEstoqueControllerTest {
         void deveRetornar204QuandoPecaDeletadaComSucesso() throws Exception {
             Response response = Response.builder().status(204).message("Peça deletada com sucesso").build();
 
-            given(pecaEstoqueService.deletePecaEstoque(1L)).willReturn(response);
+            given(pecaEstoqueService.removerPecaEstoque(1L)).willReturn(response);
 
-            mockMvc.perform(delete("/manutencao/peca-estoque/delete/1"))
+            mockMvc.perform(delete("/manutencao/peca-estoque/remover/1"))
                     .andExpect(status().isNoContent());
         }
 
         @Test
         @DisplayName("deve retornar 404 quando a peça não existe")
         void deveRetornar404QuandoPecaNaoExiste() throws Exception {
-            given(pecaEstoqueService.deletePecaEstoque(99L))
+            given(pecaEstoqueService.removerPecaEstoque(99L))
                     .willThrow(new NotFoundException("Peça não encontrada, para deletar, confira se o id está correto"));
 
-            mockMvc.perform(delete("/manutencao/peca-estoque/delete/99"))
+            mockMvc.perform(delete("/manutencao/peca-estoque/remover/99"))
                     .andExpect(status().isNotFound());
         }
     }

@@ -146,4 +146,7 @@ public class FuncionarioDTO {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<PerfilDTO> perfis;
+
+    private String emailCorporativo;
+
 }

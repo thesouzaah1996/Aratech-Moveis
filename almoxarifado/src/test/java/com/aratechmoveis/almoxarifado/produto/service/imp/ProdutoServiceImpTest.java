@@ -77,7 +77,7 @@ class ProdutoServiceImpTest {
     }
 
     @Nested
-    @DisplayName("addProduto")
+    @DisplayName("adicionarProduto")
     class AddProduto {
 
         @Test
@@ -95,7 +95,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produto)).willReturn(produto);
             given(modelMapper.map(produto, ProdutoDTO.class)).willReturn(dto);
 
-            Response response = produtoService.addProduto(dto);
+            Response response = produtoService.adicionarProduto(dto);
 
             assertThat(response.getStatus()).isEqualTo(201);
             assertThat(response.getMessage()).isEqualTo("Produto criado com sucesso");
@@ -118,7 +118,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produto)).willReturn(produto);
             given(modelMapper.map(produto, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.addProduto(dto);
+            produtoService.adicionarProduto(dto);
 
             assertThat(produto.getLocalArmazenamento()).isEqualTo("prateleiraa01");
         }
@@ -137,7 +137,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produto)).willReturn(produto);
             given(modelMapper.map(produto, ProdutoDTO.class)).willReturn(dto);
 
-            assertThatCode(() -> produtoService.addProduto(dto)).doesNotThrowAnyException();
+            assertThatCode(() -> produtoService.adicionarProduto(dto)).doesNotThrowAnyException();
         }
 
         @Test
@@ -147,7 +147,7 @@ class ProdutoServiceImpTest {
 
             given(produtoRepository.existsBySku(dto.getSku())).willReturn(true);
 
-            assertThatThrownBy(() -> produtoService.addProduto(dto))
+            assertThatThrownBy(() -> produtoService.adicionarProduto(dto))
                     .isInstanceOf(RecursoJaExistenteException.class)
                     .hasMessageContaining(dto.getSku());
 
@@ -163,7 +163,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.existsBySku(dto.getSku())).willReturn(false);
             given(categoriaRepository.findById(dto.getCategoriaID())).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> produtoService.addProduto(dto))
+            assertThatThrownBy(() -> produtoService.adicionarProduto(dto))
                     .isInstanceOf(NotFoundException.class);
 
             then(fornecedorRepository).should(never()).findById(any());
@@ -179,7 +179,7 @@ class ProdutoServiceImpTest {
             given(categoriaRepository.findById(dto.getCategoriaID())).willReturn(Optional.of(umaCategoria()));
             given(fornecedorRepository.findById(dto.getFornecedorID())).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> produtoService.addProduto(dto))
+            assertThatThrownBy(() -> produtoService.adicionarProduto(dto))
                     .isInstanceOf(NotFoundException.class);
 
             then(produtoRepository).should(never()).save(any());
@@ -187,7 +187,7 @@ class ProdutoServiceImpTest {
     }
 
     @Nested
-    @DisplayName("updateProduto")
+    @DisplayName("atualizarProduto")
     class UpdateProduto {
 
         @Test
@@ -201,7 +201,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            Response response = produtoService.updateProduto(1L, dto);
+            Response response = produtoService.atualizarProduto(1L, dto);
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getMessage()).isEqualTo("Produto atualizado com sucesso");
@@ -214,7 +214,7 @@ class ProdutoServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrado() {
             given(produtoRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> produtoService.updateProduto(99L, new ProdutoDTO()))
+            assertThatThrownBy(() -> produtoService.atualizarProduto(99L, new ProdutoDTO()))
                     .isInstanceOf(NotFoundException.class);
 
             then(produtoRepository).should(never()).save(any());
@@ -233,7 +233,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.updateProduto(1L, dto);
+            produtoService.atualizarProduto(1L, dto);
 
             assertThat(produtoExistente.getCategoria()).isEqualTo(novaCategoria);
         }
@@ -248,7 +248,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.findById(1L)).willReturn(Optional.of(produtoExistente));
             given(categoriaRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> produtoService.updateProduto(1L, dto))
+            assertThatThrownBy(() -> produtoService.atualizarProduto(1L, dto))
                     .isInstanceOf(NotFoundException.class);
 
             then(produtoRepository).should(never()).save(any());
@@ -267,7 +267,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.updateProduto(1L, dto);
+            produtoService.atualizarProduto(1L, dto);
 
             assertThat(produtoExistente.getFornecedor()).isEqualTo(novoFornecedor);
         }
@@ -282,7 +282,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.findById(1L)).willReturn(Optional.of(produtoExistente));
             given(fornecedorRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> produtoService.updateProduto(1L, dto))
+            assertThatThrownBy(() -> produtoService.atualizarProduto(1L, dto))
                     .isInstanceOf(NotFoundException.class);
 
             then(produtoRepository).should(never()).save(any());
@@ -300,7 +300,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.updateProduto(1L, dto);
+            produtoService.atualizarProduto(1L, dto);
 
             assertThat(produtoExistente.getCategoria()).isEqualTo(categoriaOriginal);
             assertThat(produtoExistente.getFornecedor()).isEqualTo(fornecedorOriginal);
@@ -319,7 +319,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.updateProduto(1L, dto);
+            produtoService.atualizarProduto(1L, dto);
 
             assertThat(produtoExistente.getNome()).isEqualTo("Cadeira de Escritório");
         }
@@ -335,7 +335,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.updateProduto(1L, dto);
+            produtoService.atualizarProduto(1L, dto);
 
             assertThat(produtoExistente.getDescricao()).isEqualTo("Nova descrição");
         }
@@ -352,7 +352,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.updateProduto(1L, dto);
+            produtoService.atualizarProduto(1L, dto);
 
             assertThat(produtoExistente.getDescricao()).isEqualTo("Descrição original");
         }
@@ -369,7 +369,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.updateProduto(1L, dto);
+            produtoService.atualizarProduto(1L, dto);
 
             assertThat(produtoExistente.getLocalArmazenamento()).isEqualTo("prateleirab02");
         }
@@ -384,7 +384,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.findById(1L)).willReturn(Optional.of(produtoExistente));
             given(produtoRepository.existsByLocalArmazenamentoAndIdNot("prateleirab02", 1L)).willReturn(true);
 
-            assertThatThrownBy(() -> produtoService.updateProduto(1L, dto))
+            assertThatThrownBy(() -> produtoService.atualizarProduto(1L, dto))
                     .isInstanceOf(RecursoJaExistenteException.class);
 
             then(produtoRepository).should(never()).save(any());
@@ -401,7 +401,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.updateProduto(1L, dto);
+            produtoService.atualizarProduto(1L, dto);
 
             assertThat(produtoExistente.getQuantidade()).isEqualTo(25);
         }
@@ -417,14 +417,14 @@ class ProdutoServiceImpTest {
             given(produtoRepository.save(produtoExistente)).willReturn(produtoExistente);
             given(modelMapper.map(produtoExistente, ProdutoDTO.class)).willReturn(dto);
 
-            produtoService.updateProduto(1L, dto);
+            produtoService.atualizarProduto(1L, dto);
 
             assertThat(produtoExistente.getQuantidade()).isEqualTo(10);
         }
     }
 
     @Nested
-    @DisplayName("getProdutos")
+    @DisplayName("listarProdutos")
     class GetProdutos {
 
         @Test
@@ -436,7 +436,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.findAll(any(org.springframework.data.domain.Sort.class))).willReturn(produtos);
             given(modelMapper.<List<ProdutoDTO>>map(eq(produtos), any(java.lang.reflect.Type.class))).willReturn(produtosDTO);
 
-            Response response = produtoService.getProdutos();
+            Response response = produtoService.listarProdutos();
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getProdutos()).hasSize(1);
@@ -448,14 +448,14 @@ class ProdutoServiceImpTest {
             given(produtoRepository.findAll(any(org.springframework.data.domain.Sort.class))).willReturn(List.of());
             given(modelMapper.<List<ProdutoDTO>>map(any(), any(java.lang.reflect.Type.class))).willReturn(List.of());
 
-            Response response = produtoService.getProdutos();
+            Response response = produtoService.listarProdutos();
 
             assertThat(response.getProdutos()).isEmpty();
         }
     }
 
     @Nested
-    @DisplayName("getProdutoById")
+    @DisplayName("buscarProdutoPorId")
     class GetProdutoById {
 
         @Test
@@ -467,7 +467,7 @@ class ProdutoServiceImpTest {
             given(produtoRepository.findById(1L)).willReturn(Optional.of(produto));
             given(modelMapper.map(produto, ProdutoDTO.class)).willReturn(dto);
 
-            Response response = produtoService.getProdutoById(1L);
+            Response response = produtoService.buscarProdutoPorId(1L);
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getProduto()).isEqualTo(dto);
@@ -478,13 +478,13 @@ class ProdutoServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrado() {
             given(produtoRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> produtoService.getProdutoById(99L))
+            assertThatThrownBy(() -> produtoService.buscarProdutoPorId(99L))
                     .isInstanceOf(NotFoundException.class);
         }
     }
 
     @Nested
-    @DisplayName("deleteProduto")
+    @DisplayName("removerProduto")
     class DeleteProduto {
 
         @Test
@@ -494,7 +494,7 @@ class ProdutoServiceImpTest {
 
             given(produtoRepository.findById(1L)).willReturn(Optional.of(produto));
 
-            Response response = produtoService.deleteProduto(1L);
+            Response response = produtoService.removerProduto(1L);
 
             assertThat(response.getStatus()).isEqualTo(204);
             then(produtoRepository).should().deleteById(1L);
@@ -505,7 +505,7 @@ class ProdutoServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrado() {
             given(produtoRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> produtoService.deleteProduto(99L))
+            assertThatThrownBy(() -> produtoService.removerProduto(99L))
                     .isInstanceOf(NotFoundException.class);
 
             then(produtoRepository).should(never()).deleteById(any());

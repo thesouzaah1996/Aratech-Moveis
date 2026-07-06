@@ -20,13 +20,13 @@ export class ChamadoService {
   getAll(status?: StatusChamado): Observable<Chamado[]> {
     const params: Record<string, string> = status ? { status } : {};
     return this.http
-      .get<ApiResponse>(`${this.api}/all`, { params })
+      .get<ApiResponse>(`${this.api}/todos`, { params })
       .pipe(map(res => res.chamados ?? []));
   }
 
   add(form: ChamadoForm): Observable<Chamado> {
     return this.http
-      .post<ApiResponse>(`${this.api}/add`, form)
+      .post<ApiResponse>(`${this.api}/adicionar`, form)
       .pipe(map(res => res.chamado!));
   }
 

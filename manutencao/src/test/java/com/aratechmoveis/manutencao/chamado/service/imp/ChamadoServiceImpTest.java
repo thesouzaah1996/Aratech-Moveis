@@ -79,7 +79,7 @@ class ChamadoServiceImpTest {
             given(chamadoRepository.save(chamado)).willReturn(chamado);
             given(modelMapper.map(chamado, ChamadoDTO.class)).willReturn(dto);
 
-            Response response = chamadoService.addChamado(dto);
+            Response response = chamadoService.adicionarChamado(dto);
 
             assertThat(response.getStatus()).isEqualTo(201);
             assertThat(response.getMessage()).isEqualTo("Chamado de manutenção criado com sucesso");
@@ -98,7 +98,7 @@ class ChamadoServiceImpTest {
             given(chamadoRepository.save(chamado)).willReturn(chamado);
             given(modelMapper.map(chamado, ChamadoDTO.class)).willReturn(dto);
 
-            chamadoService.addChamado(dto);
+            chamadoService.adicionarChamado(dto);
 
             assertThat(chamado.getStatus()).isEqualTo(StatusChamado.ABERTA);
             assertThat(chamado.getMecanico()).isNull();
@@ -116,7 +116,7 @@ class ChamadoServiceImpTest {
             given(chamadoRepository.save(chamado)).willReturn(chamado);
             given(modelMapper.map(chamado, ChamadoDTO.class)).willReturn(dto);
 
-            chamadoService.addChamado(dto);
+            chamadoService.adicionarChamado(dto);
 
             assertThat(chamado.getId()).isNull();
         }
@@ -135,7 +135,7 @@ class ChamadoServiceImpTest {
             given(chamadoRepository.findAll(any(Sort.class))).willReturn(chamados);
             given(modelMapper.<List<ChamadoDTO>>map(eq(chamados), any(Type.class))).willReturn(chamadosDTO);
 
-            Response response = chamadoService.getChamados(null);
+            Response response = chamadoService.listarChamados(null);
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getChamados()).hasSize(1);
@@ -151,7 +151,7 @@ class ChamadoServiceImpTest {
             given(chamadoRepository.findByStatus(eq(StatusChamado.ABERTA), any(Sort.class))).willReturn(chamados);
             given(modelMapper.<List<ChamadoDTO>>map(eq(chamados), any(Type.class))).willReturn(chamadosDTO);
 
-            Response response = chamadoService.getChamados(StatusChamado.ABERTA);
+            Response response = chamadoService.listarChamados(StatusChamado.ABERTA);
 
             assertThat(response.getChamados()).hasSize(1);
             then(chamadoRepository).should(never()).findAll(any(Sort.class));
@@ -163,7 +163,7 @@ class ChamadoServiceImpTest {
             given(chamadoRepository.findAll(any(Sort.class))).willReturn(List.of());
             given(modelMapper.<List<ChamadoDTO>>map(any(), any(Type.class))).willReturn(List.of());
 
-            Response response = chamadoService.getChamados(null);
+            Response response = chamadoService.listarChamados(null);
 
             assertThat(response.getChamados()).isEmpty();
         }
@@ -182,7 +182,7 @@ class ChamadoServiceImpTest {
             given(chamadoRepository.findById(1L)).willReturn(Optional.of(chamado));
             given(modelMapper.map(chamado, ChamadoDTO.class)).willReturn(dto);
 
-            Response response = chamadoService.getChamadoById(1L);
+            Response response = chamadoService.buscarChamadoPorId(1L);
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getChamado()).isEqualTo(dto);
@@ -193,7 +193,7 @@ class ChamadoServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrado() {
             given(chamadoRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> chamadoService.getChamadoById(99L))
+            assertThatThrownBy(() -> chamadoService.buscarChamadoPorId(99L))
                     .isInstanceOf(NotFoundException.class);
         }
     }
@@ -316,7 +316,7 @@ class ChamadoServiceImpTest {
 
             given(chamadoRepository.findById(1L)).willReturn(Optional.of(chamado));
 
-            Response response = chamadoService.deleteChamado(1L);
+            Response response = chamadoService.removerChamado(1L);
 
             assertThat(response.getStatus()).isEqualTo(204);
             then(chamadoRepository).should().deleteById(1L);
@@ -327,7 +327,7 @@ class ChamadoServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrado() {
             given(chamadoRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> chamadoService.deleteChamado(99L))
+            assertThatThrownBy(() -> chamadoService.removerChamado(99L))
                     .isInstanceOf(NotFoundException.class);
 
             then(chamadoRepository).should(never()).deleteById(any());

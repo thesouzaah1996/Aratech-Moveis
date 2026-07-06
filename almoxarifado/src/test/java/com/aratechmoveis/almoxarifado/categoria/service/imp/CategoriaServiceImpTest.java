@@ -88,7 +88,7 @@ class CategoriaServiceImpTest {
     }
 
     @Nested
-    @DisplayName("getCategorias")
+    @DisplayName("listarCategorias")
     class GetCategorias {
 
         @Test
@@ -100,7 +100,7 @@ class CategoriaServiceImpTest {
             given(categoriaRepository.findAll(any(Sort.class))).willReturn(categorias);
             given(modelMapper.map(eq(categorias), any(Type.class))).willReturn(categoriasDTO);
 
-            Response response = categoriaService.getCategorias();
+            Response response = categoriaService.listarCategorias();
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getCategorias()).hasSize(1);
@@ -112,14 +112,14 @@ class CategoriaServiceImpTest {
             given(categoriaRepository.findAll(any(Sort.class))).willReturn(List.of());
             given(modelMapper.map(any(), any(Type.class))).willReturn(List.of());
 
-            Response response = categoriaService.getCategorias();
+            Response response = categoriaService.listarCategorias();
 
             assertThat(response.getCategorias()).isEmpty();
         }
     }
 
     @Nested
-    @DisplayName("updateCategoria")
+    @DisplayName("atualizarCategoria")
     class UpdateCategoria {
 
         @Test
@@ -134,7 +134,7 @@ class CategoriaServiceImpTest {
             given(categoriaRepository.save(categoriaExistente)).willReturn(categoriaExistente);
             given(modelMapper.map(categoriaExistente, CategoriaDTO.class)).willReturn(dto);
 
-            Response response = categoriaService.updateCategoria(1L, dto);
+            Response response = categoriaService.atualizarCategoria(1L, dto);
 
             assertThat(response.getStatus()).isEqualTo(200);
             then(categoriaRepository).should().save(categoriaExistente);
@@ -145,7 +145,7 @@ class CategoriaServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrada() {
             given(categoriaRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> categoriaService.updateCategoria(99L, new CategoriaDTO()))
+            assertThatThrownBy(() -> categoriaService.atualizarCategoria(99L, new CategoriaDTO()))
                     .isInstanceOf(NotFoundException.class);
         }
 
@@ -159,7 +159,7 @@ class CategoriaServiceImpTest {
             given(categoriaRepository.findById(1L)).willReturn(Optional.of(categoriaExistente));
             given(categoriaRepository.existsByNomeIgnoreCase("Metal")).willReturn(true);
 
-            assertThatThrownBy(() -> categoriaService.updateCategoria(1L, dto))
+            assertThatThrownBy(() -> categoriaService.atualizarCategoria(1L, dto))
                     .isInstanceOf(RecursoJaExistenteException.class);
 
             then(categoriaRepository).should(never()).save(any());
@@ -177,7 +177,7 @@ class CategoriaServiceImpTest {
             given(categoriaRepository.save(categoriaExistente)).willReturn(categoriaExistente);
             given(modelMapper.map(categoriaExistente, CategoriaDTO.class)).willReturn(dto);
 
-            assertThatCode(() -> categoriaService.updateCategoria(1L, dto))
+            assertThatCode(() -> categoriaService.atualizarCategoria(1L, dto))
                     .doesNotThrowAnyException();
         }
 
@@ -192,14 +192,14 @@ class CategoriaServiceImpTest {
             given(categoriaRepository.save(categoriaExistente)).willReturn(categoriaExistente);
             given(modelMapper.map(categoriaExistente, CategoriaDTO.class)).willReturn(dto);
 
-            categoriaService.updateCategoria(1L, dto);
+            categoriaService.atualizarCategoria(1L, dto);
 
             assertThat(categoriaExistente.getNome()).isEqualTo("Madeira");
         }
     }
 
     @Nested
-    @DisplayName("deleteCategoria")
+    @DisplayName("removerCategoria")
     class DeleteCategoria {
 
         @Test
@@ -210,7 +210,7 @@ class CategoriaServiceImpTest {
 
             given(categoriaRepository.findById(1L)).willReturn(Optional.of(categoria));
 
-            Response response = categoriaService.deleteCategoria(1L);
+            Response response = categoriaService.removerCategoria(1L);
 
             assertThat(response.getStatus()).isEqualTo(204);
             then(categoriaRepository).should().deleteById(1L);
@@ -221,7 +221,7 @@ class CategoriaServiceImpTest {
         void deveLancarExcecaoQuandoNaoEncontrada() {
             given(categoriaRepository.findById(99L)).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> categoriaService.deleteCategoria(99L))
+            assertThatThrownBy(() -> categoriaService.removerCategoria(99L))
                     .isInstanceOf(NotFoundException.class);
 
             then(categoriaRepository).should(never()).deleteById(any());
@@ -235,7 +235,7 @@ class CategoriaServiceImpTest {
 
             given(categoriaRepository.findById(1L)).willReturn(Optional.of(categoria));
 
-            assertThatThrownBy(() -> categoriaService.deleteCategoria(1L))
+            assertThatThrownBy(() -> categoriaService.removerCategoria(1L))
                     .isInstanceOf(RecursoJaExistenteException.class)
                     .hasMessageContaining("produto(s) vinculado(s)");
 
@@ -244,7 +244,7 @@ class CategoriaServiceImpTest {
     }
 
     @Nested
-    @DisplayName("lookupCategoria")
+    @DisplayName("buscarOpcoesCategoria")
     class LookupCategoria {
 
         @Test
@@ -254,7 +254,7 @@ class CategoriaServiceImpTest {
 
             given(categoriaRepository.findAll(any(Sort.class))).willReturn(categorias);
 
-            Response response = categoriaService.lookupCategoria();
+            Response response = categoriaService.buscarOpcoesCategoria();
 
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(response.getCategoriaLookup()).hasSize(1);
@@ -266,7 +266,7 @@ class CategoriaServiceImpTest {
         void deveRetornarLookupVazioQuandoSemCategorias() {
             given(categoriaRepository.findAll(any(Sort.class))).willReturn(List.of());
 
-            Response response = categoriaService.lookupCategoria();
+            Response response = categoriaService.buscarOpcoesCategoria();
 
             assertThat(response.getCategoriaLookup()).isEmpty();
         }

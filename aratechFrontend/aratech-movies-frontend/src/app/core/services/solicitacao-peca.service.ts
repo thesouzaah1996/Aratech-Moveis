@@ -19,7 +19,7 @@ export class SolicitacaoPecaService {
 
   add(form: SolicitacaoPecaForm): Observable<SolicitacaoPeca> {
     return this.http
-      .post<ApiResponse>(`${this.api}/add`, form)
+      .post<ApiResponse>(`${this.api}/adicionar`, form)
       .pipe(map(res => res.solicitacaoPeca!));
   }
 }

@@ -4,10 +4,10 @@ import com.aratechmoveis.almoxarifado.Response;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;
 
 public interface FornecedorService {
-    Response addFornecedor(FornecedorDTO fornecedorDTO);
-    Response updateFornecedor(Long id, FornecedorDTO fornecedorDTO);
-    Response getFornecedores();
-    Response disableFornecedor(Long id);
-    Response enableFornecedor(Long id);
-    Response lookupFornecedor();
+    Response adicionarFornecedor(FornecedorDTO fornecedorDTO);
+    Response atualizarFornecedor(Long id, FornecedorDTO fornecedorDTO);
+    Response listarFornecedores();
+    Response desativarFornecedor(Long id);
+    Response ativarFornecedor(Long id);
+    Response buscarOpcoesFornecedor();
 }

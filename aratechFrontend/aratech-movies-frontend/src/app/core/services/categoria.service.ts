@@ -21,29 +21,29 @@ export class CategoriaService {
 
   getAll(): Observable<Categoria[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/all`)
+      .get<ApiResponse>(`${this.api}/todos`)
       .pipe(map(res => res.categorias ?? []));
   }
 
   lookup(): Observable<LookupItem[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/lookup-categoria`)
+      .get<ApiResponse>(`${this.api}/opcoes-categoria`)
       .pipe(map(res => res.categoriaLookup ?? []));
   }
 
   add(nome: string): Observable<Categoria> {
     return this.http
-      .post<ApiResponse>(`${this.api}/add`, { nome })
+      .post<ApiResponse>(`${this.api}/adicionar`, { nome })
       .pipe(map(res => res.categoria!));
   }
 
   update(id: number, nome: string): Observable<Categoria> {
     return this.http
-      .put<ApiResponse>(`${this.api}/update/${id}`, { nome })
+      .put<ApiResponse>(`${this.api}/atualizar/${id}`, { nome })
       .pipe(map(res => res.categoria!));
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/delete/${id}`);
+    return this.http.delete<void>(`${this.api}/remover/${id}`);
   }
 }
