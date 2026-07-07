@@ -25,12 +25,13 @@ public class FuncionarioPublisher {
     public void publicarLoginFuncionario(
             Long idFuncionario,
             String nomeFuncionario,
+            String emailPessoal,
             String emailCorporativo,
             List<Perfil> perfis,
             Boolean ativo) {
 
         try {
-            var funcionarioRepresentation = new FuncionarioRepresentation(idFuncionario, nomeFuncionario ,emailCorporativo, perfis, ativo);
+            var funcionarioRepresentation = new FuncionarioRepresentation(idFuncionario, nomeFuncionario, emailPessoal ,emailCorporativo, perfis, ativo);
             String json = objectMapper.writeValueAsString(funcionarioRepresentation);
             kafkaTemplate.send(topico, "dados para login usuário", json);
         } catch (Exception e) {

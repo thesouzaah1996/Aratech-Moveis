@@ -1,0 +1,56 @@
+<main class="page" role="main">
+  <section class="card" [class.login-error]="state === 'error'" aria-labelledby="redefinirTitle">
+
+    <header class="brand">
+      <img src="/img/aratech-logo-login-branco.png" alt="Aratech Móveis" class="login-logo" />
+    </header>
+
+    @if (state !== 'success') {
+      <form novalidate (ngSubmit)="onSubmit()">
+        <p class="intro">Informe o e-mail cadastrado para receber o link de redefinição de senha.</p>
+
+        <div class="field" [class.login-error]="state === 'error'">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="text"
+                 inputmode="email" autocomplete="email"
+                 autocapitalize="off" spellcheck="false"
+                 required placeholder="usuario@exemplo"
+                 [(ngModel)]="email"
+                 [class.is-invalid]="!!emailError"
+                 (input)="state = 'idle'" />
+          @if (emailError) {
+            <small class="err">{{ emailError }}</small>
+          }
+        </div>
+
+        <button class="btn btn-primary full" type="submit"
+                [disabled]="isLoading"
+                [class.loading]="isLoading">
+          <span class="btn-label">Enviar link de redefinição</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+
+        @if (state === 'error') {
+          <div class="form-msg error" role="status" aria-live="polite">
+            {{ errorMessage }}
+          </div>
+        }
+
+        <div class="row between">
+          <a class="link" routerLink="/login">Voltar para o login</a>
+        </div>
+      </form>
+    } @else {
+      <div class="form-msg success" role="status" aria-live="polite">
+        Se o e-mail informado estiver cadastrado, você receberá um link para redefinir sua senha.
+      </div>
+      <div class="row between">
+        <a class="link" routerLink="/login">Voltar para o login</a>
+      </div>
+    }
+  </section>
+</main>
+
+<footer class="app-footer" role="contentinfo">
+  <small>© 2026 Aratech Móveis</small>
+</footer>

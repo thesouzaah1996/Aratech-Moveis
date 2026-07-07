@@ -39,7 +39,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
             throw new RecursoJaExistenteException("Já existe um funcionário cadastrado com esse CPF");
         }
 
-        if (funcionarioRepository.existsByEmail(funcionario.getEmail())) {
+        if (funcionarioRepository.existsByEmailPessoal(funcionario.getEmailPessoal())) {
             throw new RecursoJaExistenteException("Já existe um funcionário cadastrado com esse e-mail");
         }
 
@@ -97,7 +97,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
             throw new RecursoJaExistenteException("Já existe um funcionário cadastrado com esse CPF");
         }
 
-        if (funcionarioRepository.existsByEmailAndIdNot(funcionarioDTO.getEmail(), id)) {
+        if (funcionarioRepository.existsByEmailPessoalAndIdNot(funcionarioDTO.getEmailPessoal(), id)) {
             throw new RecursoJaExistenteException("Já existe um funcionário cadastrado com esse e-mail");
         }
 
@@ -126,7 +126,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
         funcionarioExistente.setTipoFuncionario(funcionarioDTO.getTipoFuncionario());
         funcionarioExistente.setSetor(funcionarioDTO.getSetor());
         funcionarioExistente.setSalario(funcionarioDTO.getSalario());
-        funcionarioExistente.setEmail(funcionarioDTO.getEmail());
+        funcionarioExistente.setEmailPessoal(funcionarioDTO.getEmailPessoal());
         funcionarioExistente.setBanco(funcionarioDTO.getBanco());
         funcionarioExistente.setAgencia(funcionarioDTO.getAgencia());
         funcionarioExistente.setConta(funcionarioDTO.getConta());
@@ -234,6 +234,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
         funcionarioPublisher.publicarLoginFuncionario(
                 funcionario.getId(),
                 funcionario.getNome(),
+                funcionario.getEmailPessoal(),
                 funcionario.getEmailCorporativo(),
                 funcionario.getPerfis(),
                 funcionario.isAtivo());

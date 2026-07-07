@@ -145,7 +145,7 @@ public class Funcionario {
     @Email(message = "E-mail inválido.")
     @Size(max = 150, message = "O e-mail deve ter no máximo 150 caracteres.")
     @Column(nullable = false, unique = true, length = 150)
-    private String email;
+    private String emailPessoal;
 
     @NotBlank(message = "O banco é obrigatório.")
     @Size(max = 100, message = "O banco deve ter no máximo 100 caracteres.")
