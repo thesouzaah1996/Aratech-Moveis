@@ -7,6 +7,7 @@ import java.util.List;
 public record FuncionarioRepresentation(
         Long idFuncionario,
         String nomeFuncionario,
+        String emailPessoal,
         String emailCorporativo,
         List<Perfil> perfis,
         Boolean ativo

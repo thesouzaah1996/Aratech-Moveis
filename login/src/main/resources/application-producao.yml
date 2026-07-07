@@ -29,3 +29,10 @@ aratech:
     kafka:
       topics:
         login-funcionario: 'aratech.login-funcionario'
+
+password:
+  reset:
+    link: http://aratech-frontend:80/reset-password?code=
+  primeiro:
+    acesso:
+      link: http://aratech-frontend:80/primeiro-acesso?code=

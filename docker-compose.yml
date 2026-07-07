@@ -200,6 +200,7 @@ services:
     restart: always
     ports:
       - "8080:8080"
+      - "5506:5506"
     environment:
       SPRING_PROFILES_ACTIVE: producao
       SPRING_DATASOURCE_URL: jdbc:postgresql://login-db:5432/login-prod

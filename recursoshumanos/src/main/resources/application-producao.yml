@@ -16,12 +16,6 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
-aratech:
-  config:
-    kafka:
-      topics:
-        login-funcionario: 'aratech.login-funcionario'
-
   flyway:
     baseline-on-migrate: true
 
@@ -29,3 +23,9 @@ aratech:
     hibernate:
       ddl-auto: validate
     show-sql: false
+
+aratech:
+  config:
+    kafka:
+      topics:
+        login-funcionario: 'aratech.login-funcionario'

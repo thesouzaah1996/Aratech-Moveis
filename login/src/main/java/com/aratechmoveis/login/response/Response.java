@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Response {
+public class Response<T> {
 
     private int status;
     private String mensagem;

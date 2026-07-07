@@ -56,7 +56,7 @@ class FuncionarioRepositoryTest {
         funcionario.setTipoFuncionario(TipoFuncionario.ADMINISTRATIVO);
         funcionario.setSetor("TI");
         funcionario.setSalario(new BigDecimal("3000.00"));
-        funcionario.setEmail(email);
+        funcionario.setEmailPessoal(email);
         funcionario.setBanco("Banco Teste");
         funcionario.setAgencia("0001");
         funcionario.setConta("123456");
