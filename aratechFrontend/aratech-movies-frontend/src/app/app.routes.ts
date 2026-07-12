@@ -3,6 +3,7 @@ import { LoginComponent } from './componente/login/login.component';
 import { RedefinirSenhaComponent } from './componente/login/redefinir-senha/redefinir-senha.component';
 import { ResetPasswordComponent } from './componente/login/reset-password/reset-password.component';
 import { SolicitarPrimeiroAcessoComponent } from './componente/login/solicitar-primeiro-acesso/solicitar-primeiro-acesso.component';
+import { ConfirmarPrimeiroAcessoComponent } from './componente/login/confirmar-primeiro-acesso/confirmar-primeiro-acesso.component';
 import { DashboardComponent } from './componente/dashboard/dashboard.component';
 
 import { AlmoxarifadoComponent } from './componente/almoxarifado/almoxarifado.component';
@@ -73,6 +74,7 @@ export const routes: Routes = [
   { path: 'redefinir-senha',                        component: RedefinirSenhaComponent },
   { path: 'reset-password',                         component: ResetPasswordComponent },
   { path: 'primeiro-acesso/solicitar',               component: SolicitarPrimeiroAcessoComponent },
+  { path: 'primeiro-acesso',                        component: ConfirmarPrimeiroAcessoComponent },
   { path: 'dashboard',                              component: DashboardComponent },
 
   { path: 'almoxarifado',                           component: AlmoxarifadoComponent },

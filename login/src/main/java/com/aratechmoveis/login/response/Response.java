@@ -17,5 +17,7 @@ public class Response<T> {
     private String token;
     private String expirationTime;
 
+    private T dados;
+
     private final LocalDateTime timestamp = LocalDateTime.now();
 }

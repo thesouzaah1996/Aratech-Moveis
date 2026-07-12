@@ -182,6 +182,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://almoxarifado-db:5432/almoxarifado-prod
       ALMOXARIFADO_DB_USER_PROD: postgres
       ALMOXARIFADO_DB_PASSWORD_PROD: postgres
+      JWT_CHAVE_SECRETA: ${JWT_CHAVE_SECRETA}
     depends_on:
       almoxarifado-db:
         condition: service_healthy
@@ -207,6 +208,11 @@ services:
       LOGIN_DB_USER_PROD: postgres
       LOGIN_DB_PASSWORD_PROD: postgres
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EMAIL: ${EMAIL}
+      SENHA_EMAIL: ${SENHA_EMAIL}
+      JWT_CHAVE_SECRETA: ${JWT_CHAVE_SECRETA}
+      JWT_TEMPO_EXPIRACAO: ${JWT_TEMPO_EXPIRACAO}
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5506
     depends_on:
       login-db:
         condition: service_healthy

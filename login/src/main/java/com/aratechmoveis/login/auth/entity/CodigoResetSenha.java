@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "codigo_reset_senha")
+@Table(name = "codigos_reset_senha")
 @Data
 @Builder
 @AllArgsConstructor

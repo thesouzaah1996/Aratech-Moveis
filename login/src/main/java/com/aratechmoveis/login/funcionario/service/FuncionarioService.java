@@ -7,7 +7,4 @@ import com.aratechmoveis.login.funcionario.dto.FuncionarioDTO;
 public interface FuncionarioService {
 
     Response adicionarFuncionario(Funcionario funcionario);
-
-    Response editarFuncionario(FuncionarioDTO funcionario);
-
 }

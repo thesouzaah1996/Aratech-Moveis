@@ -17,6 +17,7 @@ public class FuncionarioMapper {
         novoFuncionario.setEmailCorporativo(funcionarioRepresentation.emailCorporativo());
         novoFuncionario.setPerfis(funcionarioRepresentation.perfis());
         novoFuncionario.setAtivo(funcionarioRepresentation.ativo());
+        novoFuncionario.setPrimeiroLogin(true);
 
         return novoFuncionario;
     }

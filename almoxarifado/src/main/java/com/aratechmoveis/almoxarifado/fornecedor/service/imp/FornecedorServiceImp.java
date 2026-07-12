@@ -116,6 +116,7 @@ public class FornecedorServiceImp implements FornecedorService {
         return Response.builder()
                 .status(200)
                 .message("Fornecedor desabilitado com sucesso")
+                .fornecedorDTO(modelMapper.map(fornecedorAtivo, FornecedorDTO.class))
                 .build();
     }
 
@@ -147,6 +148,7 @@ public class FornecedorServiceImp implements FornecedorService {
         return Response.builder()
                 .status(200)
                 .message("Fornecedor ativado com sucesso.")
+                .fornecedorDTO(modelMapper.map(fornecedorInativo, FornecedorDTO.class))
                 .build();
     }
 }

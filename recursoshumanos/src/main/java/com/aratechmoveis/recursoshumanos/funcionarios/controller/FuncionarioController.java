@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("recursoshumanos/funcionario")
+@RequestMapping("recursoshumanos/funcionarios")
 @RequiredArgsConstructor
 public class FuncionarioController {
 
@@ -54,7 +54,7 @@ public class FuncionarioController {
         return ResponseEntity.status(HttpStatus.OK).body(funcionarioService.atribuirPerfis(id, atribuirPerfisDTO));
     }
 
-    @PostMapping("/atribuir-email-corporativo")
+    @PostMapping("/email-corporativo")
     public ResponseEntity<Response> atribuirEmailCorporativo(@RequestBody LoginFuncionarioDTO loginFuncionarioDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(funcionarioService.atribuirEmailCorporativo(loginFuncionarioDTO));
     }
