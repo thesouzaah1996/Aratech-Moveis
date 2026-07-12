@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,7 @@ export class LoginComponent implements OnInit {
   emailError = '';
   passwordError = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {}
 
@@ -32,7 +33,7 @@ export class LoginComponent implements OnInit {
     this.passwordError = '';
   }
 
-  async onSubmit(): Promise<void> {
+  onSubmit(): void {
     this.loginState = 'idle';
     this.emailError = '';
     this.passwordError = '';
@@ -56,31 +57,17 @@ export class LoginComponent implements OnInit {
 
     this.isLoading = true;
 
-    try {
-      this.loginState = 'success';
-      setTimeout(() => this.router.navigate(['/dashboard']), 1500);
-
-    } catch (err: any) {
-      this.loginState = 'error';
-      const msg = (err?.message ?? '').toLowerCase();
-
-      if (msg.includes('invalid') || msg.includes('credenciais') || msg.includes('401')) {
-        this.passwordError = 'E-mail ou senha incorretos';
-      } else if (msg.includes('not found') || msg.includes('404')) {
-        this.passwordError = 'Usuário não encontrado';
-      } else if (msg.includes('inactive') || msg.includes('inativo')) {
-        this.passwordError = 'Conta inativa';
-      } else if (msg.includes('locked') || msg.includes('bloqueada')) {
-        this.passwordError = 'Conta bloqueada';
-      } else if (msg.includes('timeout') || msg.includes('network')) {
-        this.passwordError = 'Problema de conexão';
-      } else if (msg.includes('500')) {
-        this.passwordError = 'Erro no servidor';
-      } else {
-        this.passwordError = 'E-mail ou senha incorretos';
+    this.authService.login(this.email, this.password).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.loginState = 'success';
+        localStorage.setItem('token', res.dados.token);
+        setTimeout(() => this.router.navigate(['/dashboard']), 1500);
+      },
+      error: () => {
+        this.isLoading = false;
+        this.loginState = 'error';
       }
-    } finally {
-      this.isLoading = false;
-    }
+    });
   }
 }

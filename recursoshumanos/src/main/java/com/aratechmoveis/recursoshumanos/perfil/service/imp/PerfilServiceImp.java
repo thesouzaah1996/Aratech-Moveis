@@ -101,6 +101,7 @@ public class PerfilServiceImp implements PerfilService {
         return Response.builder()
                 .status(200)
                 .mensagem("Perfil ativado com sucesso")
+                .perfil(modelMapper.map(perfil, PerfilDTO.class))
                 .build();
     }
 
@@ -117,6 +118,7 @@ public class PerfilServiceImp implements PerfilService {
         return Response.builder()
                 .status(200)
                 .mensagem("Perfil desativado com sucesso")
+                .perfil(modelMapper.map(perfil, PerfilDTO.class))
                 .build();
     }
 }

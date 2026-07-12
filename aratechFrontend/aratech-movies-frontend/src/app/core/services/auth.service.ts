@@ -8,11 +8,22 @@ interface ApiResponse {
   mensagem: string;
 }
 
+interface LoginResponse extends ApiResponse {
+  dados: {
+    token: string;
+    perfis: string[];
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly api = `${environment.apiUrl}/login/auth`;
 
   constructor(private http: HttpClient) {}
+
+  login(emailCorporativo: string, senha: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.api}/entrar`, { emailCorporativo, senha });
+  }
 
   solicitarRedefinicaoSenha(email: string): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.api}/redefinir-senha`, { email });
@@ -23,6 +34,10 @@ export class AuthService {
   }
 
   solicitarPrimeiroAcesso(emailPessoal: string): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.api}/primeiro-acesso`, { emailPessoal });
+    return this.http.post<ApiResponse>(`${this.api}/primeiro-acesso/solicitar`, { emailPessoal });
+  }
+
+  confirmarPrimeiroAcesso(emailCorporativo: string, codigo: string, novaSenha: string): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.api}/primeiro-acesso/confirmar`, { emailCorporativo, codigo, novaSenha });
   }
 }

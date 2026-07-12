@@ -12,5 +12,7 @@ public interface AuthService {
 
     Response<?> solicitarRedefinicaoSenha(String email);
 
-    Response<?> definirSenhaPrimeiroAcesso(PrimeiroAcessoRequest primeiroAcessoRequest);
+    Response<?> solicitarPrimeiroAcesso(String emailPessoal);
+
+    Response<?> confirmarPrimeiroAcesso(PrimeiroAcessoRequest primeiroAcessoRequest);
 }

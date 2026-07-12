@@ -36,4 +36,6 @@ public class NotificacaoDTO {
     private String nomeTemplate;
 
     private Map<String, Object> variaveisTemplate;
+
+    private String logoPath;
 }

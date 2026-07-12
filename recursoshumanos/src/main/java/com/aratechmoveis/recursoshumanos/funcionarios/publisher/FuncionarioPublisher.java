@@ -1,5 +1,6 @@
 package com.aratechmoveis.recursoshumanos.funcionarios.publisher;
 
+import com.aratechmoveis.recursoshumanos.funcionarios.entity.Funcionario;
 import com.aratechmoveis.recursoshumanos.perfil.entity.Perfil;
 import com.aratechmoveis.recursoshumanos.funcionarios.publisher.representation.FuncionarioRepresentation;
 import org.springframework.beans.factory.annotation.Value;

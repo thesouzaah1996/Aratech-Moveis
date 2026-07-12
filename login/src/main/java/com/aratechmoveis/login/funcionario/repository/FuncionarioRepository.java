@@ -7,7 +7,8 @@ import java.util.Optional;
 
 public interface FuncionarioRepository extends JpaRepository<Funcionario, Long> {
     boolean existsByIdFuncionario(Long idFuncionario);
-    boolean existsByEmailCorporativoAndIdNot(String email);
+    boolean existsByEmailCorporativo(String email);
     Optional<Funcionario> findByEmailCorporativo(String email);
     Optional<Funcionario> findByEmailPessoal(String email);
+    Optional<Funcionario> findByIdFuncionario(Long id);
 }

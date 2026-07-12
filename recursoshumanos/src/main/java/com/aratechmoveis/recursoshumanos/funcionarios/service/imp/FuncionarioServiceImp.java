@@ -1,7 +1,9 @@
 package com.aratechmoveis.recursoshumanos.funcionarios.service.imp;
 
 import com.aratechmoveis.recursoshumanos.exception.FuncionarioNaoAtivoException;
+import com.aratechmoveis.recursoshumanos.exception.FuncionarioSemPerfilException;
 import com.aratechmoveis.recursoshumanos.exception.NotFoundException;
+import com.aratechmoveis.recursoshumanos.exception.PerfilNaoAtivoException;
 import com.aratechmoveis.recursoshumanos.exception.RecursoJaExistenteException;
 import com.aratechmoveis.recursoshumanos.funcionarios.dto.AtribuirPerfisDTO;
 import com.aratechmoveis.recursoshumanos.funcionarios.dto.FuncionarioDTO;
@@ -81,7 +83,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
 
         return Response.builder()
                 .status(200)
-                .mensagem("Funcionarios encontrados com sucesso")
+                .mensagem("Funcionario encontrado com sucesso")
                 .funcionarios(funcionarios)
                 .build();
     }
@@ -178,6 +180,8 @@ public class FuncionarioServiceImp implements FuncionarioService {
         funcionarioRepository.save(funcionarioAtivo);
         log.info("Funcionario id={} desativado com sucesso", id);
 
+        sincronizarComLogin(funcionarioAtivo);
+
         return Response.builder()
                 .status(200)
                 .mensagem("Funcionario desativado com sucesso")
@@ -201,9 +205,20 @@ public class FuncionarioServiceImp implements FuncionarioService {
             throw new NotFoundException("Um ou mais perfis informados não foram encontrados");
         }
 
+        List<String> perfisInativos = perfis.stream()
+                .filter(perfil -> !perfil.isAtivo())
+                .map(Perfil::getNome)
+                .toList();
+
+        if (!perfisInativos.isEmpty()) {
+            throw new PerfilNaoAtivoException("Não é possível atribuir perfis inativos: " + String.join(", ", perfisInativos));
+        }
+
         funcionario.setPerfis(perfis);
         funcionarioRepository.save(funcionario);
         log.info("Perfis do funcionario id={} atualizados com sucesso", id);
+
+        sincronizarComLogin(funcionario);
 
         return Response.builder()
                 .status(200)
@@ -217,6 +232,10 @@ public class FuncionarioServiceImp implements FuncionarioService {
 
         Funcionario funcionario = funcionarioRepository.findById(loginFuncionarioDTO.getId())
                 .orElseThrow(() -> new NotFoundException("Funcionário não encontrado, verifique o id informado."));
+
+        if (funcionario.getPerfis() == null || funcionario.getPerfis().isEmpty()) {
+            throw new FuncionarioSemPerfilException("Para atribuir um email corporativo, o funcionario deve ter perfis de acesso atribuidos a sua conta.");
+        }
 
         if (!funcionario.isAtivo()) {
             throw new FuncionarioNaoAtivoException("Para atribuir um perfil de usuário ao funcionário, ele deve estar obrigatoriamente ativo.");
@@ -244,6 +263,22 @@ public class FuncionarioServiceImp implements FuncionarioService {
         return Response.builder()
                 .status(200)
                 .mensagem("Email corporativo atribuido com sucesso")
+                .funcionario(modelmapper.map(funcionario, FuncionarioDTO.class))
                 .build();
+    }
+
+    private void sincronizarComLogin(Funcionario funcionario) {
+        if (funcionario.getEmailCorporativo() == null || funcionario.getEmailCorporativo().isBlank()) {
+            return;
+        }
+
+        funcionarioPublisher.publicarLoginFuncionario(
+                funcionario.getId(),
+                funcionario.getNome(),
+                funcionario.getEmailPessoal(),
+                funcionario.getEmailCorporativo(),
+                funcionario.getPerfis(),
+                funcionario.isAtivo());
+        log.info("Funcionario id={} sincronizado no login", funcionario.getId());
     }
 }

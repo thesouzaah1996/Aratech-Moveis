@@ -354,7 +354,7 @@
               <div class="invalid-feedback">Obrigatório.</div>
             </div>
             <div class="col-md-6">
-              <label class="form-label fw-semibold">E-mail Corporativo <span class="text-danger">*</span></label>
+              <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
               <input type="email" class="form-control" [(ngModel)]="form.email"
                 [class.is-invalid]="inv(2, !form.email.trim() || !isValidEmail(form.email))"
                 placeholder="emailcolaborador@empresa.com">

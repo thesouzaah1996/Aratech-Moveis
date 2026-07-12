@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @Entity
-@Table(name = "notificacao")
+@Table(name = "notificacoes")
 @Data
 @Builder
 @AllArgsConstructor

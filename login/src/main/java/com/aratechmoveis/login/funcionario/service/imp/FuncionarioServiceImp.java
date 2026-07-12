@@ -22,14 +22,13 @@ public class FuncionarioServiceImp implements FuncionarioService {
     private final PerfilRepository perfilRepository;
     private final ModelMapper modelMapper;
 
-
     @Override
     public Response adicionarFuncionario(Funcionario funcionario) {
         if (funcionarioRepository.existsByIdFuncionario(funcionario.getIdFuncionario())) {
             throw new RecursoJaExistenteException("Funcionario já existe no sistema.");
         }
 
-        if (funcionarioRepository.existsByEmailCorporativoAndIdNot(funcionario.getEmailCorporativo())) {
+        if (funcionarioRepository.existsByEmailCorporativo(funcionario.getEmailCorporativo())) {
             throw new RecursoJaExistenteException("Email já existe no sistema.");
         }
 
@@ -48,10 +47,5 @@ public class FuncionarioServiceImp implements FuncionarioService {
                 .status(201)
                 .mensagem("Usuário adicionado com sucesso.")
                 .build();
-    }
-
-    @Override
-    public Response editarFuncionario(FuncionarioDTO funcionario) {
-        return null;
     }
 }

@@ -13,6 +13,19 @@ spring:
       max-lifetime: 1800000
       leak-detection-threshold: 60000
 
+  mail:
+    username: ${EMAIL}
+    password: ${SENHA_EMAIL}
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -35,4 +48,8 @@ password:
     link: http://aratech-frontend:80/reset-password?code=
   primeiro:
     acesso:
-      link: http://aratech-frontend:80/primeiro-acesso?code=
+      link: http://localhost:80/primeiro-acesso?code=
+
+jwt:
+  chave-secreta: ${JWT_CHAVE_SECRETA}
+  tempo-expiracao: ${JWT_TEMPO_EXPIRACAO}

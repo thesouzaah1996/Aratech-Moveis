@@ -13,7 +13,7 @@ interface ApiResponse {
 
 @Injectable({ providedIn: 'root' })
 export class FuncionarioService {
-  private readonly api = `${environment.apiUrl}/recursoshumanos/funcionario`;
+  private readonly api = `${environment.apiUrl}/recursoshumanos/funcionarios`;
 
   constructor(private http: HttpClient) {}
 

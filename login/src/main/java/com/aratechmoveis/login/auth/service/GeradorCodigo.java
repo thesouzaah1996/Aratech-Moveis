@@ -19,7 +19,7 @@ public class GeradorCodigo {
         String codigo;
         do {
             codigo = gerarCodigoAleatorio();
-        } while (codigoResetSenhaRepo.findByCode(codigo).isPresent());
+        } while (codigoResetSenhaRepo.findByCodigo(codigo).isPresent());
 
         return codigo;
     }
