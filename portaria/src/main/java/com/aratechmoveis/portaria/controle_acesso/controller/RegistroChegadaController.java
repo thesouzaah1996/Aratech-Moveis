@@ -2,6 +2,7 @@ package com.aratechmoveis.portaria.controle_acesso.controller;
 
 import com.aratechmoveis.portaria.response.Response;
 import com.aratechmoveis.portaria.controle_acesso.dto.RegistroChegadaDTO;
+import com.aratechmoveis.portaria.controle_acesso.entity.StatusCaminhao;
 import com.aratechmoveis.portaria.controle_acesso.service.RegistroChegadaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -19,7 +20,7 @@ public class RegistroChegadaController {
 
     private final RegistroChegadaService registroChegadaService;
 
-    @PostMapping("/adicionar")
+    @PostMapping("/registrar")
     public ResponseEntity<Response> adicionarRegistroChegada(@RequestBody @Valid RegistroChegadaDTO registroChegadaDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(registroChegadaService.adicionarRegistroChegada(registroChegadaDTO));
     }
@@ -34,8 +35,13 @@ public class RegistroChegadaController {
         return ResponseEntity.status(HttpStatus.OK).body(registroChegadaService.buscarHistorico());
     }
 
-    @PutMapping("/finalizar/{id}")
-    public ResponseEntity<Response> finalizarRegistro(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(registroChegadaService.finalizarRegistro(id));
+    @GetMapping("/autorizados")
+    public ResponseEntity<Response> listarAutorizados() {
+        return ResponseEntity.status(HttpStatus.OK).body(registroChegadaService.listarAutorizados(StatusCaminhao.AUTORIZADO));
+    }
+
+    @PutMapping("/finalizar")
+    public ResponseEntity<Response> finalizarRegistro(@RequestParam String notaFiscal) {
+        return ResponseEntity.status(HttpStatus.OK).body(registroChegadaService.finalizarRegistro(notaFiscal));
     }
 }

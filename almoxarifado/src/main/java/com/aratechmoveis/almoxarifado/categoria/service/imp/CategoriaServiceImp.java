@@ -42,7 +42,7 @@ public class CategoriaServiceImp implements CategoriaService {
 
         return Response.builder()
                 .status(201)
-                .message("Categoria criada com sucesso")
+                .mensagem("Categoria criada com sucesso")
                 .categoria(categoriaCriadaDTO)
                 .build();
     }
@@ -53,7 +53,7 @@ public class CategoriaServiceImp implements CategoriaService {
         List<CategoriaDTO> categoriasDTO = modelMapper.map(categorias, new TypeToken<List<CategoriaDTO>>(){}.getType());
 
         return Response.builder()
-                .message("Categorias listadas com sucesso")
+                .mensagem("Categorias listadas com sucesso")
                 .status(200)
                 .categorias(categoriasDTO)
                 .build();
@@ -80,7 +80,7 @@ public class CategoriaServiceImp implements CategoriaService {
 
         return Response.builder()
                 .status(200)
-                .message("Categoria alterada com sucesso")
+                .mensagem("Categoria alterada com sucesso")
                 .categoria(novaCategoria)
                 .build();
     }
@@ -100,7 +100,7 @@ public class CategoriaServiceImp implements CategoriaService {
 
         return Response.builder()
                 .status(204)
-                .message("Categoria deletada com sucesso")
+                .mensagem("Categoria deletada com sucesso")
                 .build();
     }
 
@@ -113,7 +113,7 @@ public class CategoriaServiceImp implements CategoriaService {
 
         return Response.builder()
                 .status(200)
-                .message("Lookup de categorias carregado com sucesso")
+                .mensagem("Lookup de categorias carregado com sucesso")
                 .categoriaLookup(lookup)
                 .build();
     }

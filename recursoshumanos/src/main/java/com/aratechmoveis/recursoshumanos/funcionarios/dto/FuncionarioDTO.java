@@ -7,8 +7,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,6 +19,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FuncionarioDTO {
@@ -28,13 +31,16 @@ public class FuncionarioDTO {
     @Size(min = 2, max = 150, message = "O nome deve ter entre 2 e 150 caracteres.")
     private String nome;
 
+    @ToString.Exclude
     @NotBlank(message = "O CPF é obrigatório.")
     @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "CPF inválido.")
     private String cpf;
 
+    @ToString.Exclude
     @Pattern(regexp = "\\d{2}\\.\\d{3}\\.\\d{3}-\\d{1}", message = "RG inválido.")
     private String rg;
 
+    @ToString.Exclude
     @Pattern(regexp = "\\d{3}\\.\\d{5}\\.\\d{2}-\\d{1}", message = "PIS/NIT/NIS inválido.")
     private String pis;
 
@@ -112,6 +118,7 @@ public class FuncionarioDTO {
     @Size(max = 100, message = "O setor deve ter no máximo 100 caracteres.")
     private String setor;
 
+    @ToString.Exclude
     @NotNull(message = "O salário é obrigatório.")
     @DecimalMin(value = "0.01", message = "O salário deve ser maior que zero.")
     @Digits(integer = 10, fraction = 2, message = "Salário inválido.")
@@ -126,10 +133,12 @@ public class FuncionarioDTO {
     @Size(max = 100, message = "O banco deve ter no máximo 100 caracteres.")
     private String banco;
 
+    @ToString.Exclude
     @NotBlank(message = "A agência é obrigatória.")
     @Size(max = 10, message = "A agência deve ter no máximo 10 caracteres.")
     private String agencia;
 
+    @ToString.Exclude
     @NotBlank(message = "A conta é obrigatória.")
     @Size(max = 20, message = "A conta deve ter no máximo 20 caracteres.")
     private String conta;
@@ -138,6 +147,7 @@ public class FuncionarioDTO {
     @Pattern(regexp = "^(corrente|poupanca)$", message = "Tipo de conta deve ser 'corrente' ou 'poupanca'.")
     private String tipoConta;
 
+    @ToString.Exclude
     @Size(max = 100, message = "A chave PIX deve ter no máximo 100 caracteres.")
     private String pix;
 
@@ -147,6 +157,7 @@ public class FuncionarioDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<PerfilDTO> perfis;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String emailCorporativo;
 
 }

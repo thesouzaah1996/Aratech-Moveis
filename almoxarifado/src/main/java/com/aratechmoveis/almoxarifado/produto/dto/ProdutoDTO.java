@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,12 +14,10 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProdutoDTO {
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long id;
 
     @NotNull(message = "A categoria é obrigatória.")
     @Positive(message = "O ID da categoria deve ser um valor positivo.")
@@ -45,7 +44,8 @@ public class ProdutoDTO {
     @Size(max = 500, message = "A descrição deve ter no máximo 500 caracteres.")
     private String descricao;
 
-    @NotNull(message = "Local de Armazenamento é obrigatório")
+    @NotBlank(message = "Local de Armazenamento é obrigatório")
+    @Size(max = 150, message = "O local de armazenamento deve ter no máximo 150 caracteres.")
     private String localArmazenamento;
 
     @FutureOrPresent(message = "A data de vencimento deve ser uma data presente ou futura.")

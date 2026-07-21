@@ -2,9 +2,11 @@ package com.aratechmoveis.recursoshumanos.perfil.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -12,16 +14,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "perfis")
 public class Perfil {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "Nome do perfil é obrigatório")
-    @Column(unique = true)
+    @Size(min = 2, max = 100, message = "O nome precisa ter entre 2 e 100 caracteres.")
+    @Column(nullable = false, unique = true, length = 100)
     private String nome;
 
+    @Column(nullable = false)
     private boolean ativo = true;
 }

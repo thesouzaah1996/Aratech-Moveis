@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,12 +38,14 @@ public class ChamadoController {
     }
 
     @PutMapping("/atribuir/{id}")
+    @PreAuthorize("hasAnyRole('CONFERENTE_MANUTENCAO', 'ENCARREGADO_MANUTENCAO', 'ADMIN')")
     public ResponseEntity<Response> atribuirMecanico(@PathVariable @Min(1) Long id,
                                                        @RequestBody @Valid AtribuirMecanicoDTO atribuirMecanicoDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(chamadoService.atribuirMecanico(id, atribuirMecanicoDTO));
     }
 
     @PutMapping("/concluir/{id}")
+    @PreAuthorize("hasAnyRole('CONFERENTE_MANUTENCAO', 'ENCARREGADO_MANUTENCAO', 'ADMIN')")
     public ResponseEntity<Response> concluirChamado(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(chamadoService.concluirChamado(id));
     }

@@ -9,6 +9,8 @@
   display: flex;
   align-items: center;
   font-size: 0.9rem;
+  transform: translateZ(0);
+  will-change: transform;
 
   .container {
     height: 100%;

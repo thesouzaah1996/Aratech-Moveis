@@ -94,7 +94,6 @@ class SolicitacaoPecaServiceImpTest {
         @DisplayName("deve ignorar id enviado no DTO ao criar")
         void deveIgnorarIdEnviado() {
             SolicitacaoPecaDTO dto = umaSolicitacaoPecaDTO();
-            dto.setId(999L);
             SolicitacaoPeca solicitacao = umaSolicitacaoPeca();
             solicitacao.setId(999L);
 

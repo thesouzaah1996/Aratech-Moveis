@@ -4,6 +4,7 @@ export interface Funcionario {
   id: number;
   nome: string;
   email: string;
+  emailCorporativo?: string;
   cargo: string;
   setor: string;
   telefone?: string;

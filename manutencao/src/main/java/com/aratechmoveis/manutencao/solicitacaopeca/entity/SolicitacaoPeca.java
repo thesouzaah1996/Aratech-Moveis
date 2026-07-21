@@ -2,10 +2,12 @@ package com.aratechmoveis.manutencao.solicitacaopeca.entity;
 
 import com.aratechmoveis.manutencao.chamado.entity.Prioridade;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -16,11 +18,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "solicitacoes_peca")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Table(name = "solicitacoes_peca", indexes = {
+        @Index(name = "idx_solicitacoes_peca_finalidade", columnList = "finalidade"),
+        @Index(name = "idx_solicitacoes_peca_prioridade", columnList = "prioridade"),
+        @Index(name = "idx_solicitacoes_peca_criado_em", columnList = "criadoEm")
+})
 public class SolicitacaoPeca {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "O nome da peça é obrigatório")
@@ -30,6 +38,7 @@ public class SolicitacaoPeca {
     @Column(length = 50)
     private String codigo;
 
+    @Min(value = 1, message = "A quantidade deve ser maior que zero")
     @Column(nullable = false)
     private Integer quantidade;
 

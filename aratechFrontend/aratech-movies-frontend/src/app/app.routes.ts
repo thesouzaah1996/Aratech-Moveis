@@ -10,7 +10,9 @@ import { AlmoxarifadoComponent } from './componente/almoxarifado/almoxarifado.co
 import { EstoqueProdutosComponent } from './componente/almoxarifado/estoque-produtos/estoque-produtos.component';
 import { CategoriasComponent } from './componente/almoxarifado/categorias/categorias.component';
 import { FornecedoresComponent } from './componente/almoxarifado/fornecedores/fornecedores.component';
-import { AguardandoDescargaComponent } from './componente/almoxarifado/aguardando-descarga/aguardando-descarga.component';
+import { RecebimentoComponent } from './componente/almoxarifado/recebimento/recebimento.component';
+import { roleGuard } from './core/guards/role.guard';
+import { PRODUTOS_ALMOXARIFADO_ROLES } from './core/config/role-permissions';
 
 import { PortariaComponent } from './componente/portaria/portaria.component';
 import { BaixaNotasComponent } from './componente/portaria/baixa-notas/baixa-notas.component';
@@ -78,10 +80,10 @@ export const routes: Routes = [
   { path: 'dashboard',                              component: DashboardComponent },
 
   { path: 'almoxarifado',                           component: AlmoxarifadoComponent },
-  { path: 'almoxarifado/estoque-produtos',          component: EstoqueProdutosComponent },
+  { path: 'almoxarifado/estoque-produtos',          component: EstoqueProdutosComponent, canActivate: [roleGuard(PRODUTOS_ALMOXARIFADO_ROLES)] },
   { path: 'almoxarifado/categorias',                component: CategoriasComponent },
   { path: 'almoxarifado/fornecedores',              component: FornecedoresComponent },
-  { path: 'almoxarifado/aguardando-descarga',       component: AguardandoDescargaComponent },
+  { path: 'almoxarifado/recebimento',               component: RecebimentoComponent },
 
   { path: 'portaria',                               component: PortariaComponent },
   { path: 'portaria/baixa-notas',                   component: BaixaNotasComponent },

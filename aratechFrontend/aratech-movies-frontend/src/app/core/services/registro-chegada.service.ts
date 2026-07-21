@@ -6,10 +6,11 @@ import { environment } from '../../../environments/environment';
 
 interface ApiResponse {
   status: number;
-  message: string;
+  mensagem: string;
   registroChegada?: RegistroChegada;
   filaRegistroChegada?: RegistroChegada[];
   historicoRegistroChegada?: RegistroChegada[];
+  autorizados?: RegistroChegada[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -30,15 +31,21 @@ export class RegistroChegadaService {
       .pipe(map(res => res.historicoRegistroChegada ?? []));
   }
 
+  getAutorizados(): Observable<RegistroChegada[]> {
+    return this.http
+      .get<ApiResponse>(`${this.api}/autorizados`)
+      .pipe(map(res => res.autorizados ?? []));
+  }
+
   add(form: RegistroChegadaForm): Observable<RegistroChegada> {
     return this.http
-      .post<ApiResponse>(`${this.api}/adicionar`, form)
+      .post<ApiResponse>(`${this.api}/registrar`, form)
       .pipe(map(res => res.registroChegada!));
   }
 
-  finalizar(id: number): Observable<RegistroChegada> {
+  finalizar(notaFiscal: string): Observable<RegistroChegada> {
     return this.http
-      .put<ApiResponse>(`${this.api}/finalizar/${id}`, {})
+      .put<ApiResponse>(`${this.api}/finalizar`, null, { params: { notaFiscal } })
       .pipe(map(res => res.registroChegada!));
   }
 }

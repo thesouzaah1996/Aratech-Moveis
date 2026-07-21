@@ -3,6 +3,8 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:producao}
   application:
     name: aratech-portaria
+  autoconfigure:
+    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
 
   jpa:
     properties:

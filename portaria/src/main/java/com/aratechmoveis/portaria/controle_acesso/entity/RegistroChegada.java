@@ -2,10 +2,12 @@ package com.aratechmoveis.portaria.controle_acesso.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -21,6 +23,7 @@ public class RegistroChegada {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "A nota fiscal é obrigatória")
@@ -38,8 +41,13 @@ public class RegistroChegada {
     private String nomeMotorista;
 
     @NotBlank(message = "A placa do veículo é obrigatória")
+    @Pattern(regexp = "^[A-Z]{3}[0-9]{4}$|^[A-Z]{3}[0-9][A-Z][0-9]{2}$", message = "A placa deve estar em um formato válido (Mercosul ou antigo)")
     @Column(nullable = false, length = 10)
     private String placa;
+
+    @NotBlank(message = "A descrição da carga é obrigatória")
+    @Column(nullable = false, length = 500)
+    private String descricaoCarga;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -52,5 +60,5 @@ public class RegistroChegada {
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
-    private LocalDateTime dataEntrada;
+    private LocalDateTime dataChegada;
 }

@@ -29,8 +29,7 @@ export class AuditoriaComponent {
 
   logs: LogAuditoria[] = [];
   filtroModulo = '';
-  filtroDataInicio = '';
-  filtroDataFim = '';
+  filtroData = '';
   searchTerm = '';
   page = 1;
   pageSize = 8;
@@ -38,8 +37,7 @@ export class AuditoriaComponent {
   get filtrados(): LogAuditoria[] {
     let lista = [...this.logs];
     if (this.filtroModulo) lista = lista.filter(l => l.modulo === this.filtroModulo);
-    if (this.filtroDataInicio) lista = lista.filter(l => l.dataHora >= this.filtroDataInicio);
-    if (this.filtroDataFim)    lista = lista.filter(l => l.dataHora <= this.filtroDataFim + 'T23:59');
+    if (this.filtroData) lista = lista.filter(l => l.dataHora >= this.filtroData && l.dataHora <= this.filtroData + 'T23:59');
     const term = this.searchTerm.trim().toLowerCase();
     if (term) lista = lista.filter(l =>
       l.usuario.toLowerCase().includes(term) ||
@@ -66,8 +64,7 @@ export class AuditoriaComponent {
 
   limparFiltros(): void {
     this.filtroModulo = '';
-    this.filtroDataInicio = '';
-    this.filtroDataFim = '';
+    this.filtroData = '';
     this.searchTerm = '';
     this.page = 1;
   }

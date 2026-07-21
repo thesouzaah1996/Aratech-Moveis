@@ -5,6 +5,7 @@ import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaLookupDTO;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorDTO;
 import com.aratechmoveis.almoxarifado.fornecedor.dto.FornecedorLookupDTO;
 import com.aratechmoveis.almoxarifado.produto.dto.ProdutoDTO;
+import com.aratechmoveis.almoxarifado.recebimento.dto.RecebimentoDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,7 @@ import java.util.List;
 public class Response {
 
     private int status;
-    private String message;
+    private String mensagem;
 
     private String token;
     private String expirationTime;
@@ -35,6 +36,9 @@ public class Response {
     private List<FornecedorLookupDTO> fornecedorLookup;
     private List<CategoriaLookupDTO> categoriaLookup;
 
+    private RecebimentoDTO carga;
+    private List<RecebimentoDTO> recebimentos;
+    private List<RecebimentoDTO> historicoRecebimentos;
 
     private final LocalDateTime timestamp = LocalDateTime.now();
 }

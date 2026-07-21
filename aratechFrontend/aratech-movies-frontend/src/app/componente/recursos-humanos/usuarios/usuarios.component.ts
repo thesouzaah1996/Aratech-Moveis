@@ -41,9 +41,9 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
 
   @ViewChild('emailModal') emailModalEl!: ElementRef;
   private emailModal?: any;
-  private funcionariosCache: Funcionario[] = [];
   emailForm = { email: '' };
   emailSubmitted = false;
+  salvandoEmail = false;
 
   constructor(
     private readonly funcionarioService: FuncionarioService,
@@ -153,11 +153,8 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
   abrirModalEmail(): void {
     if (!this.usuarioEncontrado) return;
 
-    this.emailForm = { email: '' };
+    this.emailForm = { email: this.usuarioEncontrado.emailCorporativo ?? '' };
     this.emailSubmitted = false;
-    this.funcionarioService.getAll().subscribe({
-      next: funcionarios => (this.funcionariosCache = funcionarios)
-    });
     this.emailModal.show();
   }
 
@@ -169,19 +166,29 @@ export class UsuariosComponent implements OnInit, AfterViewInit {
     const email = this.emailForm.email.trim();
     if (!email) return 'E-mail é obrigatório.';
     if (!this.isValidEmail(email)) return 'Formato de e-mail inválido.';
-
-    const emEmUso = this.funcionariosCache.some(f =>
-      f.id !== this.usuarioEncontrado?.id && f.email?.toLowerCase() === email.toLowerCase()
-    );
-    return emEmUso ? 'Este e-mail já existe.' : '';
+    return '';
   }
 
   salvarEmail(): void {
     this.emailSubmitted = true;
     if (this.emailErro || !this.usuarioEncontrado) return;
 
-    this.usuarioEncontrado.email = this.emailForm.email.trim();
-    this.emailModal.hide();
-    this.showSuccess('E-mail corporativo atualizado com sucesso!');
+    this.salvandoEmail = true;
+    this.errorMessage = '';
+
+    this.funcionarioService
+      .atribuirEmailCorporativo(this.usuarioEncontrado.id, this.emailForm.email.trim())
+      .subscribe({
+        next: funcionario => {
+          this.usuarioEncontrado = funcionario;
+          this.salvandoEmail = false;
+          this.emailModal.hide();
+          this.showSuccess('E-mail corporativo atualizado com sucesso!');
+        },
+        error: err => {
+          this.salvandoEmail = false;
+          this.errorMessage = err.error?.mensagem ?? 'Não foi possível atualizar o e-mail corporativo.';
+        }
+      });
   }
 }
