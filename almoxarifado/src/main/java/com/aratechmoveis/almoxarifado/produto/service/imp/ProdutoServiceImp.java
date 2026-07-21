@@ -67,7 +67,7 @@ public class ProdutoServiceImp implements ProdutoService {
         return Response.builder()
                 .status(201)
                 .produto(produto)
-                .message("Produto criado com sucesso")
+                .mensagem("Produto criado com sucesso")
                 .build();
     }
 
@@ -116,7 +116,7 @@ public class ProdutoServiceImp implements ProdutoService {
         return Response.builder()
                 .status(200)
                 .produto(produto)
-                .message("Produto atualizado com sucesso")
+                .mensagem("Produto atualizado com sucesso")
                 .build();
     }
 
@@ -129,7 +129,7 @@ public class ProdutoServiceImp implements ProdutoService {
 
         return Response.builder()
                 .status(200)
-                .message("Produtos listados com sucesso")
+                .mensagem("Produtos listados com sucesso")
                 .produtos(produtoDTOS)
                 .build();
     }
@@ -144,7 +144,7 @@ public class ProdutoServiceImp implements ProdutoService {
 
         return Response.builder()
                 .status(200)
-                .message("Produto listado com sucesso")
+                .mensagem("Produto listado com sucesso")
                 .produto(produtoDTO)
                 .build();
     }
@@ -158,7 +158,7 @@ public class ProdutoServiceImp implements ProdutoService {
 
         return Response.builder()
                 .status(204)
-                .message("Produto deletado com sucesso")
+                .mensagem("Produto deletado com sucesso")
                 .build();
     }
 }

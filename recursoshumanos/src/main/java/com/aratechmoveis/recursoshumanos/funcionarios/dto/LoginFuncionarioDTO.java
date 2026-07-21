@@ -8,19 +8,24 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LoginFuncionarioDTO {
 
     @NotNull(message = "O id não pode ser nullo. Para criar o login de usuário, precisamos do id.")
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "O e-mail corporativo é obrigatório.")

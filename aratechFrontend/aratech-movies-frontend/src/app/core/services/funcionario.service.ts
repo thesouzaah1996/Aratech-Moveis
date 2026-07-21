@@ -52,4 +52,10 @@ export class FuncionarioService {
       .patch<ApiResponse>(`${this.api}/perfis/${id}`, { perfisIds })
       .pipe(map(res => res.funcionario!));
   }
+
+  atribuirEmailCorporativo(id: number, emailCorporativo: string): Observable<Funcionario> {
+    return this.http
+      .post<ApiResponse>(`${this.api}/email-corporativo`, { id, emailCorporativo })
+      .pipe(map(res => res.funcionario!));
+  }
 }

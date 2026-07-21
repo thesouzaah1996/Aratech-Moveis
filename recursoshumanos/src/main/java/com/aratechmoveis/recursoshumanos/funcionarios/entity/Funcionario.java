@@ -1,11 +1,15 @@
 package com.aratechmoveis.recursoshumanos.funcionarios.entity;
 
 import com.aratechmoveis.recursoshumanos.perfil.entity.Perfil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,12 +18,18 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
-@Table(name = "funcionarios")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Table(name = "funcionarios", indexes = {
+        @Index(name = "idx_funcionario_setor", columnList = "setor"),
+        @Index(name = "idx_funcionario_email_corporativo", columnList = "emailCorporativo")
+})
 public class Funcionario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "O nome completo é obrigatório.")
@@ -27,15 +37,21 @@ public class Funcionario {
     @Column(nullable = false, length = 150)
     private String nome;
 
+    @ToString.Exclude
+    @JsonIgnore
     @NotBlank(message = "O CPF é obrigatório.")
     @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "CPF inválido.")
     @Column(nullable = false, unique = true, length = 14)
     private String cpf;
 
+    @ToString.Exclude
+    @JsonIgnore
     @Pattern(regexp = "\\d{2}\\.\\d{3}\\.\\d{3}-\\d{1}", message = "RG inválido.")
     @Column(length = 12)
     private String rg;
 
+    @ToString.Exclude
+    @JsonIgnore
     @Pattern(regexp = "\\d{3}\\.\\d{5}\\.\\d{2}-\\d{1}", message = "PIS/NIT/NIS inválido.")
     @Column(length = 15)
     private String pis;
@@ -135,6 +151,8 @@ public class Funcionario {
     @Column(nullable = false, length = 100)
     private String setor;
 
+    @ToString.Exclude
+    @JsonIgnore
     @NotNull(message = "O salário é obrigatório.")
     @DecimalMin(value = "0.01", message = "O salário deve ser maior que zero.")
     @Digits(integer = 10, fraction = 2, message = "Salário inválido.")
@@ -152,11 +170,15 @@ public class Funcionario {
     @Column(nullable = false, length = 100)
     private String banco;
 
+    @ToString.Exclude
+    @JsonIgnore
     @NotBlank(message = "A agência é obrigatória.")
     @Size(max = 10, message = "A agência deve ter no máximo 10 caracteres.")
     @Column(nullable = false, length = 10)
     private String agencia;
 
+    @ToString.Exclude
+    @JsonIgnore
     @NotBlank(message = "A conta é obrigatória.")
     @Size(max = 20, message = "A conta deve ter no máximo 20 caracteres.")
     @Column(nullable = false, length = 20)
@@ -167,6 +189,8 @@ public class Funcionario {
     @Column(nullable = false, length = 10)
     private String tipoConta;
 
+    @ToString.Exclude
+    @JsonIgnore
     @Size(max = 100, message = "A chave PIX deve ter no máximo 100 caracteres.")
     @Column(length = 100)
     private String pix;
@@ -174,10 +198,14 @@ public class Funcionario {
     @Column(nullable = false)
     private boolean ativo = true;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "perfis_funcionarios", joinColumns = @JoinColumn(name = "funcionario_id"),
             inverseJoinColumns = @JoinColumn(name = "perfil_id"))
     private List<Perfil> perfis;
 
+    @Email(message = "E-mail inválido.")
+    @Size(max = 150, message = "O e-mail deve ter no máximo 150 caracteres.")
+    @Column(unique = true, length = 150)
     private String emailCorporativo;
 }

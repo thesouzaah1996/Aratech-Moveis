@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,18 +16,17 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SolicitacaoPecaDTO {
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long id;
 
     @NotBlank(message = "O nome da peça é obrigatório.")
     @Size(max = 150, message = "O nome da peça deve ter no máximo 150 caracteres.")
     private String nomePeca;
 
     @Size(max = 50, message = "O código deve ter no máximo 50 caracteres.")
+    @Pattern(regexp = "^[A-Za-z0-9\\-_]*$", message = "O código deve conter apenas letras, números, hífens e underscores.")
     private String codigo;
 
     @NotNull(message = "A quantidade é obrigatória.")

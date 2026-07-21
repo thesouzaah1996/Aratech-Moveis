@@ -7,9 +7,10 @@ export interface RegistroChegada {
   empresa: string;
   nomeMotorista: string;
   placa: string;
+  descricaoCarga: string;
   setorResponsavel: SetorResponsavel;
   status: StatusCaminhao;
-  dataEntrada: string;
+  dataChegada: string;
 }
 
 export interface RegistroChegadaForm {
@@ -17,6 +18,7 @@ export interface RegistroChegadaForm {
   empresa: string;
   nomeMotorista: string;
   placa: string;
+  descricaoCarga: string;
   setorResponsavel: SetorResponsavel | '';
 }
 

@@ -73,7 +73,7 @@ class FornecedorServiceImpTest {
             Response response = fornecedorService.adicionarFornecedor(dto);
 
             assertThat(response.getStatus()).isEqualTo(201);
-            assertThat(response.getMessage()).isEqualTo("Fornecedor adicionado com sucesso");
+            assertThat(response.getMensagem()).isEqualTo("Fornecedor adicionado com sucesso");
             then(fornecedorRepository).should().save(fornecedor);
         }
 

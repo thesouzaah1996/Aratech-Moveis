@@ -44,7 +44,10 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
 
   filtroNF = '';
   filtroData = '';
-  idParaConfirmar: number | null = null;
+  notaFiscalParaConfirmar: string | null = null;
+
+  page = 1;
+  pageSize = 8;
 
   private historicoModal?: any;
   private confirmEntradaModal?: any;
@@ -74,10 +77,39 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
     });
   }
 
+  get filaPaginada(): RegistroChegada[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.fila.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.fila.length / this.pageSize);
+  }
+
+  get visiblePages(): number[] {
+    const half = 5;
+    const start = Math.max(1, Math.min(this.page - half, this.totalPages - 7));
+    const end = Math.min(this.totalPages, start + 7);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  }
+
+  get paginationStart(): number {
+    return this.fila.length === 0 ? 0 : (this.page - 1) * this.pageSize + 1;
+  }
+
+  get paginationEnd(): number {
+    return Math.min(this.page * this.pageSize, this.fila.length);
+  }
+
+  setPage(p: number): void {
+    if (p < 1 || p > this.totalPages) return;
+    this.page = p;
+  }
+
   get historicoFiltrado(): RegistroChegada[] {
     return this.historico.filter(h => {
       const nfOk = !this.filtroNF || h.notaFiscal.toLowerCase().includes(this.filtroNF.toLowerCase());
-      const dataOk = !this.filtroData || h.dataEntrada.startsWith(this.filtroData);
+      const dataOk = !this.filtroData || h.dataChegada.startsWith(this.filtroData);
       return nfOk && dataOk;
     });
   }
@@ -86,13 +118,18 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
     this.submitted = true;
     if (!this.isFormValid()) return;
 
-    this.registroChegadaService.add(this.form).subscribe({
+    const payload: RegistroChegadaForm = {
+      ...this.form,
+      placa: this.form.placa.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    };
+
+    this.registroChegadaService.add(payload).subscribe({
       next: registro => {
         this.fila.push(registro);
         this.resetForm();
         this.showSuccess('Chegada registrada com sucesso!');
       },
-      error: err => this.showError(err.error?.message ?? 'Erro ao registrar chegada.')
+      error: err => this.showError(err.error?.mensagem ?? 'Erro ao registrar chegada.')
     });
   }
 
@@ -101,34 +138,26 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
     this.historicoModal.show();
   }
 
-  abrirConfirmacaoEntrada(id: number): void {
-    this.idParaConfirmar = id;
+  abrirConfirmacaoEntrada(notaFiscal: string): void {
+    this.notaFiscalParaConfirmar = notaFiscal;
     this.confirmEntradaModal.show();
   }
 
   confirmarEntrada(): void {
-    if (!this.idParaConfirmar) return;
+    if (!this.notaFiscalParaConfirmar) return;
 
-    this.registroChegadaService.finalizar(this.idParaConfirmar).subscribe({
+    this.registroChegadaService.finalizar(this.notaFiscalParaConfirmar).subscribe({
       next: () => {
-        this.fila = this.fila.filter(i => i.id !== this.idParaConfirmar);
-        this.idParaConfirmar = null;
+        this.fila = this.fila.filter(i => i.notaFiscal !== this.notaFiscalParaConfirmar);
+        this.notaFiscalParaConfirmar = null;
         this.confirmEntradaModal.hide();
         this.showSuccess('Entrada confirmada com sucesso!');
       },
       error: err => {
         this.confirmEntradaModal.hide();
-        this.showError(err.error?.message ?? 'Erro ao confirmar entrada.');
+        this.showError(err.error?.mensagem ?? 'Erro ao confirmar entrada.');
       }
     });
-  }
-
-  formatWaitTime(dataEntrada: string): string {
-    const diff = Date.now() - new Date(dataEntrada).getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(minutes / 60);
-    const rest = minutes % 60;
-    return hours > 0 ? `${hours}h ${rest}min` : `${minutes}min`;
   }
 
   badgeClass(status: StatusCaminhao): string {
@@ -151,6 +180,7 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
       this.form.empresa.trim() &&
       this.form.nomeMotorista.trim() &&
       this.form.placa.trim() &&
+      this.form.descricaoCarga.trim() &&
       this.form.setorResponsavel
     );
   }
@@ -161,7 +191,7 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
   }
 
   private emptyForm(): RegistroChegadaForm {
-    return { notaFiscal: '', empresa: '', nomeMotorista: '', placa: '', setorResponsavel: '' };
+    return { notaFiscal: '', empresa: '', nomeMotorista: '', placa: '', descricaoCarga: '', setorResponsavel: '' };
   }
 
   private showSuccess(msg: string): void {

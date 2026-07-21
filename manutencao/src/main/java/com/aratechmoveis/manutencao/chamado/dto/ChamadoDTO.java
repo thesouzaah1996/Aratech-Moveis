@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,12 +20,10 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ChamadoDTO {
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long id;
 
     @NotBlank(message = "O equipamento é obrigatório.")
     @Size(max = 150, message = "O equipamento deve ter no máximo 150 caracteres.")

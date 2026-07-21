@@ -1,3 +1,5 @@
+name: aratechmoveis
+
 networks:
   aratech-network:
     driver: bridge
@@ -153,6 +155,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_RETENTION_HOURS: 48
     networks:
       - aratech-network
 
@@ -183,6 +186,8 @@ services:
       ALMOXARIFADO_DB_USER_PROD: postgres
       ALMOXARIFADO_DB_PASSWORD_PROD: postgres
       JWT_CHAVE_SECRETA: ${JWT_CHAVE_SECRETA}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     depends_on:
       almoxarifado-db:
         condition: service_healthy
@@ -237,6 +242,8 @@ services:
       PORTARIA_DB_USER_PROD: postgres
       PORTARIA_DB_PASSWORD_PROD: postgres
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_CHAVE_SECRETA: ${JWT_CHAVE_SECRETA}
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     depends_on:
       portaria-db:
         condition: service_healthy
@@ -310,6 +317,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://manutencao-db:5432/manutencao-prod
       MANUTENCAO_DB_USER_PROD: postgres
       MANUTENCAO_DB_PASSWORD_PROD: postgres
+      JWT_CHAVE_SECRETA: ${JWT_CHAVE_SECRETA}
     depends_on:
       manutencao-db:
         condition: service_healthy
@@ -328,18 +336,5 @@ services:
     restart: always
     ports:
       - "80:80"
-    depends_on:
-      almoxarifado:
-        condition: service_healthy
-      login:
-        condition: service_healthy
-      portaria:
-        condition: service_healthy
-      recursoshumanos:
-        condition: service_healthy
-      administracao:
-        condition: service_healthy
-      manutencao:
-        condition: service_healthy
     networks:
       - aratech-network

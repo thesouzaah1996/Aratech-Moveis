@@ -16,7 +16,9 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Table(name = "fornecedores")
+@Table(name = "fornecedores", indexes = {
+        @Index(name = "idx_fornecedor_ativo", columnList = "ativo")
+})
 public class Fornecedor {
 
     @Id
@@ -36,15 +38,16 @@ public class Fornecedor {
     private String email;
 
     @NotBlank(message = "O telefone fixo do fornecedor é obrigatório.")
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String telefone;
 
     private Representante representante;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "fornecedor")
+    @OneToMany(mappedBy = "fornecedor", fetch = FetchType.LAZY)
     private List<Produto> produto;
 
     @Builder.Default
+    @Column(nullable = false)
     private Boolean ativo = true;
 }

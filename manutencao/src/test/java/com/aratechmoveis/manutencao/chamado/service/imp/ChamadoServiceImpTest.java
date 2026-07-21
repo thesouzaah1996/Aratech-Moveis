@@ -108,7 +108,6 @@ class ChamadoServiceImpTest {
         @DisplayName("deve ignorar id enviado no DTO ao criar")
         void deveIgnorarIdEnviado() {
             ChamadoDTO dto = umChamadoDTO();
-            dto.setId(999L);
             Chamado chamado = umChamado();
             chamado.setId(999L);
 

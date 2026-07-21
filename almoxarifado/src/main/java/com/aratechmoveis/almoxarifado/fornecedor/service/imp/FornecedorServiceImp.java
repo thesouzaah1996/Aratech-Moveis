@@ -44,7 +44,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
         return Response.builder()
                 .status(201)
-                .message("Fornecedor adicionado com sucesso")
+                .mensagem("Fornecedor adicionado com sucesso")
                 .fornecedorDTO(fornecedorCriadoDTO)
                 .build();
     }
@@ -82,7 +82,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
         return Response.builder()
                 .status(200)
-                .message("Fornecedor atualizado com sucesso")
+                .mensagem("Fornecedor atualizado com sucesso")
                 .fornecedorDTO(fornecedorEditado)
                 .build();
 
@@ -97,7 +97,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
         return Response.builder()
                 .status(200)
-                .message("Fornecedores listados com sucesso")
+                .mensagem("Fornecedores listados com sucesso")
                 .fornecedores(fornecedoresDTO)
                 .build();
     }
@@ -115,7 +115,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
         return Response.builder()
                 .status(200)
-                .message("Fornecedor desabilitado com sucesso")
+                .mensagem("Fornecedor desabilitado com sucesso")
                 .fornecedorDTO(modelMapper.map(fornecedorAtivo, FornecedorDTO.class))
                 .build();
     }
@@ -129,7 +129,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
         return Response.builder()
                 .status(200)
-                .message("Lookup de fornecedores carregado com sucesso")
+                .mensagem("Lookup de fornecedores carregado com sucesso")
                 .fornecedorLookup(lookup)
                 .build();
     }
@@ -147,7 +147,7 @@ public class FornecedorServiceImp implements FornecedorService {
 
         return Response.builder()
                 .status(200)
-                .message("Fornecedor ativado com sucesso.")
+                .mensagem("Fornecedor ativado com sucesso.")
                 .fornecedorDTO(modelMapper.map(fornecedorInativo, FornecedorDTO.class))
                 .build();
     }

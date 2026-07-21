@@ -40,4 +40,35 @@ export class AuthService {
   confirmarPrimeiroAcesso(emailCorporativo: string, codigo: string, novaSenha: string): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.api}/primeiro-acesso/confirmar`, { emailCorporativo, codigo, novaSenha });
   }
+
+  salvarSessao(token: string, perfis: string[]): void {
+    localStorage.setItem('token', token);
+    localStorage.setItem('perfis', JSON.stringify(perfis));
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('perfis');
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  getPerfis(): string[] {
+    try {
+      return JSON.parse(localStorage.getItem('perfis') ?? '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  hasAnyRole(roles: string[]): boolean {
+    const perfis = this.getPerfis();
+    return roles.some(role => perfis.includes(role));
+  }
 }

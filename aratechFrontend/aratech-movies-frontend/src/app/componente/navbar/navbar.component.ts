@@ -1,5 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 declare const bootstrap: any;
 
@@ -13,11 +14,12 @@ declare const bootstrap: any;
 export class NavbarComponent {
   @ViewChild('logoutModal') logoutModalEl!: ElementRef;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   performLogout(): void {
     const modal = bootstrap.Modal.getInstance(this.logoutModalEl.nativeElement);
     modal?.hide();
+    this.authService.logout();
     this.router.navigate(['/login']);
   }
 }

@@ -6,7 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -15,24 +17,22 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "categorias")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Table(name = "categorias", indexes = {
+        @Index(name = "idx_categoria_nome", columnList = "nome")
+})
 public class Categoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "Nome da categoria é obrigatório")
+    @Column(nullable = false, length = 100)
     private String nome;
 
-    @OneToMany(mappedBy = "categoria")
+    @ToString.Exclude
+    @OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY)
     private List<Produto> produtos;
-
-    @Override
-    public String toString() {
-        return "Categoria{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                '}';
-    }
 }

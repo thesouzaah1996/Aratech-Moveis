@@ -2,7 +2,6 @@ package com.aratechmoveis.almoxarifado.categoria.service.imp;
 
 import com.aratechmoveis.almoxarifado.Response;
 import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaDTO;
-import com.aratechmoveis.almoxarifado.categoria.dto.CategoriaLookupDTO;
 import com.aratechmoveis.almoxarifado.categoria.entity.Categoria;
 import com.aratechmoveis.almoxarifado.categoria.repository.CategoriaRepository;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
@@ -69,7 +68,7 @@ class CategoriaServiceImpTest {
             Response response = categoriaService.criarCategoria(dto);
 
             assertThat(response.getStatus()).isEqualTo(201);
-            assertThat(response.getMessage()).isEqualTo("Categoria criada com sucesso");
+            assertThat(response.getMensagem()).isEqualTo("Categoria criada com sucesso");
             then(categoriaRepository).should().save(categoria);
         }
 

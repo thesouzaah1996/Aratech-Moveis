@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,26 +22,31 @@ public class FornecedorController {
     private final FornecedorService fornecedorService;
 
     @PostMapping("/adicionar")
+    @PreAuthorize("hasAnyRole('ENCARREGADO_ALMOXARIFADO', 'ADMIN')")
     public ResponseEntity<Response> adicionarFornecedor(@RequestBody @Valid FornecedorDTO fornecedorDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(fornecedorService.adicionarFornecedor(fornecedorDTO));
     }
 
     @GetMapping("/todos")
+    @PreAuthorize("hasAnyRole('ENCARREGADO_ALMOXARIFADO', 'CONFERENTE_ALMOXARIFADO', 'ADMIN')")
     public ResponseEntity<Response> listarFornecedores() {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.listarFornecedores());
     }
 
     @PatchMapping("/desativar/{id}")
+    @PreAuthorize("hasAnyRole('ENCARREGADO_ALMOXARIFADO', 'ADMIN')")
     public ResponseEntity<Response> desativarFornecedor(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.desativarFornecedor(id));
     }
 
     @PatchMapping("/ativar/{id}")
+    @PreAuthorize("hasAnyRole('ENCARREGADO_ALMOXARIFADO', 'ADMIN')")
     public ResponseEntity<Response> ativarFornecedor(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.ativarFornecedor(id));
     }
 
     @PutMapping("/atualizar/{id}")
+    @PreAuthorize("hasAnyRole('ENCARREGADO_ALMOXARIFADO', 'ADMIN')")
     public ResponseEntity<Response> atualizarFornecedor(@PathVariable @Min(1) Long id, @RequestBody FornecedorDTO fornecedorDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(fornecedorService.atualizarFornecedor(id, fornecedorDTO));
     }

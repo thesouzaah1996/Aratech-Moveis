@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -15,11 +16,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "chamados")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Table(name = "chamados", indexes = {
+        @Index(name = "idx_chamados_status", columnList = "status"),
+        @Index(name = "idx_chamados_tipo", columnList = "tipo"),
+        @Index(name = "idx_chamados_prioridade", columnList = "prioridade"),
+        @Index(name = "idx_chamados_data_abertura", columnList = "dataAbertura")
+})
 public class Chamado {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @NotBlank(message = "O equipamento é obrigatório")

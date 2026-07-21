@@ -23,7 +23,7 @@ public class FuncionarioServiceImp implements FuncionarioService {
     private final ModelMapper modelMapper;
 
     @Override
-    public Response adicionarFuncionario(Funcionario funcionario) {
+    public Response adicionarFuncionario(FuncionarioDTO funcionario) {
         if (funcionarioRepository.existsByIdFuncionario(funcionario.getIdFuncionario())) {
             throw new RecursoJaExistenteException("Funcionario já existe no sistema.");
         }
@@ -41,7 +41,9 @@ public class FuncionarioServiceImp implements FuncionarioService {
                 .toList();
         funcionario.setPerfis(perfis);
 
-        funcionarioRepository.save(funcionario);
+        Funcionario funcionarioDTO = modelMapper.map(funcionario, Funcionario.class);
+
+        funcionarioRepository.save(funcionarioDTO);
 
         return Response.builder()
                 .status(201)

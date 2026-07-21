@@ -61,7 +61,7 @@ export class LoginComponent implements OnInit {
       next: (res) => {
         this.isLoading = false;
         this.loginState = 'success';
-        localStorage.setItem('token', res.dados.token);
+        this.authService.salvarSessao(res.dados.token, res.dados.perfis);
         setTimeout(() => this.router.navigate(['/dashboard']), 1500);
       },
       error: () => {

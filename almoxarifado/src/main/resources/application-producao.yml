@@ -13,6 +13,19 @@ spring:
       max-lifetime: 1800000
       leak-detection-threshold: 60000
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: aratech-almoxarifado-recebimento
+      auto-offset-reset: earliest
+
+aratech:
+  config:
+    kafka:
+      topics:
+        portaria-registro-chegada-almoxarifado: 'aratech.registro.chegada.almoxarifado'
+        almoxarifado-liberar-recebimento: 'almoxarifado-liberar-recebimento'
+
   flyway:
     baseline-on-migrate: true
     baseline-version: 3

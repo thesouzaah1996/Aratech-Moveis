@@ -98,7 +98,7 @@ class ProdutoServiceImpTest {
             Response response = produtoService.adicionarProduto(dto);
 
             assertThat(response.getStatus()).isEqualTo(201);
-            assertThat(response.getMessage()).isEqualTo("Produto criado com sucesso");
+            assertThat(response.getMensagem()).isEqualTo("Produto criado com sucesso");
             assertThat(produto.getCategoria()).isEqualTo(categoria);
             assertThat(produto.getFornecedor()).isEqualTo(fornecedor);
             then(produtoRepository).should().save(produto);
@@ -204,7 +204,7 @@ class ProdutoServiceImpTest {
             Response response = produtoService.atualizarProduto(1L, dto);
 
             assertThat(response.getStatus()).isEqualTo(200);
-            assertThat(response.getMessage()).isEqualTo("Produto atualizado com sucesso");
+            assertThat(response.getMensagem()).isEqualTo("Produto atualizado com sucesso");
             assertThat(produtoExistente.getNome()).isEqualTo("Cadeira Ergonômica");
             then(produtoRepository).should().save(produtoExistente);
         }

@@ -54,7 +54,7 @@ class ProdutoControllerTest {
         @DisplayName("deve retornar 201 quando o produto é criado com sucesso")
         void deveRetornar201QuandoProdutoCriadoComSucesso() throws Exception {
             ProdutoDTO dto = umProdutoDTOValido();
-            Response response = Response.builder().status(201).message("Produto criado com sucesso").produto(dto).build();
+            Response response = Response.builder().status(201).mensagem("Produto criado com sucesso").produto(dto).build();
 
             given(produtoService.adicionarProduto(any(ProdutoDTO.class))).willReturn(response);
 
@@ -129,7 +129,7 @@ class ProdutoControllerTest {
         void deveRetornar200QuandoProdutoAtualizadoComSucesso() throws Exception {
             ProdutoDTO dto = new ProdutoDTO();
             dto.setNome("Novo Nome");
-            Response response = Response.builder().status(200).message("Produto atualizado com sucesso").produto(dto).build();
+            Response response = Response.builder().status(200).mensagem("Produto atualizado com sucesso").produto(dto).build();
 
             given(produtoService.atualizarProduto(eq(1L), any(ProdutoDTO.class))).willReturn(response);
 
@@ -169,7 +169,7 @@ class ProdutoControllerTest {
         @Test
         @DisplayName("deve retornar 200 com a lista de produtos")
         void deveRetornar200ComListaDeProdutos() throws Exception {
-            Response response = Response.builder().status(200).message("Produtos listados com sucesso")
+            Response response = Response.builder().status(200).mensagem("Produtos listados com sucesso")
                     .produtos(java.util.List.of(umProdutoDTOValido())).build();
 
             given(produtoService.listarProdutos()).willReturn(response);
@@ -187,7 +187,7 @@ class ProdutoControllerTest {
         @Test
         @DisplayName("deve retornar 200 quando o produto existe")
         void deveRetornar200QuandoProdutoExiste() throws Exception {
-            Response response = Response.builder().status(200).message("Produto listado com sucesso").produto(umProdutoDTOValido()).build();
+            Response response = Response.builder().status(200).mensagem("Produto listado com sucesso").produto(umProdutoDTOValido()).build();
 
             given(produtoService.buscarProdutoPorId(1L)).willReturn(response);
 
@@ -221,7 +221,7 @@ class ProdutoControllerTest {
         @Test
         @DisplayName("deve retornar 204 quando o produto é deletado com sucesso")
         void deveRetornar204QuandoProdutoDeletadoComSucesso() throws Exception {
-            Response response = Response.builder().status(204).message("Produto deletado com sucesso").build();
+            Response response = Response.builder().status(204).mensagem("Produto deletado com sucesso").build();
 
             given(produtoService.removerProduto(1L)).willReturn(response);
 
