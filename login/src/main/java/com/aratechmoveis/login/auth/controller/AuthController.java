@@ -6,6 +6,8 @@ import com.aratechmoveis.login.auth.request.PrimeiroAcessoRequest;
 import com.aratechmoveis.login.auth.service.AuthService;
 import com.aratechmoveis.login.response.LoginResponse;
 import com.aratechmoveis.login.response.Response;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.micrometer.observation.autoconfigure.ObservationProperties;
 import org.springframework.http.HttpStatus;
@@ -36,11 +38,11 @@ public class AuthController {
 
     @PutMapping("/redefinir-senha")
     public ResponseEntity<Response> redefinirSenha(@RequestParam String email) {
-        return ResponseEntity.status(HttpStatus.OK).body(authService.solicitarRedefinicaoSenha(email));
+        return ResponseEntity.status(HttpStatus.OK).body(authService.redefinirSenha(email));
     }
 
-    @PutMapping("/alterar-senha")
-    public ResponseEntity<Response> alterarSenha(@RequestParam AlterarSenhaRequest alterarSenhaRequest) {
-        return ResponseEntity.status(HttpStatus.OK).body(authService.alterarSenha(alterarSenhaRequest));
+    @PutMapping("/alterar-senha/{idFuncionario}")
+    public ResponseEntity<Response> alterarSenha(@PathVariable @Min(1) Long idFuncionario,  @RequestBody @Valid AlterarSenhaRequest alterarSenhaRequest) {
+        return ResponseEntity.status(HttpStatus.OK).body(authService.alterarSenha(idFuncionario, alterarSenhaRequest));
     }
 }

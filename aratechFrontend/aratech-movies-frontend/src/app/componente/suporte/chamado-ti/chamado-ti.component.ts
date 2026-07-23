@@ -2,7 +2,6 @@ import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 declare const bootstrap: any;
@@ -22,7 +21,7 @@ interface FormChamadoTi {
 @Component({
   selector: 'app-chamado-ti',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './chamado-ti.component.html',
   styleUrl: './chamado-ti.component.scss'
 })

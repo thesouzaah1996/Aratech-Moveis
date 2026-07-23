@@ -1,7 +1,6 @@
 import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { FuncionarioService } from '../../../core/services/funcionario.service';
 import { Funcionario, FuncionarioForm } from '../../../core/models/funcionario.model';
@@ -67,7 +66,7 @@ interface FormFuncionarioEdit {
 @Component({
   selector: 'app-funcionarios',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './funcionarios.component.html',
   styleUrl: './funcionarios.component.scss'
 })

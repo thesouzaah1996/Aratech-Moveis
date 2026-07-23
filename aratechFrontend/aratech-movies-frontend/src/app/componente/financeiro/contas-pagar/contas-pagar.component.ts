@@ -2,7 +2,6 @@ import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 declare const bootstrap: any;
@@ -22,7 +21,7 @@ export interface ContaPagar {
 @Component({
   selector: 'app-contas-pagar',
   standalone: true,
-  imports: [FormsModule, CurrencyPipe, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, CurrencyPipe, NavbarComponent, BreadcrumbComponent],
   templateUrl: './contas-pagar.component.html',
   styleUrl: './contas-pagar.component.scss'
 })

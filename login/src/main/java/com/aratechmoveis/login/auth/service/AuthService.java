@@ -11,11 +11,11 @@ public interface AuthService {
 
     Response<LoginResponse> login(LoginRequest loginRequest);
 
-    Response<?> solicitarRedefinicaoSenha(String email);
-
     Response<?> solicitarPrimeiroAcesso(String emailPessoal);
 
     Response<?> confirmarPrimeiroAcesso(PrimeiroAcessoRequest primeiroAcessoRequest);
 
-    Response<?> alterarSenha(AlterarSenhaRequest alterarSenhaRequest);
+    Response<?> redefinirSenha(String email);
+
+    Response<?> alterarSenha(Long idFuncionario, AlterarSenhaRequest alterarSenhaRequest);
 }

@@ -2,7 +2,6 @@ import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 declare const bootstrap: any;
@@ -24,7 +23,7 @@ export interface PedidoCompra {
 @Component({
   selector: 'app-pedidos',
   standalone: true,
-  imports: [FormsModule, CurrencyPipe, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, CurrencyPipe, NavbarComponent, BreadcrumbComponent],
   templateUrl: './pedidos.component.html',
   styleUrl: './pedidos.component.scss'
 })

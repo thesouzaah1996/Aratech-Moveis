@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 export interface LinhaCapacidade {
@@ -14,7 +13,7 @@ export interface LinhaCapacidade {
 @Component({
   selector: 'app-capacidade',
   standalone: true,
-  imports: [NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [NavbarComponent, BreadcrumbComponent],
   templateUrl: './capacidade.component.html',
   styleUrl: './capacidade.component.scss'
 })

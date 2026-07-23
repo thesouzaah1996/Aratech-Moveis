@@ -1,34 +1,32 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Security Alert: Password Changed</title>
+    <title>Alerta de Segurança: Senha Alterada</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <style>
-        body { font-family: Inter, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Inter, Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
-        .header { background-color: #ef4444; color: #ffffff; padding: 20px; text-align: center; }
-        .content { padding: 30px; text-align: left; line-height: 1.6; color: #333333; }
-        .footer { background-color: #eeeeee; color: #666666; padding: 20px; text-align: center; font-size: 0.9em; border-top: 1px solid #dddddd; }
+        .header { background-color: #000000; padding: 20px; text-align: center; }
+        .content { padding: 30px; text-align: left; line-height: 1.6; color: #0b1020; }
+        .footer { background-color: #000000; color: #ffffff; padding: 20px; text-align: center; font-size: 0.9em; border-top: 1px solid #dddddd; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h2>Security Alert</h2>
+        <img src="cid:logoAratech" alt="Aratech Móveis" width="160" style="max-width: 160px; display: block; margin: 0 auto; vertical-align: middle;"/>
     </div>
     <div class="content">
-        <p>Dear <strong th:text="${name}">[User Name]</strong>,</p>
-        <p>This is a security notification to inform you that your password for your DAT Health account was recently
-            changed.</p>
-        <p><strong>Time of Change:</strong> <span th:text="${changeTime}">[Date and Time]</span></p>
-        <p>If you performed this action, you can disregard this message.</p>
-        <p><strong>If you did NOT authorize this change, please contact our security team immediately</strong> to secure
-            your account.</p>
-        <p>Thank you for helping us keep your account safe.</p>
-        <p>The DAT Health Security Team</p>
+        <p>Olá <strong th:text="${name}"></strong>,</p>
+        <p>Este é um alerta de segurança para informar que a senha da sua conta Aratech Móveis foi alterada recentemente.</p>
+        <p><strong>Data e hora da alteração:</strong> <span th:text="${changeTime}"></span></p>
+        <p>Se foi você quem realizou essa alteração, pode ignorar esta mensagem.</p>
+        <p><strong>Se você não autorizou essa alteração, entre em contato com nossa equipe de suporte imediatamente</strong> para proteger sua conta.</p>
+        <p>Obrigado por nos ajudar a manter sua conta segura.</p>
+        <p>Atenciosamente,<br>Equipe Aratech Móveis</p>
     </div>
     <div class="footer">
-        &copy; <span th:text="${T(java.time.Year).now()}">2026</span> DAT Health. All rights reserved.
+        &copy; <span th:text="${T(java.time.Year).now()}">2026</span> Aratech Móveis. Todos os direitos reservados.
     </div>
 </div>
 </body>

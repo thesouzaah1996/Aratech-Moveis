@@ -1,7 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { PerfilService } from '../../../core/services/perfil.service';
 import { Perfil } from '../../../core/models/perfil.model';
@@ -11,7 +10,7 @@ declare const bootstrap: any;
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.scss'
 })

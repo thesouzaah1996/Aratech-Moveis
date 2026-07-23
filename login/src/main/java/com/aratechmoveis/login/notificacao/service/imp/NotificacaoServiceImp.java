@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
 public class NotificacaoServiceImp implements NotificacaoService {
 
     private static final String LOGO_CID = "logoAratech";
-    private static final String LOGO_PATH_PADRAO = "static/img/aratech-logo-login-branco.png";
+    private static final String LOGO_PATH_PADRAO = "static/img/aratech-logo-dashboard.png";
 
     private final NotificacaoRepo notificacaoRepo;
     private final FuncionarioRepository funcionarioRepository;

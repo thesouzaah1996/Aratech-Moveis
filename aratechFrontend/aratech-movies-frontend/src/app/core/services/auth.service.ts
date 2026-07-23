@@ -29,8 +29,8 @@ export class AuthService {
     return this.http.put<ApiResponse>(`${this.api}/redefinir-senha`, null, { params: { email } });
   }
 
-  confirmarRedefinicaoSenha(codigo: string, novaSenha: string): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.api}/reset-password`, { codigo, novaSenha });
+  confirmarRedefinicaoSenha(codigo: string, senha: string, confirmarSenha: string): Observable<ApiResponse> {
+    return this.http.put<ApiResponse>(`${this.api}/alterar-senha`, { codigo, senha, confirmarSenha });
   }
 
   solicitarPrimeiroAcesso(emailPessoal: string): Observable<ApiResponse> {

@@ -151,7 +151,7 @@ class AuthServiceImpTest {
             given(funcionarioRepository.findByEmailCorporativo(funcionario.getEmailCorporativo())).willReturn(Optional.of(funcionario));
             given(geradorCodigo.gerarCodigoUnico()).willReturn("CODIG");
 
-            Response<?> response = authService.solicitarRedefinicaoSenha(funcionario.getEmailCorporativo());
+            Response<?> response = authService.redefinirSenha(funcionario.getEmailCorporativo());
 
             assertThat(response.getStatus()).isEqualTo(200);
             then(codigoResetSenhaRepo).should().deleteByFuncionarioIdFuncionario(funcionario.getIdFuncionario());
@@ -164,7 +164,7 @@ class AuthServiceImpTest {
         void deveLancarExcecaoQuandoFuncionarioNaoEncontrado() {
             given(funcionarioRepository.findByEmailCorporativo("inexistente@aratech.com")).willReturn(Optional.empty());
 
-            assertThatThrownBy(() -> authService.solicitarRedefinicaoSenha("inexistente@aratech.com"))
+            assertThatThrownBy(() -> authService.redefinirSenha("inexistente@aratech.com"))
                     .isInstanceOf(NotFoundException.class);
 
             then(codigoResetSenhaRepo).should(never()).save(any());

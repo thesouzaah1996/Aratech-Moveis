@@ -1,6 +1,5 @@
 import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { RecebimentoService } from '../../../core/services/recebimento.service';
 import { Recebimento, STATUS_RECEBIMENTO_LABELS, StatusRecebimento } from '../../../core/models/recebimento.model';
@@ -10,7 +9,7 @@ declare const bootstrap: any;
 @Component({
   selector: 'app-recebimento',
   standalone: true,
-  imports: [NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [NavbarComponent, BreadcrumbComponent],
   templateUrl: './recebimento.component.html',
   styleUrl: './recebimento.component.scss'
 })

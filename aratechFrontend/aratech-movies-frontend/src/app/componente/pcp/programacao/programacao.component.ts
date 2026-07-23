@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 export interface ProgramacaoItem {
@@ -18,7 +17,7 @@ export interface ProgramacaoItem {
 @Component({
   selector: 'app-programacao',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './programacao.component.html',
   styleUrl: './programacao.component.scss'
 })

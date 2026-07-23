@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 export interface PedidoAprovacao {
@@ -19,7 +18,7 @@ export interface PedidoAprovacao {
 @Component({
   selector: 'app-aprovacoes',
   standalone: true,
-  imports: [CurrencyPipe, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [CurrencyPipe, NavbarComponent, BreadcrumbComponent],
   templateUrl: './aprovacoes.component.html',
   styleUrl: './aprovacoes.component.scss'
 })

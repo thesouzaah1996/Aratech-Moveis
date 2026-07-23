@@ -74,7 +74,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login',                                  component: LoginComponent },
   { path: 'redefinir-senha',                        component: RedefinirSenhaComponent },
-  { path: 'reset-password',                         component: ResetPasswordComponent },
+  { path: 'reset-senha',                            component: ResetPasswordComponent },
   { path: 'primeiro-acesso/solicitar',               component: SolicitarPrimeiroAcessoComponent },
   { path: 'primeiro-acesso',                        component: ConfirmarPrimeiroAcessoComponent },
   { path: 'dashboard',                              component: DashboardComponent },

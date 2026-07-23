@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NavbarComponent } from '../navbar/navbar.component';
-import { FooterComponent } from '../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../breadcrumb/breadcrumb.component';
 import { AuthService } from '../../core/services/auth.service';
 import { PRODUTOS_ALMOXARIFADO_ROLES } from '../../core/config/role-permissions';
@@ -9,7 +8,7 @@ import { PRODUTOS_ALMOXARIFADO_ROLES } from '../../core/config/role-permissions'
 @Component({
   selector: 'app-almoxarifado',
   standalone: true,
-  imports: [RouterLink, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [RouterLink, NavbarComponent, BreadcrumbComponent],
   templateUrl: './almoxarifado.component.html',
   styleUrl: './almoxarifado.component.scss'
 })

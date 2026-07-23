@@ -1,7 +1,6 @@
 import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 declare const bootstrap: any;
@@ -28,7 +27,7 @@ export interface Solicitacao {
 @Component({
   selector: 'app-solicitacoes',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './solicitacoes.component.html',
   styleUrl: './solicitacoes.component.scss'
 })

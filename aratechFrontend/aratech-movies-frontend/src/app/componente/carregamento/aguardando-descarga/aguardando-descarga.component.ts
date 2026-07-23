@@ -1,6 +1,5 @@
 import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 declare const bootstrap: any;
@@ -20,7 +19,7 @@ export interface ItemFilaCarregamento {
 @Component({
   selector: 'app-carregamento-aguardando-descarga',
   standalone: true,
-  imports: [NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [NavbarComponent, BreadcrumbComponent],
   templateUrl: './aguardando-descarga.component.html',
   styleUrl: './aguardando-descarga.component.scss'
 })

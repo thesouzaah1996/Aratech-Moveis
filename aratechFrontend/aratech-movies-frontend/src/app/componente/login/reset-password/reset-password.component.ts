@@ -12,7 +12,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class ResetPasswordComponent implements OnInit {
   codigo = '';
-  novaSenha = '';
+  senha = '';
   confirmarSenha = '';
   senhaError = '';
   confirmarError = '';
@@ -30,7 +30,9 @@ export class ResetPasswordComponent implements OnInit {
     this.codigo = this.route.snapshot.queryParamMap.get('code') ?? '';
     if (!this.codigo) {
       this.state = 'sem-codigo';
+      return;
     }
+    this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
   }
 
   clearState(): void {
@@ -46,12 +48,12 @@ export class ResetPasswordComponent implements OnInit {
 
     let valid = true;
 
-    if (!this.novaSenha || this.novaSenha.length < 8) {
+    if (!this.senha || this.senha.length < 8) {
       this.senhaError = 'A senha deve ter ao menos 8 caracteres';
       valid = false;
     }
 
-    if (this.confirmarSenha !== this.novaSenha) {
+    if (this.confirmarSenha !== this.senha) {
       this.confirmarError = 'As senhas não coincidem';
       valid = false;
     }
@@ -59,16 +61,16 @@ export class ResetPasswordComponent implements OnInit {
     if (!valid) return;
 
     this.isLoading = true;
-    this.authService.confirmarRedefinicaoSenha(this.codigo, this.novaSenha).subscribe({
+    this.authService.confirmarRedefinicaoSenha(this.codigo, this.senha, this.confirmarSenha).subscribe({
       next: () => {
         this.isLoading = false;
         this.state = 'success';
         setTimeout(() => this.router.navigate(['/login']), 2000);
       },
-      error: (err) => {
+      error: () => {
         this.isLoading = false;
         this.state = 'error';
-        this.errorMessage = err.error?.message ?? 'Não foi possível redefinir a senha. O link pode ter expirado.';
+        this.errorMessage = 'Não foi possível redefinir a senha. O link pode ter expirado.';
       }
     });
   }

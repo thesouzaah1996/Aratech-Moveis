@@ -1,7 +1,6 @@
 import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { FornecedorService } from '../../../core/services/fornecedor.service';
 import { Fornecedor, FornecedorForm } from '../../../core/models/fornecedor.model';
@@ -11,7 +10,7 @@ declare const bootstrap: any;
 @Component({
   selector: 'app-fornecedores',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './fornecedores.component.html',
   styleUrl: './fornecedores.component.scss'
 })

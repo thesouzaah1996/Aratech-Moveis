@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 export type StatusPonto = 'Presente' | 'Incompleto' | 'Ausente';
@@ -20,7 +19,7 @@ export interface RegistroPonto {
 @Component({
   selector: 'app-ponto',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './ponto.component.html',
   styleUrl: './ponto.component.scss'
 })

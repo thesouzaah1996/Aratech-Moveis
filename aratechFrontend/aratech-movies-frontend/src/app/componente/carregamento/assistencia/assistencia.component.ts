@@ -1,6 +1,5 @@
 import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 declare const bootstrap: any;
@@ -21,7 +20,7 @@ export interface ItemAssistencia {
 @Component({
   selector: 'app-carregamento-assistencia',
   standalone: true,
-  imports: [NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [NavbarComponent, BreadcrumbComponent],
   templateUrl: './assistencia.component.html',
   styleUrl: './assistencia.component.scss'
 })

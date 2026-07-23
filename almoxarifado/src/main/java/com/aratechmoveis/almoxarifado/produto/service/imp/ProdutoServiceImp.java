@@ -7,7 +7,9 @@ import com.aratechmoveis.almoxarifado.fornecedor.entity.Fornecedor;
 import com.aratechmoveis.almoxarifado.fornecedor.repository.FornecedorRepository;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
+import com.aratechmoveis.almoxarifado.produto.dto.EntradaEstoqueDTO;
 import com.aratechmoveis.almoxarifado.produto.dto.ProdutoDTO;
+import com.aratechmoveis.almoxarifado.produto.dto.SaidaEstoqueDTO;
 import com.aratechmoveis.almoxarifado.produto.entity.Produto;
 import com.aratechmoveis.almoxarifado.produto.repository.ProdutoRepository;
 import com.aratechmoveis.almoxarifado.produto.service.ProdutoService;
@@ -159,6 +161,40 @@ public class ProdutoServiceImp implements ProdutoService {
         return Response.builder()
                 .status(204)
                 .mensagem("Produto deletado com sucesso")
+                .build();
+    }
+
+    @Override
+    public Response entradaEstoque(String sku, EntradaEstoqueDTO entradaEstoque) {
+        Produto produto = produtoRepository.findBySku(sku)
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
+
+        if (produto.getQuantidade() >= 0) {
+            produto.setQuantidade(produto.getQuantidade() + entradaEstoque.quantidade());
+            produtoRepository.save(produto);
+        }
+
+        return Response.builder()
+                .status(200)
+                .mensagem("Entrada de estoque realizada com sucesso")
+                .produto(modelMapper.map(produto, ProdutoDTO.class))
+                .build();
+    }
+
+    @Override
+    public Response saidaEstoque(String sku, SaidaEstoqueDTO saidaEstoque) {
+        Produto produto = produtoRepository.findBySku(sku)
+                .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
+
+        if (produto.getQuantidade() >= 0) {
+            produto.setQuantidade(produto.getQuantidade() - saidaEstoque.quantidade());
+            produtoRepository.save(produto);
+        }
+
+        return Response.builder()
+                .status(200)
+                .mensagem("Entrada de estoque realizada com sucesso")
+                .produto(modelMapper.map(produto, ProdutoDTO.class))
                 .build();
     }
 }

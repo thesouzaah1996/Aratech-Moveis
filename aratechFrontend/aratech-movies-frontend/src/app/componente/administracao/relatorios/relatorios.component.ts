@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-relatorios',
   standalone: true,
-  imports: [NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [NavbarComponent, BreadcrumbComponent],
   templateUrl: './relatorios.component.html',
   styleUrl: './relatorios.component.scss'
 })

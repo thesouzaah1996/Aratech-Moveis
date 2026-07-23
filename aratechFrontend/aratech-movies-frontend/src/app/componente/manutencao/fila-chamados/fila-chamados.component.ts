@@ -2,7 +2,6 @@ import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { ChamadoService } from '../../../core/services/chamado.service';
 import {
@@ -23,7 +22,7 @@ const STATUS_FILA_LABELS: Record<StatusChamado, string> = {
 @Component({
   selector: 'app-fila-chamados',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './fila-chamados.component.html',
   styleUrl: './fila-chamados.component.scss'
 })

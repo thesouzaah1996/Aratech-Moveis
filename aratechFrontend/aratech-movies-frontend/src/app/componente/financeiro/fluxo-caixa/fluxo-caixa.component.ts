@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe } from '@angular/common';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 export interface LinhaCaixa {
@@ -16,7 +15,7 @@ export interface LinhaCaixa {
 @Component({
   selector: 'app-fluxo-caixa',
   standalone: true,
-  imports: [FormsModule, CurrencyPipe, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, CurrencyPipe, NavbarComponent, BreadcrumbComponent],
   templateUrl: './fluxo-caixa.component.html',
   styleUrl: './fluxo-caixa.component.scss'
 })

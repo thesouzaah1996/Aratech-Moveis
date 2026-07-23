@@ -10,10 +10,6 @@ public class AlterarSenhaRequest {
     @NotBlank(message = "Código é obrigatório")
     private String codigo;
 
-    @NotBlank(message = "Email é obrigatório")
-    @Email
-    private String emailCorporativo;
-
     @NotBlank(message = "Senha é obrigatório")
     private String senha;
 

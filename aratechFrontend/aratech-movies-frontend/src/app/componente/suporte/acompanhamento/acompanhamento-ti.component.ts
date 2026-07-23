@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 export type StatusChamado = 'Aberto' | 'Em Atendimento' | 'Concluído' | 'Cancelado';
@@ -23,7 +22,7 @@ const PRIORIDADE_ORDEM: Record<PrioridadeTi, number> = { Crítica: 0, Alta: 1, M
 @Component({
   selector: 'app-acompanhamento-ti',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './acompanhamento-ti.component.html',
   styleUrl: './acompanhamento-ti.component.scss'
 })

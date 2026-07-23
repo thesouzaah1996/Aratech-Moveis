@@ -2,7 +2,6 @@ import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angula
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { RegistroChegadaService } from '../../../core/services/registro-chegada.service';
 import {
@@ -18,7 +17,7 @@ declare const bootstrap: any;
 @Component({
   selector: 'app-controle-acesso',
   standalone: true,
-  imports: [FormsModule, DatePipe, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, DatePipe, NavbarComponent, BreadcrumbComponent],
   templateUrl: './controle-acesso.component.html',
   styleUrl: './controle-acesso.component.scss'
 })

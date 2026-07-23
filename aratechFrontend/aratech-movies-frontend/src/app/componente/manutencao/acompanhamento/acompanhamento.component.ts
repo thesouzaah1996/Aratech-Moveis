@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { ChamadoService } from '../../../core/services/chamado.service';
 import {
@@ -18,7 +17,7 @@ const PRIORIDADE_ORDEM: Record<string, number> = { ALTA: 0, MEDIA: 1, BAIXA: 2 }
 @Component({
   selector: 'app-acompanhamento',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './acompanhamento.component.html',
   styleUrl: './acompanhamento.component.scss'
 })

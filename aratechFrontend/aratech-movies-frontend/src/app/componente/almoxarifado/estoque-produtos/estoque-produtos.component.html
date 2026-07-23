@@ -18,8 +18,8 @@
       </div>
     }
 
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
-      <div class="input-group" style="max-width: 340px;">
+    <div class="toolbar d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mb-4">
+      <div class="input-group toolbar-search">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
         </span>
@@ -46,7 +46,6 @@
             <table class="table table-hover align-middle">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Nome</th>
                   <th>SKU</th>
                   <th>Quantidade</th>
@@ -57,7 +56,7 @@
               <tbody>
                 @if (paged.length === 0) {
                   <tr>
-                    <td colspan="6">
+                    <td colspan="5">
                       <div class="empty-state">
                         <i class="bi bi-box-seam"></i>
                         <p>{{ searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhum produto cadastrado.' }}</p>
@@ -67,13 +66,18 @@
                 } @else {
                   @for (produto of paged; track produto.id) {
                     <tr>
-                      <td><span class="badge-id">#{{ produto.id }}</span></td>
                       <td class="fw-semibold">{{ produto.nome }}</td>
                       <td><code>{{ produto.sku }}</code></td>
                       <td>{{ produto.quantidade }}</td>
                       <td>{{ categoriaNome(produto.categoriaID) }}</td>
                       <td>
                         <div class="d-flex justify-content-end align-items-center gap-1">
+                          <button class="btn-action btn-action-entrada" title="Entrada de Estoque" (click)="openEntrada(produto)">
+                            <i class="bi bi-plus-circle"></i>
+                          </button>
+                          <button class="btn-action btn-action-saida" title="Saída de Estoque" (click)="openSaida(produto)">
+                            <i class="bi bi-dash-circle"></i>
+                          </button>
                           <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(produto)">
                             <i class="bi bi-pencil"></i>
                           </button>
@@ -100,11 +104,31 @@
                   <li class="page-item" [class.disabled]="page === 1">
                     <a class="page-link" (click)="setPage(page - 1)">‹</a>
                   </li>
-                  @for (p of pages; track p) {
+
+                  @if (visiblePages[0] > 1) {
+                    <li class="page-item">
+                      <a class="page-link" (click)="setPage(1)">1</a>
+                    </li>
+                    @if (visiblePages[0] > 2) {
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                  }
+
+                  @for (p of visiblePages; track p) {
                     <li class="page-item" [class.active]="p === page">
                       <a class="page-link" (click)="setPage(p)">{{ p }}</a>
                     </li>
                   }
+
+                  @if (visiblePages[visiblePages.length - 1] < totalPages) {
+                    @if (visiblePages[visiblePages.length - 1] < totalPages - 1) {
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                    <li class="page-item">
+                      <a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a>
+                    </li>
+                  }
+
                   <li class="page-item" [class.disabled]="page === totalPages">
                     <a class="page-link" (click)="setPage(page + 1)">›</a>
                   </li>
@@ -118,8 +142,6 @@
 
   </div>
 </main>
-
-<app-footer />
 
 <div class="modal fade" #productModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -236,6 +258,68 @@
         <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-danger" (click)="confirmDelete()">
           <i class="bi bi-trash me-1"></i>Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" #entradaModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-plus-circle me-2"></i>Entrada de Estoque
+        </h5>
+      </div>
+      <div class="modal-body p-4">
+        @if (produtoMovimentacao) {
+          <p class="mb-1"><strong>Produto:</strong> {{ produtoMovimentacao.nome }}</p>
+          <p class="mb-3 text-muted">Quantidade atual: {{ produtoMovimentacao.quantidade }}</p>
+        }
+        <label class="form-label fw-semibold">Quantidade recebida <span class="text-danger">*</span></label>
+        <input type="number" class="form-control" min="1" [(ngModel)]="quantidadeMovimentacao"
+          [class.is-invalid]="!!movimentacaoError"
+          (input)="movimentacaoError = ''">
+        @if (movimentacaoError) {
+          <div class="invalid-feedback d-block">{{ movimentacaoError }}</div>
+        }
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmEntrada()">
+          <i class="bi bi-check-circle me-1"></i>Confirmar Entrada
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" #saidaModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-dash-circle me-2"></i>Saída de Estoque
+        </h5>
+      </div>
+      <div class="modal-body p-4">
+        @if (produtoMovimentacao) {
+          <p class="mb-1"><strong>Produto:</strong> {{ produtoMovimentacao.nome }}</p>
+          <p class="mb-3 text-muted">Quantidade atual: {{ produtoMovimentacao.quantidade }}</p>
+        }
+        <label class="form-label fw-semibold">Quantidade retirada <span class="text-danger">*</span></label>
+        <input type="number" class="form-control" min="1" [(ngModel)]="quantidadeMovimentacao"
+          [class.is-invalid]="!!movimentacaoError"
+          (input)="movimentacaoError = ''">
+        @if (movimentacaoError) {
+          <div class="invalid-feedback d-block">{{ movimentacaoError }}</div>
+        }
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmSaida()">
+          <i class="bi bi-check-circle me-1"></i>Confirmar Saída
         </button>
       </div>
     </div>

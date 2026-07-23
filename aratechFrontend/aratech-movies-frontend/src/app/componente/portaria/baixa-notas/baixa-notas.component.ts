@@ -2,7 +2,6 @@ import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angula
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
-import { FooterComponent } from '../../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
 declare const bootstrap: any;
@@ -22,7 +21,7 @@ export interface NotaFiscal {
 @Component({
   selector: 'app-baixa-notas',
   standalone: true,
-  imports: [FormsModule, CurrencyPipe, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, CurrencyPipe, NavbarComponent, BreadcrumbComponent],
   templateUrl: './baixa-notas.component.html',
   styleUrl: './baixa-notas.component.scss'
 })

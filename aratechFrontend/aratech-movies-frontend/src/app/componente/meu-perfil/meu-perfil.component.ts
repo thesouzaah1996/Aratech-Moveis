@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { NavbarComponent } from '../navbar/navbar.component';
-import { FooterComponent } from '../footer/footer.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../breadcrumb/breadcrumb.component';
 
 interface DadosPerfil {
@@ -22,7 +21,7 @@ interface DadosPerfil {
 @Component({
   selector: 'app-meu-perfil',
   standalone: true,
-  imports: [NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [NavbarComponent, BreadcrumbComponent],
   templateUrl: './meu-perfil.component.html',
   styleUrl: './meu-perfil.component.scss'
 })

@@ -171,7 +171,7 @@ public class AuthServiceImp implements AuthService {
 
     @Override
     @Transactional
-    public Response<?> solicitarRedefinicaoSenha(String email) {
+    public Response<?> redefinirSenha(String email) {
         Funcionario funcionario = funcionarioRepository.findByEmailCorporativo(email)
                 .orElseThrow(() -> new NotFoundException("Funcionário não encontrado. Para alterar a senha, confira se o email está correto."));
 
@@ -189,7 +189,7 @@ public class AuthServiceImp implements AuthService {
         codigoResetSenhaRepo.save(codigoReset);
 
         NotificacaoDTO resetSenhaEmail = NotificacaoDTO.builder()
-                .destinatario(funcionario.getEmailPessoal())
+                .destinatario(funcionario.getEmailCorporativo())
                 .assunto("Codigo para reset de senha")
                 .nomeTemplate("reset-senha")
                 .variaveisTemplate(Map.of(
@@ -203,16 +203,15 @@ public class AuthServiceImp implements AuthService {
         return Response.builder()
                 .status(200)
                 .mensagem("Codigo para alterar senha enviado com sucesso")
+                .dados(codigo)
                 .build();
     }
 
     @Override
-    public Response<?> alterarSenha(AlterarSenhaRequest alterarSenhaRequest) {
-        String emailCorporativoFuncionario = alterarSenhaRequest.getEmailCorporativo();
+    public Response<?> alterarSenha(Long idFuncionario, AlterarSenhaRequest alterarSenhaRequest) {
         String novaSenha = alterarSenhaRequest.getSenha();
         String codigoReset = alterarSenhaRequest.getCodigo();
         String confirmarSenha = alterarSenhaRequest.getConfirmarSenha();
-
 
         CodigoResetSenha codigo = codigoResetSenhaRepo.findByCodigo(codigoReset)
                 .orElseThrow(() -> new BadRequestException("Codigo inválido"));
@@ -222,7 +221,7 @@ public class AuthServiceImp implements AuthService {
             throw new BadRequestException("Código expirado");
         }
 
-        Funcionario funcionario = funcionarioRepository.findByEmailCorporativo(emailCorporativoFuncionario)
+        Funcionario funcionario = funcionarioRepository.findByIdFuncionario(idFuncionario)
                 .orElseThrow(() -> new BadRequestException("Funcionário não encontrado"));
 
         if (novaSenha.equals(confirmarSenha)) {
@@ -232,7 +231,7 @@ public class AuthServiceImp implements AuthService {
         }
 
         NotificacaoDTO confirmacaoAlteracaoSenha = NotificacaoDTO.builder()
-                .destinatario(emailCorporativoFuncionario)
+                .destinatario(funcionario.getEmailCorporativo())
                 .assunto("Confirmação de alteração de senha")
                 .nomeTemplate("sucesso-troca-de-senha")
                 .variaveisTemplate(Map.of(
