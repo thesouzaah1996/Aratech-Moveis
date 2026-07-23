@@ -45,8 +45,8 @@ public class RecebimentoServiceImp implements RecebimentoService {
     }
 
     @Override
-    public Response listarRecebimentos() {
-        List<Recebimento> recebimentos = recebimentoRepository.findAll(Sort.by(Sort.Direction.ASC, "dataRecebimento"));
+    public Response buscarFila() {
+        List<Recebimento> recebimentos = recebimentoRepository.findByStatusRecebimentoNot(StatusRecebimento.FINALIZADO, Sort.by(Sort.Direction.ASC, "dataRecebimento"));
 
         List<RecebimentoDTO> recebimentosDTO = modelMapper.map(recebimentos, new TypeToken<List<RecebimentoDTO>>() {
         }.getType());
@@ -103,6 +103,24 @@ public class RecebimentoServiceImp implements RecebimentoService {
         return Response.builder()
                 .status(200)
                 .mensagem("Recebimento finalizado")
+                .carga(modelMapper.map(recebimento, RecebimentoDTO.class))
+                .build();
+    }
+
+    @Override
+    public Response atualizarRecebimento(RecebimentoDTO recebimentoDTO) {
+        Recebimento recebimento = recebimentoRepository.findByNotaFiscal(recebimentoDTO.getNotaFiscal())
+                .orElseThrow(() -> new NotFoundException("Nota fiscal não encontrada"));
+
+        recebimento.setNotaFiscal(recebimentoDTO.getNotaFiscal());
+        recebimento.setEmpresa(recebimentoDTO.getEmpresa());
+        recebimento.setNomeMotorista(recebimentoDTO.getNomeMotorista());
+        recebimento.setPlaca(recebimentoDTO.getPlaca());
+        recebimento.setDescricaoCarga(recebimentoDTO.getDescricaoCarga());
+
+        return Response.builder()
+                .status(200)
+                .mensagem("Dados atualizados com sucesso.")
                 .carga(modelMapper.map(recebimento, RecebimentoDTO.class))
                 .build();
     }

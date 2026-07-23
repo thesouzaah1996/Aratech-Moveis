@@ -1,9 +1,9 @@
 package com.aratechmoveis.almoxarifado.recebimento.subscriber.representation;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import com.aratechmoveis.almoxarifado.recebimento.subscriber.TipoEventoRecebimento;
 
 public record RecebimentoRepresentation(
+         TipoEventoRecebimento tipo,
          String notaFiscal,
          String empresa,
          String nomeMotorista,
@@ -11,5 +11,4 @@ public record RecebimentoRepresentation(
          String placa,
          String setorResponsavel,
          String status
-) {
-}
+) {}

@@ -14,4 +14,5 @@ public interface RecebimentoRepository extends JpaRepository<Recebimento, Long> 
     boolean existsByNotaFiscal(String notaFiscal);
     Optional<Recebimento> findByNotaFiscal(String notaFiscal);
     List<Recebimento> findByStatusRecebimento(StatusRecebimento statusRecebimento, Sort sort);
+    List<Recebimento> findByStatusRecebimentoNot(StatusRecebimento statusRecebimento, Sort sort);
 }

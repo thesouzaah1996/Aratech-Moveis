@@ -11,4 +11,5 @@ public interface RegistroChegadaService {
     Response listarAutorizados(StatusCaminhao statusCaminhao);
     Response autorizarRecebimento(String notaFiscal);
     Response finalizarRegistro(String notaFiscal);
+    Response atualizarRegistroChegada(RegistroChegadaDTO registroChegadaDTO);
 }

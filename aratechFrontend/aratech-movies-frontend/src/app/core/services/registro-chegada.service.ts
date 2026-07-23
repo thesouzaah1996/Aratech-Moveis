@@ -43,6 +43,12 @@ export class RegistroChegadaService {
       .pipe(map(res => res.registroChegada!));
   }
 
+  atualizar(form: RegistroChegadaForm): Observable<RegistroChegada> {
+    return this.http
+      .put<ApiResponse>(`${this.api}/atualizar`, form)
+      .pipe(map(res => res.registroChegada!));
+  }
+
   finalizar(notaFiscal: string): Observable<RegistroChegada> {
     return this.http
       .put<ApiResponse>(`${this.api}/finalizar`, null, { params: { notaFiscal } })

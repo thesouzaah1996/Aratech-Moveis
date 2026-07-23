@@ -82,9 +82,6 @@
 
     <div class="card shadow-sm">
       <div class="card-body">
-        <h5 class="card-title fw-bold mb-3">
-          <i class="bi bi-hourglass-split text-warning me-2"></i>Fila de Espera
-        </h5>
         <div class="table-responsive">
           <table class="table table-hover align-middle">
             <thead>
@@ -121,11 +118,16 @@
                     <td>
                       <span class="badge {{ badgeClass(item.status) }}">{{ statusLabels[item.status] }}</span>
                     </td>
-                    <td class="text-end action-buttons">
+                    <td class="text-end text-nowrap action-buttons">
                       <button class="btn-action btn-action-edit"
                               title="Confirmar entrada"
                               (click)="abrirConfirmacaoEntrada(item.notaFiscal)">
                         <i class="bi bi-unlock"></i>
+                      </button>
+                      <button class="btn-action btn-action-edit ms-1"
+                              title="Editar registro"
+                              (click)="abrirEdicao(item)">
+                        <i class="bi bi-pencil"></i>
                       </button>
                     </td>
                   </tr>
@@ -242,7 +244,7 @@
                     <td>{{ item.placa }}</td>
                     <td>{{ item.descricaoCarga }}</td>
                     <td>{{ setorLabels[item.setorResponsavel] }}</td>
-                    <td>{{ item.dataChegada }}</td>
+                    <td>{{ item.dataChegada | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>
                       <span class="badge {{ badgeClass(item.status) }}">{{ statusLabels[item.status] }}</span>
                     </td>
@@ -277,6 +279,69 @@
         <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-success px-4" (click)="confirmarEntrada()">
           <i class="bi bi-unlock me-1"></i>Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" #editModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-pencil me-2"></i>Editar Registro de Chegada
+        </h5>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Nota Fiscal</label>
+            <input type="text" class="form-control" [(ngModel)]="editForm.notaFiscal"
+              [class.is-invalid]="editSubmitted && !editForm.notaFiscal.trim()">
+            <div class="invalid-feedback">Nota fiscal é obrigatória.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Empresa</label>
+            <input type="text" class="form-control" [(ngModel)]="editForm.empresa"
+              [class.is-invalid]="editSubmitted && !editForm.empresa.trim()">
+            <div class="invalid-feedback">Empresa é obrigatória.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Motorista</label>
+            <input type="text" class="form-control" [(ngModel)]="editForm.nomeMotorista"
+              [class.is-invalid]="editSubmitted && !editForm.nomeMotorista.trim()">
+            <div class="invalid-feedback">Motorista é obrigatório.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Placa</label>
+            <input type="text" class="form-control" [(ngModel)]="editForm.placa"
+              [class.is-invalid]="editSubmitted && !editForm.placa.trim()">
+            <div class="invalid-feedback">Placa é obrigatória.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Setor Responsável</label>
+            <select class="form-select" [(ngModel)]="editForm.setorResponsavel"
+              [class.is-invalid]="editSubmitted && !editForm.setorResponsavel">
+              <option value="" disabled>Selecione</option>
+              <option value="ALMOXARIFADO">Almoxarifado</option>
+              <option value="CARREGAMENTO">Carregamento</option>
+              <option value="PCP">PCP</option>
+            </select>
+            <div class="invalid-feedback">Setor é obrigatório.</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Descrição da Carga</label>
+            <textarea class="form-control" rows="3" [(ngModel)]="editForm.descricaoCarga"
+              [class.is-invalid]="editSubmitted && !editForm.descricaoCarga.trim()"></textarea>
+            <div class="invalid-feedback">Descrição da carga é obrigatória.</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger px-4" (click)="salvarEdicao()">
+          <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>
     </div>

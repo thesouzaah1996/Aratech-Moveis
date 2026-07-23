@@ -27,6 +27,7 @@ public class RegistroChegadaPublisher {
     private String topicoPcp;
 
     public void publicarRegistroChegada(
+            TipoRegistroChegada tipo,
             String notaFiscal,
             String empresa,
             String nomeMotorista,
@@ -36,6 +37,7 @@ public class RegistroChegadaPublisher {
     ) {
         try {
             var registroChegadaRepresentation = new RegistroChegadaRepresentation(
+                    tipo,
                     notaFiscal,
                     empresa,
                     nomeMotorista,
@@ -47,17 +49,17 @@ public class RegistroChegadaPublisher {
             var topico = registroChegadaRepresentation.setorResponsavel();
 
             switch (topico) {
-                case topico.ALMOXARIFADO -> {
+                case ALMOXARIFADO -> {
                     kafkaTemplate.send(topicoAlmoxarifado, "dadosEntrega", json);
                     log.info("Caminhão se deslocando para almoxarifado");
                 }
 
-                case topico.CARREGAMENTO -> {
+                case CARREGAMENTO -> {
                     kafkaTemplate.send(topicoCarregamento, "dadosEntrega", json);
                     log.info("Caminhão se deslocando para carregamento");
                 }
 
-                case topico.PCP -> {
+                case PCP -> {
                     kafkaTemplate.send(topicoPcp, "dadosEntrega", json);
                     log.info("Caminhão se deslocando para descarga de chapas");
                 }

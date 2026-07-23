@@ -1,10 +1,7 @@
 <div class="top-progress" [class.active]="isLoading" aria-hidden="true"></div>
 
 <main class="page" role="main">
-  <section class="card"
-           [class.login-success]="loginState === 'success'"
-           [class.login-error]="loginState === 'error'"
-           aria-labelledby="loginTitle">
+  <section class="card" aria-labelledby="loginTitle">
 
     <header class="brand">
       <img src="/img/aratech-logo-login-branco.png" alt="Aratech Móveis" class="login-logo" />
@@ -13,8 +10,7 @@
     <form novalidate (ngSubmit)="onSubmit()">
 
       <div class="field"
-           [class.login-success]="loginState === 'success'"
-           [class.login-error]="loginState === 'error'">
+           [class.login-error]="loginState === 'error' || loginState === 'blocked'">
         <label for="email">Usuário</label>
         <input id="email" name="email" type="text"
                inputmode="email" autocomplete="email"
@@ -29,8 +25,7 @@
       </div>
 
       <div class="field"
-           [class.login-success]="loginState === 'success'"
-           [class.login-error]="loginState === 'error'">
+           [class.login-error]="loginState === 'error' || loginState === 'blocked'">
         <label for="password">Senha</label>
         <div class="password-wrap">
           <input id="password" name="password"
@@ -58,17 +53,19 @@
       </div>
 
       <button class="btn btn-primary full" type="submit"
-              [disabled]="isLoading"
-              [class.loading]="isLoading">
-        <span class="btn-label">{{ loginState === 'success' ? 'Redirecionando...' : 'Entrar' }}</span>
-        <span class="spinner" aria-hidden="true"></span>
+              [disabled]="isLoading">
+        Entrar
       </button>
 
-      @if (loginState !== 'idle') {
-        <div class="form-msg" role="status" aria-live="polite"
-             [class.success]="loginState === 'success'"
-             [class.error]="loginState === 'error'">
-          {{ loginState === 'success' ? 'Login realizado com sucesso!' : 'Usuário ou senha incorretos' }}
+      @if (loginState === 'error') {
+        <div class="form-msg error" role="status" aria-live="polite">
+          Usuário ou senha incorretos
+        </div>
+      }
+
+      @if (loginState === 'blocked') {
+        <div class="form-msg error" role="status" aria-live="polite">
+          Conta bloqueada por excesso de tentativas. Tente novamente em 15 minutos.
         </div>
       }
 
