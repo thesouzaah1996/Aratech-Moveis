@@ -1,5 +1,6 @@
 package com.aratechmoveis.almoxarifado.recebimento.subscriber;
 
+import com.aratechmoveis.almoxarifado.exceptions.SetorResponsavelInvalidoException;
 import com.aratechmoveis.almoxarifado.recebimento.dto.RecebimentoDTO;
 import com.aratechmoveis.almoxarifado.recebimento.mapper.RecebimentoMapper;
 import com.aratechmoveis.almoxarifado.recebimento.service.RecebimentoService;
@@ -24,14 +25,25 @@ public class RecebimentoSubscriber {
     @KafkaListener(groupId = "aratech-almoxarifado-recebimento",
         topics = "${aratech.config.kafka.topics.portaria-registro-chegada-almoxarifado}")
     public void listenNovosRecebimentos(String json) {
-        log.info("Recebendo nova carga para salvar");
         try {
             var representation = objectMapper.readValue(json, RecebimentoRepresentation.class);
             var recebimento = recebimentoMapper.map(representation);
+            RecebimentoDTO recebimentoDTO = modelMapper.map(recebimento, RecebimentoDTO.class);
 
-            RecebimentoDTO novoRecebimento = modelMapper.map(recebimento, RecebimentoDTO.class);
-            recebimentoService.adicionarRecebimento(novoRecebimento);
-            log.info("Recebido com sucesso");
+            if (!"ALMOXARIFADO".equalsIgnoreCase(recebimentoDTO.getSetorResponsavel())) {
+                throw new SetorResponsavelInvalidoException("Esse recebimento não pertence ao setor de almoxarifado: " + recebimentoDTO.getSetorResponsavel());
+            }
+
+            switch (representation.tipo()) {
+                case CHEGADA_REGISTRADA -> {
+                    recebimentoService.adicionarRecebimento(recebimentoDTO);
+                }
+                case DADOS_CORRIGIDOS -> {
+                    recebimentoService.atualizarRecebimento(recebimentoDTO);
+                }
+            }
+        } catch (SetorResponsavelInvalidoException e) {
+            log.warn(e.getMessage());
         } catch (Exception e) {
             log.error(e.getMessage());
         }

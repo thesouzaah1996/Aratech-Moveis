@@ -5,8 +5,9 @@ import com.aratechmoveis.almoxarifado.recebimento.dto.RecebimentoDTO;
 
 public interface RecebimentoService {
     Response adicionarRecebimento(RecebimentoDTO recebimentoDTO);
-    Response listarRecebimentos();
+    Response buscarFila();
     Response buscarHistorico();
     Response autorizarRecebimento(String notaFiscal);
     Response finalizarRecebimento(String notaFiscal);
+    Response atualizarRecebimento(RecebimentoDTO recebimentoDTO);
 }

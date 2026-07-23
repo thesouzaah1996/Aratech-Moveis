@@ -45,7 +45,7 @@ aratech:
 
 password:
   reset:
-    link: http://aratech-frontend:80/reset-password?code=
+    link: http://aratech-frontend:80/reset-senha?code=
   primeiro:
     acesso:
       link: http://localhost:80/primeiro-acesso?code=

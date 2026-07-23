@@ -1,5 +1,6 @@
 package com.aratechmoveis.login.auth.service;
 
+import com.aratechmoveis.login.auth.request.AlterarSenhaRequest;
 import com.aratechmoveis.login.auth.request.LoginRequest;
 import com.aratechmoveis.login.auth.request.PrimeiroAcessoRequest;
 import com.aratechmoveis.login.funcionario.entity.Funcionario;
@@ -15,4 +16,6 @@ public interface AuthService {
     Response<?> solicitarPrimeiroAcesso(String emailPessoal);
 
     Response<?> confirmarPrimeiroAcesso(PrimeiroAcessoRequest primeiroAcessoRequest);
+
+    Response<?> alterarSenha(AlterarSenhaRequest alterarSenhaRequest);
 }

@@ -1,6 +1,7 @@
 package com.aratechmoveis.portaria.controle_acesso.service.imp;
 
 import com.aratechmoveis.portaria.controle_acesso.publisher.RegistroChegadaPublisher;
+import com.aratechmoveis.portaria.controle_acesso.publisher.TipoRegistroChegada;
 import com.aratechmoveis.portaria.response.Response;
 import com.aratechmoveis.portaria.controle_acesso.dto.RegistroChegadaDTO;
 import com.aratechmoveis.portaria.controle_acesso.entity.RegistroChegada;
@@ -49,6 +50,7 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
                 registroParaSalvar.getNotaFiscal(), registroParaSalvar.getPlaca());
 
         registroChegadaPublisher.publicarRegistroChegada(
+                TipoRegistroChegada.CHEGADA_REGISTRADA,
                 registroParaSalvar.getNotaFiscal(),
                 registroParaSalvar.getEmpresa(),
                 registroParaSalvar.getNomeMotorista(),
@@ -69,7 +71,7 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
     @Override
     public Response buscarFila() {
         List<RegistroChegada> fila = registroChegadaRepository.findByStatusNot(
-                StatusCaminhao.FINALIZADO, Sort.by(Sort.Direction.ASC, "dataChegada"));
+                StatusCaminhao.FINALIZADO, Sort.by(Sort.Direction.ASC, "dataRecebimento"));
 
         List<RegistroChegadaDTO> filaDTO = modelMapper.map(fila, new TypeToken<List<RegistroChegadaDTO>>() {}.getType());
 
@@ -121,6 +123,38 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
         return Response.builder()
                 .status(200)
                 .mensagem("Registro de chegada autorizado com sucesso")
+                .registroChegada(modelMapper.map(registro, RegistroChegadaDTO.class))
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public Response atualizarRegistroChegada(RegistroChegadaDTO registroChegadaDTO) {
+        RegistroChegada registro = registroChegadaRepository.findByNotaFiscal(registroChegadaDTO.getNotaFiscal())
+                .orElseThrow(() -> new NotFoundException("Registro de chegada não encontrado para a nota fiscal: " + registroChegadaDTO.getNotaFiscal()));
+
+        registro.setEmpresa(registroChegadaDTO.getEmpresa());
+        registro.setNomeMotorista(registroChegadaDTO.getNomeMotorista());
+        registro.setPlaca(registroChegadaDTO.getPlaca());
+        registro.setDescricaoCarga(registroChegadaDTO.getDescricaoCarga());
+        registro.setSetorResponsavel(registroChegadaDTO.getSetorResponsavel());
+
+        registroChegadaRepository.save(registro);
+        log.info("Registro de chegada notaFiscal={} atualizado", registro.getNotaFiscal());
+
+        registroChegadaPublisher.publicarRegistroChegada(
+                TipoRegistroChegada.DADOS_CORRIGIDOS,
+                registro.getNotaFiscal(),
+                registro.getEmpresa(),
+                registro.getNomeMotorista(),
+                registro.getPlaca(),
+                registro.getDescricaoCarga(),
+                registro.getSetorResponsavel());
+        log.info("Enviando correção de dados para o setor responsável.");
+
+        return Response.builder()
+                .status(200)
+                .mensagem("Registro de chegada atualizado com sucesso")
                 .registroChegada(modelMapper.map(registro, RegistroChegadaDTO.class))
                 .build();
     }

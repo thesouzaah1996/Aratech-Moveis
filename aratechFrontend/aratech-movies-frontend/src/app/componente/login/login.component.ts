@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -15,7 +16,7 @@ export class LoginComponent implements OnInit {
   password = '';
   showPassword = false;
   isLoading = false;
-  loginState: 'idle' | 'success' | 'error' = 'idle';
+  loginState: 'idle' | 'success' | 'error' | 'blocked' = 'idle';
   emailError = '';
   passwordError = '';
 
@@ -59,14 +60,13 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(this.email, this.password).subscribe({
       next: (res) => {
-        this.isLoading = false;
         this.loginState = 'success';
         this.authService.salvarSessao(res.dados.token, res.dados.perfis);
         setTimeout(() => this.router.navigate(['/dashboard']), 1500);
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.isLoading = false;
-        this.loginState = 'error';
+        this.loginState = err.status === 423 ? 'blocked' : 'error';
       }
     });
   }

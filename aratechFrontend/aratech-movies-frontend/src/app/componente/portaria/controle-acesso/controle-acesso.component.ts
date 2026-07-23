@@ -1,4 +1,5 @@
 import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { FooterComponent } from '../../footer/footer.component';
@@ -17,13 +18,14 @@ declare const bootstrap: any;
 @Component({
   selector: 'app-controle-acesso',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, FooterComponent, BreadcrumbComponent],
+  imports: [FormsModule, DatePipe, NavbarComponent, FooterComponent, BreadcrumbComponent],
   templateUrl: './controle-acesso.component.html',
   styleUrl: './controle-acesso.component.scss'
 })
 export class ControleAcessoComponent implements OnInit, AfterViewInit {
   @ViewChild('historicoModal') historicoModalEl!: ElementRef;
   @ViewChild('confirmEntradaModal') confirmEntradaModalEl!: ElementRef;
+  @ViewChild('editModal') editModalEl!: ElementRef;
 
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
@@ -46,11 +48,15 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
   filtroData = '';
   notaFiscalParaConfirmar: string | null = null;
 
+  editForm: RegistroChegadaForm = this.emptyForm();
+  editSubmitted = false;
+
   page = 1;
   pageSize = 8;
 
   private historicoModal?: any;
   private confirmEntradaModal?: any;
+  private editModal?: any;
 
   constructor(private readonly registroChegadaService: RegistroChegadaService) {}
 
@@ -61,6 +67,7 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.historicoModal = new bootstrap.Modal(this.historicoModalEl.nativeElement);
     this.confirmEntradaModal = new bootstrap.Modal(this.confirmEntradaModalEl.nativeElement);
+    this.editModal = new bootstrap.Modal(this.editModalEl.nativeElement);
   }
 
   private carregarFila(): void {
@@ -158,6 +165,49 @@ export class ControleAcessoComponent implements OnInit, AfterViewInit {
         this.showError(err.error?.mensagem ?? 'Erro ao confirmar entrada.');
       }
     });
+  }
+
+  abrirEdicao(item: RegistroChegada): void {
+    this.editSubmitted = false;
+    this.editForm = {
+      notaFiscal: item.notaFiscal,
+      empresa: item.empresa,
+      nomeMotorista: item.nomeMotorista,
+      placa: item.placa,
+      descricaoCarga: item.descricaoCarga,
+      setorResponsavel: item.setorResponsavel
+    };
+    this.editModal.show();
+  }
+
+  salvarEdicao(): void {
+    this.editSubmitted = true;
+    if (!this.isEditFormValid()) return;
+
+    const payload: RegistroChegadaForm = {
+      ...this.editForm,
+      placa: this.editForm.placa.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    };
+
+    this.registroChegadaService.atualizar(payload).subscribe({
+      next: registro => {
+        this.fila = this.fila.map(i => (i.notaFiscal === registro.notaFiscal ? registro : i));
+        this.editModal.hide();
+        this.showSuccess('Registro atualizado com sucesso!');
+      },
+      error: err => this.showError(err.error?.mensagem ?? 'Erro ao atualizar registro.')
+    });
+  }
+
+  private isEditFormValid(): boolean {
+    return !!(
+      this.editForm.notaFiscal.trim() &&
+      this.editForm.empresa.trim() &&
+      this.editForm.nomeMotorista.trim() &&
+      this.editForm.placa.trim() &&
+      this.editForm.descricaoCarga.trim() &&
+      this.editForm.setorResponsavel
+    );
   }
 
   badgeClass(status: StatusCaminhao): string {
