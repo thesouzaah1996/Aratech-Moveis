@@ -45,13 +45,8 @@ public class ChamadoController {
     }
 
     @PutMapping("/concluir/{id}")
-    @PreAuthorize("hasAnyRole('CONFERENTE_MANUTENCAO', 'ENCARREGADO_MANUTENCAO', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MECANICO','ADMIN')")
     public ResponseEntity<Response> concluirChamado(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(chamadoService.concluirChamado(id));
-    }
-
-    @DeleteMapping("/remover/{id}")
-    public ResponseEntity<Response> removerChamado(@PathVariable @Min(1) Long id) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(chamadoService.removerChamado(id));
     }
 }

@@ -26,6 +26,9 @@ public class RegistroChegadaPublisher {
     @Value("${aratech.config.kafka.topics.portaria-registro-chegada-pcp}")
     private String topicoPcp;
 
+    @Value("${aratech.config.kafka.topics.portaria-registro-chegada-manutencao}")
+    private String topicoManutencao;
+
     public void publicarRegistroChegada(
             TipoRegistroChegada tipo,
             String notaFiscal,
@@ -62,6 +65,11 @@ public class RegistroChegadaPublisher {
                 case PCP -> {
                     kafkaTemplate.send(topicoPcp, "dadosEntrega", json);
                     log.info("Caminhão se deslocando para descarga de chapas");
+                }
+
+                case MANUTENCAO -> {
+                    kafkaTemplate.send(topicoManutencao, "dadosEntrega", json);
+                    log.info("Entregador se deslocando para manutenção");
                 }
 
                 default -> throw new IllegalArgumentException("Tópico inválido: " + topico);

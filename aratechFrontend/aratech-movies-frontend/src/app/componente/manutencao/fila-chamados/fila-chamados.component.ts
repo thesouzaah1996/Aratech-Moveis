@@ -4,12 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { ChamadoService } from '../../../core/services/chamado.service';
+import { MecanicoService } from '../../../core/services/mecanico.service';
 import {
   Chamado,
   StatusChamado,
   PRIORIDADE_LABELS,
   TIPO_MANUTENCAO_LABELS
 } from '../../../core/models/chamado.model';
+import { LookupItem } from '../../../core/models/lookup.model';
 
 declare const bootstrap: any;
 
@@ -47,19 +49,27 @@ export class FilaChamadosComponent implements OnInit, AfterViewInit {
   submitted = false;
   successMessage = '';
   errorMessage = '';
-  mecanico = '';
+  mecanicoId: number | null = null;
 
   chamadoSelecionado: Chamado | null = null;
+  mecanicosAtivos: LookupItem[] = [];
 
   private atribuirModal?: any;
   private detalhesModal?: any;
 
   chamados: Chamado[] = [];
 
-  constructor(private chamadoService: ChamadoService) {}
+  constructor(
+    private chamadoService: ChamadoService,
+    private mecanicoService: MecanicoService
+  ) {}
 
   ngOnInit(): void {
     this.carregarChamados();
+    this.mecanicoService.lookup().subscribe({
+      next: lista => this.mecanicosAtivos = lista,
+      error: () => {}
+    });
   }
 
   ngAfterViewInit(): void {
@@ -129,7 +139,7 @@ export class FilaChamadosComponent implements OnInit, AfterViewInit {
 
   openAtribuir(chamado: Chamado): void {
     this.submitted = false;
-    this.mecanico = chamado.mecanico ?? '';
+    this.mecanicoId = chamado.mecanico?.id ?? null;
     this.chamadoSelecionado = chamado;
     this.atribuirModal.show();
   }
@@ -146,16 +156,16 @@ export class FilaChamadosComponent implements OnInit, AfterViewInit {
 
   confirmarAtribuicao(): void {
     this.submitted = true;
-    if (!this.mecanico.trim() || !this.chamadoSelecionado) return;
+    if (!this.mecanicoId || !this.chamadoSelecionado) return;
 
-    this.chamadoService.atribuirMecanico(this.chamadoSelecionado.id, this.mecanico.trim()).subscribe({
+    this.chamadoService.atribuirMecanico(this.chamadoSelecionado.id, this.mecanicoId).subscribe({
       next: atualizado => {
         const idx = this.chamados.findIndex(c => c.id === atualizado.id);
         if (idx > -1) this.chamados[idx] = atualizado;
 
         this.atribuirModal.hide();
         this.chamadoSelecionado = null;
-        this.mecanico = '';
+        this.mecanicoId = null;
         this.submitted = false;
 
         this.showSuccess('Chamado atribuído com sucesso!');

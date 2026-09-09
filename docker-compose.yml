@@ -124,6 +124,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: manutencao-prod
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     volumes:
       - manutencao-db-prod-data:/var/lib/postgresql/data
     networks:
@@ -187,7 +188,7 @@ services:
       ALMOXARIFADO_DB_PASSWORD_PROD: postgres
       JWT_CHAVE_SECRETA: ${JWT_CHAVE_SECRETA}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006
     depends_on:
       almoxarifado-db:
         condition: service_healthy

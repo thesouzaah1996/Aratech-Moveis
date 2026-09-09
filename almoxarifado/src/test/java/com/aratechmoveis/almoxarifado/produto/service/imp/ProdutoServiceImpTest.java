@@ -3,11 +3,14 @@ package com.aratechmoveis.almoxarifado.produto.service.imp;
 import com.aratechmoveis.almoxarifado.Response;
 import com.aratechmoveis.almoxarifado.categoria.entity.Categoria;
 import com.aratechmoveis.almoxarifado.categoria.repository.CategoriaRepository;
+import com.aratechmoveis.almoxarifado.exceptions.EstoqueInsuficienteException;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.fornecedor.entity.Fornecedor;
 import com.aratechmoveis.almoxarifado.fornecedor.repository.FornecedorRepository;
+import com.aratechmoveis.almoxarifado.produto.dto.EntradaEstoqueDTO;
 import com.aratechmoveis.almoxarifado.produto.dto.ProdutoDTO;
+import com.aratechmoveis.almoxarifado.produto.dto.SaidaEstoqueDTO;
 import com.aratechmoveis.almoxarifado.produto.entity.Produto;
 import com.aratechmoveis.almoxarifado.produto.repository.ProdutoRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -509,6 +512,95 @@ class ProdutoServiceImpTest {
                     .isInstanceOf(NotFoundException.class);
 
             then(produtoRepository).should(never()).deleteById(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("entradaEstoque")
+    class EntradaEstoque {
+
+        @Test
+        @DisplayName("deve incrementar a quantidade em estoque e retornar status 200")
+        void deveIncrementarQuantidadeComSucesso() {
+            Produto produto = umProduto();
+            EntradaEstoqueDTO entrada = new EntradaEstoqueDTO(5);
+            ProdutoDTO dtoRetornado = umProdutoDTO();
+
+            given(produtoRepository.findBySku("SKU-001")).willReturn(Optional.of(produto));
+            given(produtoRepository.save(produto)).willReturn(produto);
+            given(modelMapper.map(produto, ProdutoDTO.class)).willReturn(dtoRetornado);
+
+            Response response = produtoService.entradaEstoque("SKU-001", entrada);
+
+            assertThat(response.getStatus()).isEqualTo(200);
+            assertThat(response.getMensagem()).isEqualTo("Entrada de estoque realizada com sucesso");
+            assertThat(produto.getQuantidade()).isEqualTo(15);
+            then(produtoRepository).should().save(produto);
+        }
+
+        @Test
+        @DisplayName("deve lançar NotFoundException quando produto não encontrado pelo sku")
+        void deveLancarExcecaoQuandoSkuNaoEncontrado() {
+            EntradaEstoqueDTO entrada = new EntradaEstoqueDTO(5);
+
+            given(produtoRepository.findBySku("SKU-INEXISTENTE")).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> produtoService.entradaEstoque("SKU-INEXISTENTE", entrada))
+                    .isInstanceOf(NotFoundException.class);
+
+            then(produtoRepository).should(never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("saidaEstoque")
+    class SaidaEstoque {
+
+        @Test
+        @DisplayName("deve decrementar a quantidade em estoque e retornar status 200")
+        void deveDecrementarQuantidadeComSucesso() {
+            Produto produto = umProduto();
+            SaidaEstoqueDTO saida = new SaidaEstoqueDTO(4);
+            ProdutoDTO dtoRetornado = umProdutoDTO();
+
+            given(produtoRepository.findBySku("SKU-001")).willReturn(Optional.of(produto));
+            given(produtoRepository.save(produto)).willReturn(produto);
+            given(modelMapper.map(produto, ProdutoDTO.class)).willReturn(dtoRetornado);
+
+            Response response = produtoService.saidaEstoque("SKU-001", saida);
+
+            assertThat(response.getStatus()).isEqualTo(200);
+            assertThat(response.getMensagem()).isEqualTo("Saída de estoque realizada com sucesso");
+            assertThat(produto.getQuantidade()).isEqualTo(6);
+            then(produtoRepository).should().save(produto);
+        }
+
+        @Test
+        @DisplayName("deve lançar EstoqueInsuficienteException quando quantidade solicitada é maior que a disponível")
+        void deveLancarExcecaoQuandoEstoqueInsuficiente() {
+            Produto produto = umProduto();
+            SaidaEstoqueDTO saida = new SaidaEstoqueDTO(50);
+
+            given(produtoRepository.findBySku("SKU-001")).willReturn(Optional.of(produto));
+
+            assertThatThrownBy(() -> produtoService.saidaEstoque("SKU-001", saida))
+                    .isInstanceOf(EstoqueInsuficienteException.class)
+                    .hasMessageContaining("SKU-001");
+
+            then(produtoRepository).should(never()).save(any());
+        }
+
+        @Test
+        @DisplayName("deve lançar NotFoundException quando produto não encontrado pelo sku")
+        void deveLancarExcecaoQuandoSkuNaoEncontrado() {
+            SaidaEstoqueDTO saida = new SaidaEstoqueDTO(1);
+
+            given(produtoRepository.findBySku("SKU-INEXISTENTE")).willReturn(Optional.empty());
+
+            assertThatThrownBy(() -> produtoService.saidaEstoque("SKU-INEXISTENTE", saida))
+                    .isInstanceOf(NotFoundException.class);
+
+            then(produtoRepository).should(never()).save(any());
         }
     }
 }

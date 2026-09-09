@@ -50,13 +50,14 @@
                   <th>SKU</th>
                   <th>Quantidade</th>
                   <th>Categoria</th>
+                  <th>Local de Armazenamento</th>
                   <th class="text-end" style="width: 1%">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 @if (paged.length === 0) {
                   <tr>
-                    <td colspan="5">
+                    <td colspan="6">
                       <div class="empty-state">
                         <i class="bi bi-box-seam"></i>
                         <p>{{ searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhum produto cadastrado.' }}</p>
@@ -70,6 +71,7 @@
                       <td><code>{{ produto.sku }}</code></td>
                       <td>{{ produto.quantidade }}</td>
                       <td>{{ categoriaNome(produto.categoriaID) }}</td>
+                      <td>{{ produto.localArmazenamento }}</td>
                       <td>
                         <div class="d-flex justify-content-end align-items-center gap-1">
                           <button class="btn-action btn-action-entrada" title="Entrada de Estoque" (click)="openEntrada(produto)">

@@ -3,6 +3,7 @@ package com.aratechmoveis.manutencao.chamado.dto;
 import com.aratechmoveis.manutencao.chamado.entity.Prioridade;
 import com.aratechmoveis.manutencao.chamado.entity.StatusChamado;
 import com.aratechmoveis.manutencao.chamado.entity.TipoManutencao;
+import com.aratechmoveis.manutencao.Mecanico.dto.MecanicoLookupDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,8 +51,8 @@ public class ChamadoDTO {
     @Size(max = 1000, message = "A descrição deve ter no máximo 1000 caracteres.")
     private String descricao;
 
-    @Size(max = 150, message = "O mecânico deve ter no máximo 150 caracteres.")
-    private String mecanico;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private MecanicoLookupDTO mecanico;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private StatusChamado status;

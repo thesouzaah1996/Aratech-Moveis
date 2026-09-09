@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -45,6 +47,30 @@ class ProdutoRepositoryTest {
             boolean existe = produtoRepository.existsBySku("SKU-INEXISTENTE");
 
             assertThat(existe).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("findBySku")
+    class FindBySku {
+
+        @Test
+        @DisplayName("deve retornar o produto quando o SKU informado existe")
+        void deveRetornarProdutoQuandoSkuExiste() {
+            produtoRepository.save(umProduto("SKU-001", "prateleiraa01"));
+
+            Optional<Produto> produto = produtoRepository.findBySku("SKU-001");
+
+            assertThat(produto).isPresent();
+            assertThat(produto.get().getSku()).isEqualTo("SKU-001");
+        }
+
+        @Test
+        @DisplayName("deve retornar vazio quando o SKU informado não existe")
+        void deveRetornarVazioQuandoSkuNaoExiste() {
+            Optional<Produto> produto = produtoRepository.findBySku("SKU-INEXISTENTE");
+
+            assertThat(produto).isEmpty();
         }
     }
 

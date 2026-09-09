@@ -71,7 +71,7 @@ public class RegistroChegadaServiceImp implements RegistroChegadaService {
     @Override
     public Response buscarFila() {
         List<RegistroChegada> fila = registroChegadaRepository.findByStatusNot(
-                StatusCaminhao.FINALIZADO, Sort.by(Sort.Direction.ASC, "dataRecebimento"));
+                StatusCaminhao.FINALIZADO, Sort.by(Sort.Direction.ASC, "dataChegada"));
 
         List<RegistroChegadaDTO> filaDTO = modelMapper.map(fila, new TypeToken<List<RegistroChegadaDTO>>() {}.getType());
 

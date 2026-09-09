@@ -5,6 +5,7 @@ import com.aratechmoveis.almoxarifado.categoria.entity.Categoria;
 import com.aratechmoveis.almoxarifado.categoria.repository.CategoriaRepository;
 import com.aratechmoveis.almoxarifado.fornecedor.entity.Fornecedor;
 import com.aratechmoveis.almoxarifado.fornecedor.repository.FornecedorRepository;
+import com.aratechmoveis.almoxarifado.exceptions.EstoqueInsuficienteException;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
 import com.aratechmoveis.almoxarifado.produto.dto.EntradaEstoqueDTO;
@@ -169,10 +170,8 @@ public class ProdutoServiceImp implements ProdutoService {
         Produto produto = produtoRepository.findBySku(sku)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
 
-        if (produto.getQuantidade() >= 0) {
-            produto.setQuantidade(produto.getQuantidade() + entradaEstoque.quantidade());
-            produtoRepository.save(produto);
-        }
+        produto.setQuantidade(produto.getQuantidade() + entradaEstoque.quantidade());
+        produtoRepository.save(produto);
 
         return Response.builder()
                 .status(200)
@@ -186,14 +185,18 @@ public class ProdutoServiceImp implements ProdutoService {
         Produto produto = produtoRepository.findBySku(sku)
                 .orElseThrow(() -> new NotFoundException("Produto não encontrado"));
 
-        if (produto.getQuantidade() >= 0) {
-            produto.setQuantidade(produto.getQuantidade() - saidaEstoque.quantidade());
-            produtoRepository.save(produto);
+        if (produto.getQuantidade() < saidaEstoque.quantidade()) {
+            throw new EstoqueInsuficienteException(
+                    "Estoque insuficiente para: " + sku
+            );
         }
+
+        produto.setQuantidade(produto.getQuantidade() - saidaEstoque.quantidade());
+        produtoRepository.save(produto);
 
         return Response.builder()
                 .status(200)
-                .mensagem("Entrada de estoque realizada com sucesso")
+                .mensagem("Saída de estoque realizada com sucesso")
                 .produto(modelMapper.map(produto, ProdutoDTO.class))
                 .build();
     }

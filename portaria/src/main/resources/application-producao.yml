@@ -34,4 +34,5 @@ aratech:
         portaria-registro-chegada-almoxarifado: 'aratech.registro.chegada.almoxarifado'
         portaria-registro-chegada-carregamento: 'aratech.registro.chegada.carregamento'
         portaria-registro-chegada-pcp: 'aratech.registro.chegada.pcp'
+        portaria-registro-chegada-manutencao: 'aratech.registro.chegada.manutencao'
         almoxarifado-liberar-recebimento: 'almoxarifado-liberar-recebimento'

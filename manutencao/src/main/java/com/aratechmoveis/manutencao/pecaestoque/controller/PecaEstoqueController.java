@@ -1,7 +1,9 @@
 package com.aratechmoveis.manutencao.pecaestoque.controller;
 
 import com.aratechmoveis.manutencao.Response;
+import com.aratechmoveis.manutencao.pecaestoque.dto.EntradaEstoqueDTO;
 import com.aratechmoveis.manutencao.pecaestoque.dto.PecaEstoqueDTO;
+import com.aratechmoveis.manutencao.pecaestoque.dto.SaidaEstoqueDTO;
 import com.aratechmoveis.manutencao.pecaestoque.service.PecaEstoqueService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -48,5 +50,17 @@ public class PecaEstoqueController {
     @PreAuthorize("hasAnyRole('CONFERENTE_MANUTENCAO', 'ENCARREGADO_MANUTENCAO', 'ADMIN')")
     public ResponseEntity<Response> removerPecaEstoque(@PathVariable @Min(1) Long id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(pecaEstoqueService.removerPecaEstoque(id));
+    }
+
+    @PutMapping("/entrada-estoque/{codigo}")
+    @PreAuthorize("hasAnyRole('CONFERENTE_MANUTENCAO', 'ENCARREGADO_MANUTENCAO', 'ADMIN')")
+    public ResponseEntity<Response> entradaEstoque(@PathVariable String codigo, @RequestBody @Valid EntradaEstoqueDTO entradaEstoque) {
+        return ResponseEntity.status(HttpStatus.OK).body(pecaEstoqueService.entradaEstoque(codigo, entradaEstoque));
+    }
+
+    @PutMapping("/saida-estoque/{codigo}")
+    @PreAuthorize("hasAnyRole('CONFERENTE_MANUTENCAO', 'ENCARREGADO_MANUTENCAO', 'ADMIN')")
+    public ResponseEntity<Response> saidaEstoque(@PathVariable String codigo, @RequestBody @Valid SaidaEstoqueDTO saidaEstoque) {
+        return ResponseEntity.status(HttpStatus.OK).body(pecaEstoqueService.saidaEstoque(codigo, saidaEstoque));
     }
 }

@@ -1,9 +1,12 @@
 package com.aratechmoveis.almoxarifado.produto.controller;
 
 import com.aratechmoveis.almoxarifado.Response;
+import com.aratechmoveis.almoxarifado.exceptions.EstoqueInsuficienteException;
 import com.aratechmoveis.almoxarifado.exceptions.NotFoundException;
 import com.aratechmoveis.almoxarifado.exceptions.RecursoJaExistenteException;
+import com.aratechmoveis.almoxarifado.produto.dto.EntradaEstoqueDTO;
 import com.aratechmoveis.almoxarifado.produto.dto.ProdutoDTO;
+import com.aratechmoveis.almoxarifado.produto.dto.SaidaEstoqueDTO;
 import com.aratechmoveis.almoxarifado.produto.service.ProdutoService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -63,7 +67,7 @@ class ProdutoControllerTest {
                             .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.status").value(201))
-                    .andExpect(jsonPath("$.message").value("Produto criado com sucesso"));
+                    .andExpect(jsonPath("$.mensagem").value("Produto criado com sucesso"));
         }
 
         @Test
@@ -91,32 +95,31 @@ class ProdutoControllerTest {
         }
 
         @Test
-        @DisplayName("deve retornar 409 quando o serviço identifica SKU duplicado")
-        void deveRetornar409QuandoSkuDuplicado() throws Exception {
+        @DisplayName("deve propagar RecursoJaExistenteException quando o serviço identifica SKU duplicado")
+        void devePropagarExcecaoQuandoSkuDuplicado() {
             ProdutoDTO dto = umProdutoDTOValido();
 
             given(produtoService.adicionarProduto(any(ProdutoDTO.class)))
                     .willThrow(new RecursoJaExistenteException("Já existe um produto cadastrado com o SKU: " + dto.getSku()));
 
-            mockMvc.perform(post("/almoxarifado/produto/adicionar")
+            assertThatThrownBy(() -> mockMvc.perform(post("/almoxarifado/produto/adicionar")
                             .contentType("application/json")
-                            .content(objectMapper.writeValueAsString(dto)))
-                    .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.status").value(409));
+                            .content(objectMapper.writeValueAsString(dto))))
+                    .isInstanceOf(RecursoJaExistenteException.class);
         }
 
         @Test
-        @DisplayName("deve retornar 404 quando categoria ou fornecedor não são encontrados")
-        void deveRetornar404QuandoCategoriaOuFornecedorNaoEncontrados() throws Exception {
+        @DisplayName("deve propagar NotFoundException quando categoria ou fornecedor não são encontrados")
+        void devePropagarExcecaoQuandoCategoriaOuFornecedorNaoEncontrados() {
             ProdutoDTO dto = umProdutoDTOValido();
 
             given(produtoService.adicionarProduto(any(ProdutoDTO.class)))
                     .willThrow(new NotFoundException("Categoria não encontrada"));
 
-            mockMvc.perform(post("/almoxarifado/produto/adicionar")
+            assertThatThrownBy(() -> mockMvc.perform(post("/almoxarifado/produto/adicionar")
                             .contentType("application/json")
-                            .content(objectMapper.writeValueAsString(dto)))
-                    .andExpect(status().isNotFound());
+                            .content(objectMapper.writeValueAsString(dto))))
+                    .isInstanceOf(NotFoundException.class);
         }
     }
 
@@ -150,15 +153,15 @@ class ProdutoControllerTest {
         }
 
         @Test
-        @DisplayName("deve retornar 404 quando o produto não é encontrado")
-        void deveRetornar404QuandoProdutoNaoEncontrado() throws Exception {
+        @DisplayName("deve propagar NotFoundException quando o produto não é encontrado")
+        void devePropagarExcecaoQuandoProdutoNaoEncontrado() {
             given(produtoService.atualizarProduto(eq(99L), any(ProdutoDTO.class)))
                     .willThrow(new NotFoundException("Produto não encontrado"));
 
-            mockMvc.perform(put("/almoxarifado/produto/atualizar/99")
+            assertThatThrownBy(() -> mockMvc.perform(put("/almoxarifado/produto/atualizar/99")
                             .contentType("application/json")
-                            .content(objectMapper.writeValueAsString(new ProdutoDTO())))
-                    .andExpect(status().isNotFound());
+                            .content(objectMapper.writeValueAsString(new ProdutoDTO()))))
+                    .isInstanceOf(NotFoundException.class);
         }
     }
 
@@ -197,13 +200,13 @@ class ProdutoControllerTest {
         }
 
         @Test
-        @DisplayName("deve retornar 404 quando o produto não existe")
-        void deveRetornar404QuandoProdutoNaoExiste() throws Exception {
+        @DisplayName("deve propagar NotFoundException quando o produto não existe")
+        void devePropagarExcecaoQuandoProdutoNaoExiste() {
             given(produtoService.buscarProdutoPorId(99L))
                     .willThrow(new NotFoundException("Produto não encontrado, confira se o id está correto"));
 
-            mockMvc.perform(get("/almoxarifado/produto/99"))
-                    .andExpect(status().isNotFound());
+            assertThatThrownBy(() -> mockMvc.perform(get("/almoxarifado/produto/99")))
+                    .isInstanceOf(NotFoundException.class);
         }
 
         @Test
@@ -230,13 +233,117 @@ class ProdutoControllerTest {
         }
 
         @Test
-        @DisplayName("deve retornar 404 quando o produto não existe")
-        void deveRetornar404QuandoProdutoNaoExiste() throws Exception {
+        @DisplayName("deve propagar NotFoundException quando o produto não existe")
+        void devePropagarExcecaoQuandoProdutoNaoExiste() {
             given(produtoService.removerProduto(99L))
                     .willThrow(new NotFoundException("Produto não encontrado, para deletar, confira se o id está correto"));
 
-            mockMvc.perform(delete("/almoxarifado/produto/remover/99"))
-                    .andExpect(status().isNotFound());
+            assertThatThrownBy(() -> mockMvc.perform(delete("/almoxarifado/produto/remover/99")))
+                    .isInstanceOf(NotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("PUT /almoxarifado/produto/entrada-estoque/{sku}")
+    class EntradaEstoque {
+
+        @Test
+        @DisplayName("deve retornar 200 quando a entrada de estoque é realizada com sucesso")
+        void deveRetornar200QuandoEntradaRealizadaComSucesso() throws Exception {
+            EntradaEstoqueDTO dto = new EntradaEstoqueDTO(5);
+            Response response = Response.builder().status(200).mensagem("Entrada de estoque realizada com sucesso").produto(umProdutoDTOValido()).build();
+
+            given(produtoService.entradaEstoque(eq("SKU-001"), any(EntradaEstoqueDTO.class))).willReturn(response);
+
+            mockMvc.perform(put("/almoxarifado/produto/entrada-estoque/SKU-001")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.mensagem").value("Entrada de estoque realizada com sucesso"));
+        }
+
+        @Test
+        @DisplayName("deve retornar 400 quando a quantidade informada é inválida")
+        void deveRetornar400QuandoQuantidadeInvalida() throws Exception {
+            EntradaEstoqueDTO dto = new EntradaEstoqueDTO(0);
+
+            mockMvc.perform(put("/almoxarifado/produto/entrada-estoque/SKU-001")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("deve propagar NotFoundException quando o produto não é encontrado")
+        void devePropagarExcecaoQuandoProdutoNaoEncontrado() {
+            EntradaEstoqueDTO dto = new EntradaEstoqueDTO(5);
+
+            given(produtoService.entradaEstoque(eq("SKU-INEXISTENTE"), any(EntradaEstoqueDTO.class)))
+                    .willThrow(new NotFoundException("Produto não encontrado"));
+
+            assertThatThrownBy(() -> mockMvc.perform(put("/almoxarifado/produto/entrada-estoque/SKU-INEXISTENTE")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(dto))))
+                    .isInstanceOf(NotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("PUT /almoxarifado/produto/saida-estoque/{sku}")
+    class SaidaEstoque {
+
+        @Test
+        @DisplayName("deve retornar 200 quando a saída de estoque é realizada com sucesso")
+        void deveRetornar200QuandoSaidaRealizadaComSucesso() throws Exception {
+            SaidaEstoqueDTO dto = new SaidaEstoqueDTO(5);
+            Response response = Response.builder().status(200).mensagem("Saída de estoque realizada com sucesso").produto(umProdutoDTOValido()).build();
+
+            given(produtoService.saidaEstoque(eq("SKU-001"), any(SaidaEstoqueDTO.class))).willReturn(response);
+
+            mockMvc.perform(put("/almoxarifado/produto/saida-estoque/SKU-001")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.mensagem").value("Saída de estoque realizada com sucesso"));
+        }
+
+        @Test
+        @DisplayName("deve retornar 400 quando a quantidade informada é inválida")
+        void deveRetornar400QuandoQuantidadeInvalida() throws Exception {
+            SaidaEstoqueDTO dto = new SaidaEstoqueDTO(-1);
+
+            mockMvc.perform(put("/almoxarifado/produto/saida-estoque/SKU-001")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("deve propagar EstoqueInsuficienteException quando não há estoque suficiente")
+        void devePropagarExcecaoQuandoEstoqueInsuficiente() {
+            SaidaEstoqueDTO dto = new SaidaEstoqueDTO(50);
+
+            given(produtoService.saidaEstoque(eq("SKU-001"), any(SaidaEstoqueDTO.class)))
+                    .willThrow(new EstoqueInsuficienteException("Estoque insuficiente para: SKU-001"));
+
+            assertThatThrownBy(() -> mockMvc.perform(put("/almoxarifado/produto/saida-estoque/SKU-001")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(dto))))
+                    .isInstanceOf(EstoqueInsuficienteException.class);
+        }
+
+        @Test
+        @DisplayName("deve propagar NotFoundException quando o produto não é encontrado")
+        void devePropagarExcecaoQuandoProdutoNaoEncontrado() {
+            SaidaEstoqueDTO dto = new SaidaEstoqueDTO(1);
+
+            given(produtoService.saidaEstoque(eq("SKU-INEXISTENTE"), any(SaidaEstoqueDTO.class)))
+                    .willThrow(new NotFoundException("Produto não encontrado"));
+
+            assertThatThrownBy(() -> mockMvc.perform(put("/almoxarifado/produto/saida-estoque/SKU-INEXISTENTE")
+                            .contentType("application/json")
+                            .content(objectMapper.writeValueAsString(dto))))
+                    .isInstanceOf(NotFoundException.class);
         }
     }
 }

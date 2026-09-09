@@ -76,7 +76,7 @@
                     </td>
                     <td>
                       @if (chamado.mecanico) {
-                        <span class="fw-semibold">{{ chamado.mecanico }}</span>
+                        <span class="fw-semibold">{{ chamado.mecanico.nome }}</span>
                       } @else {
                         <span class="text-muted fst-italic">Não atribuído</span>
                       }
@@ -161,10 +161,14 @@
         }
         <div>
           <label class="form-label fw-semibold">Mecânico Responsável <span class="text-danger">*</span></label>
-          <input type="text" class="form-control form-control-lg" [(ngModel)]="mecanico"
-            placeholder="Nome do mecânico"
-            [class.is-invalid]="submitted && !mecanico.trim()">
-          <div class="invalid-feedback">Informe o nome do mecânico.</div>
+          <select class="form-select form-select-lg" [(ngModel)]="mecanicoId"
+            [class.is-invalid]="submitted && !mecanicoId">
+            <option [ngValue]="null" disabled>Selecione um mecânico</option>
+            @for (m of mecanicosAtivos; track m.id) {
+              <option [ngValue]="m.id">{{ m.nome }}</option>
+            }
+          </select>
+          <div class="invalid-feedback">Selecione o mecânico responsável.</div>
           <p class="text-muted small mt-2 mb-0">
             <i class="bi bi-info-circle me-1"></i>
             O status do chamado será alterado para <strong>Em Manutenção</strong>.
@@ -239,7 +243,7 @@
           <div class="row g-3">
             <div class="col-12">
               <p class="text-muted small mb-1">Mecânico Responsável</p>
-              <p class="fw-semibold mb-0">{{ chamadoSelecionado.mecanico || '—' }}</p>
+              <p class="fw-semibold mb-0">{{ chamadoSelecionado.mecanico?.nome || '—' }}</p>
             </div>
           </div>
         </div>

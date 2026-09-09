@@ -1,6 +1,15 @@
+import { Especialidade, Turno } from './mecanico.model';
+
 export type TipoManutencao = 'CORRETIVA' | 'PREVENTIVA';
 export type PrioridadeChamado = 'BAIXA' | 'MEDIA' | 'ALTA';
 export type StatusChamado = 'ABERTA' | 'EM_MANUTENCAO' | 'CONCLUIDA';
+
+export interface ChamadoMecanico {
+  id: number;
+  nome: string;
+  especialidades: Especialidade[];
+  turno: Turno;
+}
 
 export interface Chamado {
   id: number;
@@ -11,7 +20,7 @@ export interface Chamado {
   setor: string;
   telefone?: string;
   descricao: string;
-  mecanico?: string;
+  mecanico?: ChamadoMecanico;
   status: StatusChamado;
   dataAbertura: string;
 }

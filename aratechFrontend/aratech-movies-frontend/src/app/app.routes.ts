@@ -15,7 +15,6 @@ import { roleGuard } from './core/guards/role.guard';
 import { PRODUTOS_ALMOXARIFADO_ROLES } from './core/config/role-permissions';
 
 import { PortariaComponent } from './componente/portaria/portaria.component';
-import { BaixaNotasComponent } from './componente/portaria/baixa-notas/baixa-notas.component';
 import { ControleAcessoComponent } from './componente/portaria/controle-acesso/controle-acesso.component';
 
 import { CarregamentoComponent } from './componente/carregamento/carregamento.component';
@@ -28,6 +27,7 @@ import { EstoqueManutencaoComponent } from './componente/manutencao/estoque/esto
 import { AcompanhamentoComponent } from './componente/manutencao/acompanhamento/acompanhamento.component';
 import { FilaChamadosComponent } from './componente/manutencao/fila-chamados/fila-chamados.component';
 import { SolicitarPecaComponent } from './componente/manutencao/solicitar-peca/solicitar-peca.component';
+import { MecanicosComponent } from './componente/manutencao/mecanicos/mecanicos.component';
 
 import { AssistenciaTecnicaComponent } from './componente/assistencia/assistencia.component';
 import { AssistenciaLotesComponent } from './componente/assistencia/lotes/lotes.component';
@@ -56,6 +56,7 @@ import { FinanceiroComponent } from './componente/financeiro/financeiro.componen
 import { ContasPagarComponent } from './componente/financeiro/contas-pagar/contas-pagar.component';
 import { ContasReceberComponent } from './componente/financeiro/contas-receber/contas-receber.component';
 import { FluxoCaixaComponent } from './componente/financeiro/fluxo-caixa/fluxo-caixa.component';
+import { BaixaNotasComponent } from './componente/financeiro/baixa-notas/baixa-notas.component';
 
 import { LotesComponent } from './componente/lotes/lotes.component';
 
@@ -86,7 +87,6 @@ export const routes: Routes = [
   { path: 'almoxarifado/recebimento',               component: RecebimentoComponent },
 
   { path: 'portaria',                               component: PortariaComponent },
-  { path: 'portaria/baixa-notas',                   component: BaixaNotasComponent },
   { path: 'portaria/controle-acesso',               component: ControleAcessoComponent },
 
   { path: 'carregamento',                           component: CarregamentoComponent },
@@ -99,6 +99,7 @@ export const routes: Routes = [
   { path: 'manutencao/estoque',                     component: EstoqueManutencaoComponent },
   { path: 'manutencao/acompanhamento',              component: AcompanhamentoComponent },
   { path: 'manutencao/fila-chamados',               component: FilaChamadosComponent },
+  { path: 'manutencao/mecanicos',                   component: MecanicosComponent },
 
   { path: 'assistencia',                            component: AssistenciaTecnicaComponent },
   { path: 'assistencia/lotes',                      component: AssistenciaLotesComponent },
@@ -127,6 +128,7 @@ export const routes: Routes = [
   { path: 'financeiro/contas-pagar',                component: ContasPagarComponent },
   { path: 'financeiro/contas-receber',              component: ContasReceberComponent },
   { path: 'financeiro/fluxo-caixa',                 component: FluxoCaixaComponent },
+  { path: 'financeiro/baixa-notas',                 component: BaixaNotasComponent },
 
   { path: 'administracao',                          component: AdministracaoComponent },
   { path: 'administracao/auditoria',                component: AuditoriaComponent },

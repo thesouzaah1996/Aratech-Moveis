@@ -1,6 +1,8 @@
 package com.aratechmoveis.manutencao;
 
+import com.aratechmoveis.manutencao.Mecanico.dto.MecanicoDTO;
 import com.aratechmoveis.manutencao.chamado.dto.ChamadoDTO;
+import com.aratechmoveis.manutencao.Mecanico.dto.MecanicoLookupDTO;
 import com.aratechmoveis.manutencao.pecaestoque.dto.PecaEstoqueDTO;
 import com.aratechmoveis.manutencao.solicitacaopeca.dto.SolicitacaoPecaDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,6 +22,10 @@ public class Response {
 
     private ChamadoDTO chamado;
     private List<ChamadoDTO> chamados;
+
+    private MecanicoDTO mecanico;
+    private List<MecanicoDTO> mecanicos;
+    private List<MecanicoLookupDTO> mecanicosLookup;
 
     private PecaEstoqueDTO pecaEstoque;
     private List<PecaEstoqueDTO> pecasEstoque;

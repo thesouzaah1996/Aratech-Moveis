@@ -20,7 +20,7 @@ export class RecebimentoService {
 
   getTodos(): Observable<Recebimento[]> {
     return this.http
-      .get<ApiResponse>(`${this.api}/todos`)
+      .get<ApiResponse>(`${this.api}/fila`)
       .pipe(map(res => res.recebimentos ?? []));
   }
 

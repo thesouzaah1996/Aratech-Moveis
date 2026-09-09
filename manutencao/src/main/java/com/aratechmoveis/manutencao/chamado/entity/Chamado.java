@@ -1,5 +1,6 @@
 package com.aratechmoveis.manutencao.chamado.entity;
 
+import com.aratechmoveis.manutencao.Mecanico.entity.Mecanico;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -57,8 +58,9 @@ public class Chamado {
     @Column(nullable = false, length = 1000)
     private String descricao;
 
-    @Column(length = 150)
-    private String mecanico;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mecanico_id")
+    private Mecanico mecanico;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

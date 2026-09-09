@@ -1,0 +1,285 @@
+<app-navbar />
+
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+
+    @if (successMessage) {
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      </div>
+    }
+
+    @if (errorMessage) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>{{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+      <div class="input-group" style="max-width: 340px;">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0"
+          placeholder="Buscar por nome ou ID…"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch()">
+      </div>
+
+      <div class="filtro-status flex-shrink-0">
+        <button type="button" [class.ativo]="filtroStatus === 'todos'" (click)="setFiltroStatus('todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ativos'" (click)="setFiltroStatus('ativos')">Ativos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'inativos'" (click)="setFiltroStatus('inativos')">Inativos</button>
+      </div>
+
+      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+        <i class="bi bi-plus-circle me-2"></i>Novo Mecânico
+      </button>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-body">
+        @if (loading) {
+          <div class="text-center py-5 text-muted">
+            <div class="spinner-border spinner-border-sm me-2"></div>
+            Carregando mecânicos...
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nome</th>
+                  <th>Status</th>
+                  <th class="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (paged.length === 0) {
+                  <tr>
+                    <td colspan="4">
+                      <div class="empty-state">
+                        <i class="bi bi-person-gear"></i>
+                        <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum mecânico cadastrado.' }}</p>
+                      </div>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (m of paged; track m.id) {
+                    <tr>
+                      <td><span class="badge-id">#{{ m.id }}</span></td>
+                      <td class="fw-semibold">{{ m.nome }}</td>
+                      <td>
+                        <div class="form-check form-switch mb-0">
+                          <input class="form-check-input" type="checkbox" role="switch"
+                            [checked]="m.ativo"
+                            [title]="m.ativo ? 'Clique para desativar' : 'Clique para ativar'"
+                            (click)="onSwitchClick($event, m)">
+                        </div>
+                      </td>
+                      <td class="text-end action-buttons">
+                        <button class="btn-action btn-action-edit" title="Editar" (click)="openEditModal(m)">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (totalPages > 1) {
+            <div class="pagination-container">
+              <span class="pagination-info">
+                Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} mecânico(s)
+              </span>
+              <nav>
+                <ul class="pagination">
+                  <li class="page-item" [class.disabled]="page === 1">
+                    <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                  </li>
+
+                  @if (visiblePages[0] > 1) {
+                    <li class="page-item">
+                      <a class="page-link" (click)="setPage(1)">1</a>
+                    </li>
+                    @if (visiblePages[0] > 2) {
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                  }
+
+                  @for (p of visiblePages; track p) {
+                    <li class="page-item" [class.active]="p === page">
+                      <a class="page-link" (click)="setPage(p)">{{ p }}</a>
+                    </li>
+                  }
+
+                  @if (visiblePages[visiblePages.length - 1] < totalPages) {
+                    @if (visiblePages[visiblePages.length - 1] < totalPages - 1) {
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                    <li class="page-item">
+                      <a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a>
+                    </li>
+                  }
+
+                  <li class="page-item" [class.disabled]="page === totalPages">
+                    <a class="page-link" (click)="setPage(page + 1)">›</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div class="modal fade" #mecanicoModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Novo Mecânico</h5>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome completo"
+            [class.is-invalid]="submitted && !form.nome.trim()">
+          <div class="invalid-feedback">Nome é obrigatório.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Turno <span class="text-danger">*</span></label>
+          <select class="form-select" [(ngModel)]="form.turno"
+            [class.is-invalid]="submitted && !form.turno">
+            <option value="" disabled>Selecione o turno</option>
+            @for (t of turnosDisponiveis; track t) {
+              <option [value]="t">{{ turnoLabels[t] }}</option>
+            }
+          </select>
+          <div class="invalid-feedback">Turno é obrigatório.</div>
+        </div>
+
+        <div>
+          <label class="form-label fw-semibold">Especialidades <span class="text-danger">*</span></label>
+          <div class="row g-2">
+            @for (esp of especialidadesDisponiveis; track esp) {
+              <div class="col-6 col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" [id]="'esp-' + esp"
+                    [checked]="form.especialidades.includes(esp)"
+                    (change)="toggleEspecialidade(form, esp)">
+                  <label class="form-check-label" [for]="'esp-' + esp">{{ especialidadeLabels[esp] }}</label>
+                </div>
+              </div>
+            }
+          </div>
+          @if (submitted && form.especialidades.length === 0) {
+            <div class="text-danger small mt-1">Selecione ao menos uma especialidade.</div>
+          }
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="save()">
+          <i class="bi bi-check-circle me-1"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" #editModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">Editar Mecânico</h5>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="formEdit.nome" placeholder="Nome completo"
+            [class.is-invalid]="submittedEdit && !formEdit.nome.trim()">
+          <div class="invalid-feedback">Nome é obrigatório.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Turno <span class="text-danger">*</span></label>
+          <select class="form-select" [(ngModel)]="formEdit.turno"
+            [class.is-invalid]="submittedEdit && !formEdit.turno">
+            <option value="" disabled>Selecione o turno</option>
+            @for (t of turnosDisponiveis; track t) {
+              <option [value]="t">{{ turnoLabels[t] }}</option>
+            }
+          </select>
+          <div class="invalid-feedback">Turno é obrigatório.</div>
+        </div>
+
+        <div>
+          <label class="form-label fw-semibold">Especialidades <span class="text-danger">*</span></label>
+          <div class="row g-2">
+            @for (esp of especialidadesDisponiveis; track esp) {
+              <div class="col-6 col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" [id]="'esp-edit-' + esp"
+                    [checked]="formEdit.especialidades.includes(esp)"
+                    (change)="toggleEspecialidade(formEdit, esp)">
+                  <label class="form-check-label" [for]="'esp-edit-' + esp">{{ especialidadeLabels[esp] }}</label>
+                </div>
+              </div>
+            }
+          </div>
+          @if (submittedEdit && formEdit.especialidades.length === 0) {
+            <div class="text-danger small mt-1">Selecione ao menos uma especialidade.</div>
+          }
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="saveEdit()">
+          <i class="bi bi-check-circle me-1"></i>Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" #deleteModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Desativação
+        </h5>
+      </div>
+      <div class="modal-body text-center p-4">
+        <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
+        <h5 class="mt-3">Tem certeza que deseja desativar?</h5>
+        @if (mecanicoParaDesativar) {
+          <p class="mb-0 mt-2">
+            O mecânico <strong class="text-danger">{{ mecanicoParaDesativar.nome }}</strong>
+            será marcado como inativo e não poderá mais receber novos chamados.
+          </p>
+          <div class="delete-warning">
+            <i class="bi bi-info-circle-fill text-danger me-2"></i>
+            <span>O mecânico poderá ser reativado futuramente.</span>
+          </div>
+        }
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" (click)="confirmDesativar()">
+          <i class="bi bi-slash-circle me-1"></i>Desativar Mecânico
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

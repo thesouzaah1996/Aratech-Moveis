@@ -9,6 +9,8 @@ import com.aratechmoveis.manutencao.chamado.repository.ChamadoRepository;
 import com.aratechmoveis.manutencao.chamado.service.ChamadoService;
 import com.aratechmoveis.manutencao.exceptions.NotFoundException;
 import com.aratechmoveis.manutencao.exceptions.RecursoJaExistenteException;
+import com.aratechmoveis.manutencao.Mecanico.entity.Mecanico;
+import com.aratechmoveis.manutencao.Mecanico.repository.MecanicoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import java.util.List;
 public class ChamadoServiceImp implements ChamadoService {
 
     private final ChamadoRepository chamadoRepository;
+    private final MecanicoRepository mecanicoRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -85,10 +88,16 @@ public class ChamadoServiceImp implements ChamadoService {
             throw new RecursoJaExistenteException("Não é possível atribuir um mecânico a um chamado já concluído");
         }
 
-        chamado.setMecanico(atribuirMecanicoDTO.getMecanico());
+        Mecanico mecanico = mecanicoRepository.findById(atribuirMecanicoDTO.getMecanicoId())
+                .orElseThrow(() -> new NotFoundException("Mecânico não encontrado, confira se o id está correto"));
+
+        if (!mecanico.getAtivo()) {
+            throw new RecursoJaExistenteException("Não é possível atribuir um mecânico inativo a um chamado");
+        }
+
+        chamado.setMecanico(mecanico);
         chamado.setStatus(StatusChamado.EM_MANUTENCAO);
         chamadoRepository.save(chamado);
-        log.info("Chamado id={} atribuído ao mecânico={}", id, chamado.getMecanico());
 
         return Response.builder()
                 .status(200)
@@ -109,26 +118,11 @@ public class ChamadoServiceImp implements ChamadoService {
 
         chamado.setStatus(StatusChamado.CONCLUIDA);
         chamadoRepository.save(chamado);
-        log.info("Chamado id={} concluído", id);
 
         return Response.builder()
                 .status(200)
                 .message("Chamado concluído com sucesso")
                 .chamado(modelMapper.map(chamado, ChamadoDTO.class))
-                .build();
-    }
-
-    @Override
-    @Transactional
-    public Response removerChamado(Long id) {
-        chamadoRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Chamado não encontrado, para deletar, confira se o id está correto"));
-
-        chamadoRepository.deleteById(id);
-
-        return Response.builder()
-                .status(204)
-                .message("Chamado deletado com sucesso")
                 .build();
     }
 }

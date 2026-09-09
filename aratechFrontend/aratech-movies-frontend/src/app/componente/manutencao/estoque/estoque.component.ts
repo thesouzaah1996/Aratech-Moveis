@@ -17,6 +17,8 @@ declare const bootstrap: any;
 export class EstoqueManutencaoComponent implements OnInit, AfterViewInit {
   @ViewChild('pecaModal') pecaModalEl!: ElementRef;
   @ViewChild('deleteModal') deleteModalEl!: ElementRef;
+  @ViewChild('entradaModal') entradaModalEl!: ElementRef;
+  @ViewChild('saidaModal') saidaModalEl!: ElementRef;
 
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
@@ -36,9 +38,14 @@ export class EstoqueManutencaoComponent implements OnInit, AfterViewInit {
 
   form: PecaEstoqueForm = this.emptyForm();
   pecaParaExcluir: PecaEstoque | null = null;
+  pecaMovimentacao: PecaEstoque | null = null;
+  quantidadeMovimentacao: number | null = null;
+  movimentacaoError = '';
 
   private pecaModal?: any;
   private deleteModal?: any;
+  private entradaModal?: any;
+  private saidaModal?: any;
 
   constructor(private pecaEstoqueService: PecaEstoqueService) {}
 
@@ -57,8 +64,10 @@ export class EstoqueManutencaoComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.pecaModal   = new bootstrap.Modal(this.pecaModalEl.nativeElement);
-    this.deleteModal = new bootstrap.Modal(this.deleteModalEl.nativeElement);
+    this.pecaModal    = new bootstrap.Modal(this.pecaModalEl.nativeElement);
+    this.deleteModal  = new bootstrap.Modal(this.deleteModalEl.nativeElement);
+    this.entradaModal = new bootstrap.Modal(this.entradaModalEl.nativeElement);
+    this.saidaModal   = new bootstrap.Modal(this.saidaModalEl.nativeElement);
   }
 
   get filtradas(): PecaEstoque[] {
@@ -82,23 +91,13 @@ export class EstoqueManutencaoComponent implements OnInit, AfterViewInit {
   }
 
   get visiblePages(): number[] {
-    const start = Math.max(1, Math.min(this.page - 2, this.totalPages - 4));
-    const end   = Math.min(this.totalPages, start + 4);
+    const half = 5;
+    const start = Math.max(1, Math.min(this.page - half, this.totalPages - 7));
+    const end = Math.min(this.totalPages, start + 7);
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
-  get paginationStart(): number {
-    return this.filtradas.length === 0 ? 0 : (this.page - 1) * this.pageSize + 1;
-  }
-
-  get paginationEnd(): number {
-    return Math.min(this.page * this.pageSize, this.filtradas.length);
-  }
-
-  setPage(p: number): void {
-    if (p < 1 || p > this.totalPages) return;
-    this.page = p;
-  }
+  setPage(p: number): void { this.page = p; }
 
   openAdd(): void {
     this.isEditing = false;
@@ -125,6 +124,81 @@ export class EstoqueManutencaoComponent implements OnInit, AfterViewInit {
   openDelete(peca: PecaEstoque): void {
     this.pecaParaExcluir = peca;
     this.deleteModal.show();
+  }
+
+  openEntrada(peca: PecaEstoque): void {
+    this.pecaMovimentacao = peca;
+    this.quantidadeMovimentacao = null;
+    this.movimentacaoError = '';
+    this.entradaModal.show();
+  }
+
+  openSaida(peca: PecaEstoque): void {
+    this.pecaMovimentacao = peca;
+    this.quantidadeMovimentacao = null;
+    this.movimentacaoError = '';
+    this.saidaModal.show();
+  }
+
+  confirmEntrada(): void {
+    if (!this.pecaMovimentacao) return;
+
+    if (!this.quantidadeMovimentacao || this.quantidadeMovimentacao <= 0) {
+      this.movimentacaoError = 'Informe uma quantidade válida.';
+      return;
+    }
+
+    const peca = this.pecaMovimentacao;
+    const novaQuantidade = peca.quantidade + this.quantidadeMovimentacao;
+
+    this.pecaEstoqueService.update(peca.id, this.formFromPeca(peca, novaQuantidade)).subscribe({
+      next: atualizada => {
+        const idx = this.pecas.findIndex(p => p.id === atualizada.id);
+        if (idx > -1) this.pecas[idx] = atualizada;
+        this.entradaModal.hide();
+        this.showSuccess('Entrada de estoque registrada com sucesso!');
+      },
+      error: () => this.showError('Erro ao registrar entrada de estoque.')
+    });
+  }
+
+  confirmSaida(): void {
+    if (!this.pecaMovimentacao) return;
+
+    if (!this.quantidadeMovimentacao || this.quantidadeMovimentacao <= 0) {
+      this.movimentacaoError = 'Informe uma quantidade válida.';
+      return;
+    }
+
+    if (this.quantidadeMovimentacao > this.pecaMovimentacao.quantidade) {
+      this.movimentacaoError = 'Quantidade maior que o estoque disponível.';
+      return;
+    }
+
+    const peca = this.pecaMovimentacao;
+    const novaQuantidade = peca.quantidade - this.quantidadeMovimentacao;
+
+    this.pecaEstoqueService.update(peca.id, this.formFromPeca(peca, novaQuantidade)).subscribe({
+      next: atualizada => {
+        const idx = this.pecas.findIndex(p => p.id === atualizada.id);
+        if (idx > -1) this.pecas[idx] = atualizada;
+        this.saidaModal.hide();
+        this.showSuccess('Saída de estoque registrada com sucesso!');
+      },
+      error: () => this.showError('Erro ao registrar saída de estoque.')
+    });
+  }
+
+  private formFromPeca(peca: PecaEstoque, quantidade: number): PecaEstoqueForm {
+    return {
+      id: peca.id,
+      nome: peca.nome,
+      codigo: peca.codigo,
+      quantidade,
+      unidade: peca.unidade,
+      localizacao: peca.localizacao,
+      descricao: peca.descricao ?? ''
+    };
   }
 
   save(): void {

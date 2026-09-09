@@ -11,5 +11,4 @@ public interface ChamadoService {
     Response buscarChamadoPorId(Long id);
     Response atribuirMecanico(Long id, AtribuirMecanicoDTO atribuirMecanicoDTO);
     Response concluirChamado(Long id);
-    Response removerChamado(Long id);
 }

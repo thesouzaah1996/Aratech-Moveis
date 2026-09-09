@@ -1,9 +1,12 @@
 package com.aratechmoveis.manutencao.pecaestoque.service.imp;
 
 import com.aratechmoveis.manutencao.Response;
+import com.aratechmoveis.manutencao.exceptions.EstoqueInsuficienteException;
 import com.aratechmoveis.manutencao.exceptions.NotFoundException;
 import com.aratechmoveis.manutencao.exceptions.RecursoJaExistenteException;
+import com.aratechmoveis.manutencao.pecaestoque.dto.EntradaEstoqueDTO;
 import com.aratechmoveis.manutencao.pecaestoque.dto.PecaEstoqueDTO;
+import com.aratechmoveis.manutencao.pecaestoque.dto.SaidaEstoqueDTO;
 import com.aratechmoveis.manutencao.pecaestoque.entity.PecaEstoque;
 import com.aratechmoveis.manutencao.pecaestoque.repository.PecaEstoqueRepository;
 import com.aratechmoveis.manutencao.pecaestoque.service.PecaEstoqueService;
@@ -128,6 +131,44 @@ public class PecaEstoqueServiceImp implements PecaEstoqueService {
         return Response.builder()
                 .status(204)
                 .message("Peça deletada com sucesso")
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public Response entradaEstoque(String codigo, EntradaEstoqueDTO entradaEstoque) {
+        PecaEstoque peca = pecaEstoqueRepository.findByCodigoIgnoreCase(codigo)
+                .orElseThrow(() -> new NotFoundException("Peça não encontrada"));
+
+        peca.setQuantidade(peca.getQuantidade() + entradaEstoque.quantidade());
+        pecaEstoqueRepository.save(peca);
+
+        return Response.builder()
+                .status(200)
+                .message("Entrada de estoque realizada com sucesso")
+                .pecaEstoque(modelMapper.map(peca, PecaEstoqueDTO.class))
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public Response saidaEstoque(String codigo, SaidaEstoqueDTO saidaEstoque) {
+        PecaEstoque peca = pecaEstoqueRepository.findByCodigoIgnoreCase(codigo)
+                .orElseThrow(() -> new NotFoundException("Peça não encontrada"));
+
+        if (peca.getQuantidade() < saidaEstoque.quantidade()) {
+            throw new EstoqueInsuficienteException(
+                    "Estoque insuficiente para: " + codigo
+            );
+        }
+
+        peca.setQuantidade(peca.getQuantidade() - saidaEstoque.quantidade());
+        pecaEstoqueRepository.save(peca);
+
+        return Response.builder()
+                .status(200)
+                .message("Saída de estoque realizada com sucesso")
+                .pecaEstoque(modelMapper.map(peca, PecaEstoqueDTO.class))
                 .build();
     }
 }

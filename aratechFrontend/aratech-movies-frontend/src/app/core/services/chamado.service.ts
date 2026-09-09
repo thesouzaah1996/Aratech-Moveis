@@ -30,9 +30,9 @@ export class ChamadoService {
       .pipe(map(res => res.chamado!));
   }
 
-  atribuirMecanico(id: number, mecanico: string): Observable<Chamado> {
+  atribuirMecanico(id: number, mecanicoId: number): Observable<Chamado> {
     return this.http
-      .put<ApiResponse>(`${this.api}/atribuir/${id}`, { mecanico })
+      .put<ApiResponse>(`${this.api}/atribuir/${id}`, { mecanicoId })
       .pipe(map(res => res.chamado!));
   }
 

@@ -54,13 +54,13 @@ public class ProdutoController {
 
     @PutMapping("/entrada-estoque/{sku}")
     @PreAuthorize("hasAnyRole('ENCARREGADO_ALMOXARIFADO', 'CONFERENTE_ALMOXARIFADO', 'ADMIN')")
-    public ResponseEntity<Response> entradaEstoque(@PathVariable String sku, @RequestBody EntradaEstoqueDTO entradaEstoque) {
+    public ResponseEntity<Response> entradaEstoque(@PathVariable String sku, @RequestBody @Valid EntradaEstoqueDTO entradaEstoque) {
         return ResponseEntity.status(HttpStatus.OK).body(produtoService.entradaEstoque(sku, entradaEstoque));
     }
 
     @PutMapping("/saida-estoque/{sku}")
     @PreAuthorize("hasAnyRole('ENCARREGADO_ALMOXARIFADO', 'CONFERENTE_ALMOXARIFADO', 'ADMIN')")
-    public ResponseEntity<Response> saidaEstoque(@PathVariable String sku, @RequestBody SaidaEstoqueDTO saidaEstoque) {
+    public ResponseEntity<Response> saidaEstoque(@PathVariable String sku, @RequestBody @Valid SaidaEstoqueDTO saidaEstoque) {
         return ResponseEntity.status(HttpStatus.OK).body(produtoService.saidaEstoque(sku, saidaEstoque));
     }
 }
