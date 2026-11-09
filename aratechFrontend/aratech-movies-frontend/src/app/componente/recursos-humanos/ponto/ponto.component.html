@@ -1,170 +1,59 @@
 <app-navbar />
-
 <main class="app-main">
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-4">
-
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-      <div>
-        <div class="integracao-badge">
-          <i class="bi bi-phone me-1"></i>
-          Dados recebidos via integração com o app de ponto
-        </div>
-      </div>
-
-      <div class="d-flex align-items-center gap-2">
-        <div class="navegacao-data">
-          <button type="button" class="btn-nav" (click)="diaAnterior()" title="Dia anterior">
-            <i class="bi bi-chevron-left"></i>
-          </button>
-          <input type="date" class="form-control form-control-sm data-input"
-            [(ngModel)]="dataSelecionada"
-            (change)="onDataChange()">
-          <button type="button" class="btn-nav" (click)="proximoDia()" [disabled]="isHoje" title="Próximo dia">
-            <i class="bi bi-chevron-right"></i>
-          </button>
-        </div>
-
-        <button type="button" class="btn btn-danger" (click)="sincronizar()" [disabled]="sincronizando">
-          @if (sincronizando) {
-            <span class="spinner-border spinner-border-sm me-2"></span>Sincronizando...
-          } @else {
-            <i class="bi bi-arrow-repeat me-2"></i>Sincronizar
+    @if (erro) { <div class="alert alert-danger" role="alert">{{ erro }}</div> }
+    @if (!id && !proprio) {
+      <div class="input-group busca-ponto mb-3"><span class="input-group-text bg-white"><i class="bi bi-search"></i></span><input type="search" class="form-control" placeholder="Digite o nome ou ID do funcionário..." aria-label="Buscar funcionário por nome ou ID" maxlength="150" [(ngModel)]="buscaNome" (ngModelChange)="buscar()"></div>
+      @if (buscaNome.trim()) {
+        <div class="busca-ponto" aria-live="polite">
+          @if (pesquisando) { <div class="text-muted py-3"><span class="spinner-border spinner-border-sm me-2"></span>Buscando funcionários...</div> }
+          @else {
+            <div class="list-group">
+              @for (f of resultados; track f.id) {
+                <a class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3" [routerLink]="['/recursos-humanos/ponto', f.id]">
+                  <span class="avatar-ponto">{{ f.nome.charAt(0) }}</span><span class="flex-grow-1"><strong class="d-block">{{ f.nome }}</strong><small class="text-muted">ID: {{ f.id }} · {{ f.cargo }} · {{ f.setor }}</small></span><i class="bi bi-chevron-right text-muted"></i>
+                </a>
+              } @empty { <div class="list-group-item text-muted">Nenhum funcionário encontrado.</div> }
+            </div>
           }
-        </button>
-      </div>
-    </div>
-
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-      <div class="input-group" style="max-width: 320px;">
-        <span class="input-group-text bg-white border-end-0">
-          <i class="bi bi-search text-muted"></i>
-        </span>
-        <input type="text" class="form-control border-start-0 ps-0"
-          placeholder="Buscar por nome, matrícula ou setor…"
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="page = 1">
-      </div>
-
-      <div class="filtro-status flex-shrink-0">
-        <button type="button" [class.ativo]="filtroStatus === 'Todos'"      (click)="setFiltro('Todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Presente'"   (click)="setFiltro('Presente')">Presentes</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Incompleto'" (click)="setFiltro('Incompleto')">Incompletos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Ausente'"    (click)="setFiltro('Ausente')">Ausentes</button>
-      </div>
-    </div>
-
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead>
-              <tr>
-                <th>Matrícula</th>
-                <th>Funcionário</th>
-                <th>Cargo</th>
-                <th>Setor</th>
-                <th class="text-center">Entrada</th>
-                <th class="text-center">Saída</th>
-                <th class="text-center">Total</th>
-                <th class="text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (paged.length === 0) {
-                <tr>
-                  <td colspan="8">
-                    <div class="empty-state">
-                      <i class="bi bi-clock-history"></i>
-                      <p>
-                        @if (searchTerm || filtroStatus !== 'Todos') {
-                          Nenhum resultado para o filtro selecionado.
-                        } @else {
-                          Nenhum registro de ponto para {{ dataFormatada || 'esta data' }}.
-                        }
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              } @else {
-                @for (r of paged; track r.matricula) {
-                  <tr>
-                    <td><span class="badge-id">{{ r.matricula }}</span></td>
-                    <td class="fw-semibold">{{ r.funcionario }}</td>
-                    <td class="text-muted">{{ r.cargo }}</td>
-                    <td>{{ r.setor }}</td>
-                    <td class="text-center">
-                      @if (r.entrada) {
-                        <span class="hora">{{ r.entrada }}</span>
-                      } @else {
-                        <span class="text-muted">—</span>
-                      }
-                    </td>
-                    <td class="text-center">
-                      @if (r.saida) {
-                        <span class="hora">{{ r.saida }}</span>
-                      } @else {
-                        <span class="text-muted">—</span>
-                      }
-                    </td>
-                    <td class="text-center">
-                      @if (r.totalHoras) {
-                        <span class="total-horas">{{ r.totalHoras }}</span>
-                      } @else {
-                        <span class="text-muted">—</span>
-                      }
-                    </td>
-                    <td class="text-center">
-                      <span class="badge" [class]="statusBadge(r.status)">{{ r.status }}</span>
-                    </td>
-                  </tr>
-                }
-              }
-            </tbody>
-          </table>
         </div>
-
-        @if (totalPages > 1) {
-          <div class="pagination-container">
-            <span class="pagination-info">
-              Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} registro(s)
-            </span>
-            <nav>
-              <ul class="pagination">
-                <li class="page-item" [class.disabled]="page === 1">
-                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
-                </li>
-
-                @if (visiblePages[0] > 1) {
-                  <li class="page-item"><a class="page-link" (click)="setPage(1)">1</a></li>
-                  @if (visiblePages[0] > 2) {
-                    <li class="page-item disabled"><span class="page-link">…</span></li>
-                  }
-                }
-
-                @for (p of visiblePages; track p) {
-                  <li class="page-item" [class.active]="p === page">
-                    <a class="page-link" (click)="setPage(p)">{{ p }}</a>
-                  </li>
-                }
-
-                @if (visiblePages[visiblePages.length - 1] < totalPages) {
-                  @if (visiblePages[visiblePages.length - 1] < totalPages - 1) {
-                    <li class="page-item disabled"><span class="page-link">…</span></li>
-                  }
-                  <li class="page-item"><a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a></li>
-                }
-
-                <li class="page-item" [class.disabled]="page === totalPages">
-                  <a class="page-link" (click)="setPage(page + 1)">›</a>
-                </li>
-              </ul>
-            </nav>
-          </div>
+      }
+    } @else if (id) {
+      <div class="card shadow-sm mb-4"><div class="card-body p-4 d-flex flex-wrap align-items-center gap-3"><span class="avatar-ponto">{{ nome.charAt(0) || '?' }}</span><div class="flex-grow-1"><h4 class="fw-bold mb-1">{{ nome }}</h4><span class="text-muted">ID: {{ id }} @if(cargo) { · {{ cargo }} } @if(setor) { · {{ setor }} }</span></div><div><label for="mes-ponto" class="form-label small text-muted mb-1">Competência</label><input id="mes-ponto" type="month" class="form-control" [(ngModel)]="mes" (change)="carregar()"></div></div></div>
+      @if (sucesso) { <div class="alert alert-success" role="status">{{ sucesso }}</div> }
+      @if (podeEditar && !proprio) {
+        <button type="button" class="btn btn-outline-secondary mb-3" (click)="configurarEscala()">Configurar escala e horas extras</button>
+        @if(editandoEscala) {
+          <section class="card mb-4"><div class="card-body">
+            <h2 class="h5">Escala semanal</h2>
+            <p class="small text-muted">Preencha pares de entrada e saída. Deixe a folga vazia. A soma deve respeitar a jornada semanal cadastrada. Extras autorizadas: 0 a 120 minutos por dia. A comparação usa os horários exatos da escala atual.</p>
+            <div class="table-responsive"><table class="table"><thead><tr><th>Dia</th>@for(c of colunas;track c){<th>{{ c }}</th>}<th>Extras (min)</th></tr></thead><tbody>
+            @for(e of escala;track e.diaSemana){<tr><td>{{ nomesDias[e.diaSemana-1] }}</td>@for(h of e.horarios;track $index;let i=$index){<td><input type="time" class="form-control" [attr.aria-label]="nomesDias[e.diaSemana-1] + ' ' + colunas[i]" [(ngModel)]="e.horarios[i]" [disabled]="salvandoEscala"></td>}<td><input type="number" min="0" max="120" class="form-control" [attr.aria-label]="'Minutos extras de ' + nomesDias[e.diaSemana-1]" [(ngModel)]="e.extraMinutos" [disabled]="salvandoEscala"></td></tr>}
+            </tbody></table></div>
+            <button type="button" class="btn btn-danger me-2" (click)="gravarEscala()" [disabled]="salvandoEscala">Salvar escala</button>
+            <button type="button" class="btn btn-light" (click)="editandoEscala=false" [disabled]="salvandoEscala">Cancelar</button>
+          </div></section>
         }
-      </div>
-    </div>
-
+      }
+      <div class="row g-3 mb-4"><div class="col-sm-4"><div class="resumo-ponto"><span>Horas registradas</span><strong>{{ totalMes }}</strong></div></div><div class="col-sm-4"><div class="resumo-ponto"><span>Dias com marcação</span><strong>{{ diasMarcados }}</strong></div></div><div class="col-sm-4"><div class="resumo-ponto"><span>Marcações incompletas</span><strong>{{ incompletos }}</strong></div></div></div>
+      <div class="card shadow-sm"><div class="card-header bg-white py-3"><h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-danger me-2"></i>Espelho de ponto</h5></div><div class="table-responsive"><table class="table table-hover align-middle mb-0 tabela-ponto"><thead><tr><th>Data</th><th>Dia da semana</th>@for(c of colunas;track c){<th class="text-center">{{ c }}</th>}<th class="text-center">Total</th><th>Status</th><th class="text-end">Ações</th></tr></thead><tbody>
+        @if(loading){<tr><td colspan="11" class="text-center py-5"><span class="spinner-border spinner-border-sm me-2"></span>Carregando marcações...</td></tr>}
+        @else { @for(d of dias;track d.data){<tr [attr.title]="d.aviso || null" [class.ponto-certo]="d.situacao === 'NO_HORARIO'" [class.ponto-errado]="d.situacao === 'FORA_HORARIO'"><td>{{ d.data | date:'dd/MM/yyyy' }}</td><td>{{ diaSemana(d.data) }}</td>@for(h of d.horarios;track $index){<td class="text-center hora-ponto" [class.sem-marcacao]="!h">{{ h || 'Sem marcação' }}</td>}<td class="text-center fw-semibold">{{ horas(total(d)) }}</td><td>@if(d.horarios.join('')){<span class="badge" [class]="d.situacao === 'FORA_HORARIO' ? 'bg-danger-subtle text-danger' : incompleto(d) ? 'bg-warning-subtle text-warning-emphasis' : 'bg-success-subtle text-success'">{{ d.situacao === 'FORA_HORARIO' ? 'Fora do horário' : d.situacao === 'SEM_ESCALA' ? 'Escala não definida' : status(d) }}</span>}@else{<span class="text-muted small">Sem marcação</span>}</td><td class="text-end"><button type="button" class="btn-action btn-action-edit" [attr.title]="podeEditarDia(d) ? 'Alterar marcação' : 'Ver histórico'" [attr.aria-label]="(podeEditarDia(d) ? 'Alterar marcação de ' : 'Ver histórico de ') + d.data" (click)="abrir(d)"><i [class]="podeEditarDia(d) ? 'bi bi-pencil' : 'bi bi-clock-history'"></i></button></td></tr>} }
+      </tbody></table></div></div>
+      <p class="text-muted small mt-3">Horários locais, no formato de 24 horas. Dias sem registros não representam falta. O total considera somente pares completos de entrada e saída.</p>
+    }
   </div>
 </main>
-
+<div class="modal fade" #ajusteModal tabindex="-1" aria-labelledby="ajuste-ponto-titulo" data-bs-backdrop="static" data-bs-keyboard="false"><div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+  <div class="modal-header bg-danger text-white"><h5 class="modal-title fw-bold" id="ajuste-ponto-titulo"><i class="bi bi-clock-history me-2"></i>Marcação de ponto · {{ selecionado?.data | date:'dd/MM/yyyy' }}</h5></div>
+  <div class="modal-body p-4">
+    @if(erroModal){<div class="alert alert-danger" role="alert">{{ erroModal }}</div>}
+    @if(selecionado;as d){<div class="row g-3 mb-3">@for(c of colunas;track c;let i=$index){<div class="col-6 col-md-4"><label [for]="'horario-'+i" class="form-label">{{ c }}</label><input type="time" [id]="'horario-'+i" class="form-control" [(ngModel)]="d.horarios[i]" [disabled]="salvando || !podeEditarDia(d)"></div>}</div>
+      @if(podeEditarDia(d)){<label for="motivo-ponto" class="form-label">Motivo da alteração</label><textarea id="motivo-ponto" class="form-control mb-3" rows="2" maxlength="500" placeholder="Descreva o motivo da correção" [(ngModel)]="motivo" [disabled]="salvando"></textarea>}
+    }
+    <h6 class="fw-bold border-top pt-3">Histórico de alterações</h6>
+    @if(carregandoHistorico){<p class="text-muted">Carregando histórico...</p>}
+    @else{@for(h of historico;track h.id){<div class="historico-ponto"><strong>{{ h.autor }}</strong><small class="text-muted ms-2">{{ h.alteradoEm | date:'dd/MM/yyyy HH:mm' }}</small><p class="mb-1">{{ h.motivo }}</p><div class="small text-muted">Antes: {{ textoHorarios(h.anteriores) }}</div><div class="small">Depois: {{ textoHorarios(h.novos) }}</div></div>}@empty{<p class="text-muted small">Nenhuma alteração registrada neste dia.</p>}}
+  </div><div class="modal-footer border-0 bg-light"><button type="button" class="btn btn-cancelar" [disabled]="salvando" (click)="fechar()">Fechar</button>@if(selecionado && podeEditarDia(selecionado)){<button type="button" class="btn btn-danger" [disabled]="salvando" (click)="salvar()">{{ salvando ? 'Salvando...' : 'Salvar alteração' }}</button>}</div>
+</div></div></div>

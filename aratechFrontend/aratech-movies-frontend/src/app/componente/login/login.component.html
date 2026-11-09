@@ -11,11 +11,11 @@
 
       <div class="field"
            [class.login-error]="loginState === 'error' || loginState === 'blocked'">
-        <label for="email">Usuário</label>
-        <input id="email" name="email" type="text"
-               inputmode="email" autocomplete="email"
+        <label for="email">E-mail corporativo</label>
+        <input id="email" name="email" type="email"
+               inputmode="email" autocomplete="username" maxlength="150"
                autocapitalize="off" spellcheck="false"
-               required placeholder="usuario@exemplo"
+               required placeholder="nome@aratechmoveis"
                [(ngModel)]="email"
                [class.is-invalid]="!!emailError"
                (input)="clearState()" />
@@ -47,11 +47,6 @@
         }
       </div>
 
-      <div class="row between">
-        <a class="link" routerLink="/redefinir-senha">Redefinir senha</a>
-        <a class="link" routerLink="/primeiro-acesso/solicitar">Primeiro acesso</a>
-      </div>
-
       <button class="btn btn-primary full" type="submit"
               [disabled]="isLoading">
         Entrar
@@ -59,13 +54,13 @@
 
       @if (loginState === 'error') {
         <div class="form-msg error" role="status" aria-live="polite">
-          Usuário ou senha incorretos
+          {{ erroLogin }}
         </div>
       }
 
       @if (loginState === 'blocked') {
         <div class="form-msg error" role="status" aria-live="polite">
-          Conta bloqueada por excesso de tentativas. Tente novamente em 15 minutos.
+          Muitas tentativas de acesso. Aguarde 15 minutos e tente novamente.
         </div>
       }
 

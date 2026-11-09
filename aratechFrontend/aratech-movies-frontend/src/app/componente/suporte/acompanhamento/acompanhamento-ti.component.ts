@@ -1,74 +1,65 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
-export type StatusChamado = 'Aberto' | 'Em Atendimento' | 'Concluído' | 'Cancelado';
-export type PrioridadeTi  = 'Baixa'  | 'Média'          | 'Alta'      | 'Crítica';
-
-export interface ChamadoTi {
-  id: string;
-  tipo: string;
-  prioridade: PrioridadeTi;
-  titulo: string;
-  solicitante: string;
-  setor: string;
-  status: StatusChamado;
-  data: string;
-}
-
-const PRIORIDADE_ORDEM: Record<PrioridadeTi, number> = { Crítica: 0, Alta: 1, Média: 2, Baixa: 3 };
+import { DatePipe } from '@angular/common';
+import { Subject, Subscription, debounceTime, interval } from 'rxjs';
+import { ChamadoTiService } from '../../../core/services/chamado-ti.service';
+import { ChamadoTi, PrioridadeTi, StatusChamadoTi } from '../../../core/models/chamado-ti.model';
 
 @Component({
   selector: 'app-acompanhamento-ti',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
+  imports: [DatePipe, FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './acompanhamento-ti.component.html',
   styleUrl: './acompanhamento-ti.component.scss'
 })
-export class AcompanhamentoTiComponent {
+export class AcompanhamentoTiComponent implements OnInit, OnDestroy {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
     { label: 'Suporte de TI', route: '/suporte' },
     { label: 'Acompanhamento' }
   ];
 
-  filtroStatus: StatusChamado | 'Todos' = 'Todos';
+  filtroStatus: StatusChamadoTi | 'Todos' = 'Todos';
   searchTerm = '';
   page = 1;
   readonly pageSize = 8;
 
   chamados: ChamadoTi[] = [];
 
-  get filtrados(): ChamadoTi[] {
-    let lista = [...this.chamados].sort((a, b) =>
-      PRIORIDADE_ORDEM[a.prioridade] - PRIORIDADE_ORDEM[b.prioridade]
-    );
-
-    if (this.filtroStatus !== 'Todos') {
-      lista = lista.filter(c => c.status === this.filtroStatus);
-    }
-
-    const term = this.searchTerm.trim().toLowerCase();
-    if (term) {
-      lista = lista.filter(c =>
-        c.id.toLowerCase().includes(term) ||
-        c.titulo.toLowerCase().includes(term) ||
-        c.solicitante.toLowerCase().includes(term) ||
-        c.tipo.toLowerCase().includes(term)
-      );
-    }
-
-    return lista;
+  total = 0;
+  loading = false;
+  errorMessage = '';
+  private request?: Subscription;
+  private polling?: Subscription;
+  private searchRequest?: Subscription;
+  private search = new Subject<void>();
+  constructor(private readonly chamadoTiService: ChamadoTiService) {}
+  ngOnInit(): void {
+    this.carregar();
+    this.searchRequest = this.search.pipe(debounceTime(300)).subscribe(() => this.carregar());
+    this.polling = interval(5000).subscribe(() => { if (!this.loading) this.carregar(); });
   }
-
-  get paged(): ChamadoTi[] {
-    const start = (this.page - 1) * this.pageSize;
-    return this.filtrados.slice(start, start + this.pageSize);
+  ngOnDestroy(): void { this.request?.unsubscribe(); this.polling?.unsubscribe(); this.searchRequest?.unsubscribe(); this.search.complete(); }
+  carregar(): void {
+    this.request?.unsubscribe(); this.loading = true;
+    this.request = this.chamadoTiService.getPagina(this.page-1,this.pageSize,this.filtroStatus === 'Todos' ? undefined : this.filtroStatus,this.searchTerm).subscribe({
+      next: p => {
+        this.total=p.total;this.loading=false;this.errorMessage='';
+        const ultima=Math.max(1,Math.ceil(p.total/this.pageSize));
+        if(this.page>ultima){this.page=ultima;this.carregar();return;}
+        this.chamados=p.chamados;
+      },
+      error: e => {this.loading=false;this.errorMessage=e.error?.mensagem || 'Nao foi possivel atualizar os chamados. Os dados exibidos podem estar desatualizados.';}
+    });
   }
+  onSearch(): void {this.page=1;this.search.next();}
+  get paged(): ChamadoTi[] {return this.chamados;}
 
   get totalPages(): number {
-    return Math.ceil(this.filtrados.length / this.pageSize);
+    return Math.ceil(this.total / this.pageSize);
   }
 
   get visiblePages(): number[] {
@@ -78,24 +69,24 @@ export class AcompanhamentoTiComponent {
   }
 
   get paginationStart(): number {
-    return this.filtrados.length === 0 ? 0 : (this.page - 1) * this.pageSize + 1;
+    return this.total === 0 ? 0 : (this.page - 1) * this.pageSize + 1;
   }
 
   get paginationEnd(): number {
-    return Math.min(this.page * this.pageSize, this.filtrados.length);
+    return Math.min(this.page * this.pageSize, this.total);
   }
 
   setPage(p: number): void {
-    if (p < 1 || p > this.totalPages) return;
-    this.page = p;
+    if (this.loading || p < 1 || p > this.totalPages) return;
+    this.page = p; this.carregar();
   }
 
-  setFiltro(status: StatusChamado | 'Todos'): void {
+  setFiltro(status: StatusChamadoTi | 'Todos'): void {
     this.filtroStatus = status;
-    this.page = 1;
+    this.page = 1; this.carregar();
   }
 
-  statusBadge(status: StatusChamado): string {
+  statusBadge(status: StatusChamadoTi): string {
     if (status === 'Concluído')       return 'bg-success';
     if (status === 'Em Atendimento')  return 'bg-warning text-dark';
     if (status === 'Cancelado')       return 'bg-secondary';

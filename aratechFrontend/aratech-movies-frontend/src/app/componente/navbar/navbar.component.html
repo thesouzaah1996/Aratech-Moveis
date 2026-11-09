@@ -12,10 +12,11 @@
             <div class="profile-avatar">
               <i class="bi bi-person-circle"></i>
             </div>
-            <span>Usuário</span>
+            <span>{{ nomeExibido }}</span>
           </div>
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+          <li><a class="dropdown-item" routerLink="/marcacao-ponto"><i class="bi bi-clock me-2"></i>Marcação de ponto</a></li>
           <li>
             <a class="dropdown-item" routerLink="/meu-perfil">
               <i class="bi bi-person me-2"></i>
@@ -23,7 +24,7 @@
             </a>
           </li>
           <li>
-            <a class="dropdown-item" routerLink="/suporte">
+            <a *appPermissao="'SUPORTE.CONSULTAR'" class="dropdown-item" routerLink="/suporte">
               <i class="bi bi-headset me-2"></i>
               Suporte TI
             </a>
@@ -60,11 +61,12 @@
         <h5 class="modal-title ms-2" id="logoutModalLabel">Confirmar Saída</h5>
       </div>
       <div class="modal-body py-4">
+        @if (erroLogout) { <div class="alert alert-danger" role="alert">{{ erroLogout }}</div> }
         <p class="mb-0">Tem certeza que deseja sair do sistema?</p>
       </div>
       <div class="modal-footer border-0">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="performLogout()">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="saindo">Cancelar</button>
+        <button type="button" class="btn btn-danger" [disabled]="saindo" (click)="performLogout()">
           <i class="bi bi-power me-2"></i>Sair
         </button>
       </div>

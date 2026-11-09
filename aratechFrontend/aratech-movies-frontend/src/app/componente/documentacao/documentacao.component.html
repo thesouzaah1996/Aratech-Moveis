@@ -1,0 +1,83 @@
+<app-navbar />
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+    <div class="row g-3 align-items-center mb-4 filtros">
+      <div class="col-md">
+        <label for="busca-guia" class="visually-hidden">Buscar na documentação</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-search" aria-hidden="true"></i></span>
+          <input id="busca-guia" type="search" class="form-control" maxlength="150" [(ngModel)]="busca" placeholder="Buscar por módulo ou tarefa...">
+        </div>
+      </div>
+      <div class="col-md-4">
+        <label for="setor-guia" class="visually-hidden">Filtrar módulo</label>
+        <select id="setor-guia" class="form-select" [(ngModel)]="setor">
+          <option value="">Todos os módulos</option>
+          @for (item of setores; track item.id) { <option [value]="item.id">{{ item.nome }}</option> }
+        </select>
+      </div>
+      <div class="col-md-auto d-flex justify-content-md-end">
+        <button type="button" class="btn btn-cancelar text-nowrap" (click)="limpar()">Limpar filtros</button>
+      </div>
+    </div>
+
+    <p class="small text-muted mb-3" role="status">{{ resultados.length }} de {{ setores.length }} módulos</p>
+
+    @for (item of resultados; track item.id) {
+      <article class="setor card shadow-sm mb-3" [attr.aria-labelledby]="'titulo-' + item.id">
+        <details [open]="!!busca.trim() || !!setor">
+          <summary class="cabecalho-modulo">
+            <span class="icone" aria-hidden="true">
+              @if (item.id === 'corte') { <app-serra-icon /> }
+              @else if (item.id === 'furacao') { <app-furadeira-icon /> }
+              @else { <i [class]="'bi ' + item.icone"></i> }
+            </span>
+            <h2 class="h6 mb-0 flex-grow-1" [id]="'titulo-' + item.id">{{ item.nome }}</h2>
+            <i class="bi bi-chevron-down indicador" aria-hidden="true"></i>
+          </summary>
+          <div class="card-body border-top">
+            <p class="text-muted">{{ item.resumo }}</p>
+            <p class="small mb-4"><strong>Onde acessar:</strong> {{ item.telas }}</p>
+            <div class="row g-4">
+              <div class="col-lg-7">
+                <h3 class="h6">Como usar</h3>
+                <ol class="passos mb-0">
+                  @for (passo of item.passos; track $index) { <li>{{ passo }}</li> }
+                </ol>
+              </div>
+              <div class="col-lg-5">
+                <h3 class="h6">Regras e conferências</h3>
+                <ul class="passos mb-0">
+                  @for (cuidado of item.cuidados; track $index) { <li>{{ cuidado }}</li> }
+                </ul>
+              </div>
+            </div>
+            <p class="exemplo bg-light border rounded p-3 mt-4 mb-0"><strong>Exemplo:</strong> {{ item.exemplo }}</p>
+          </div>
+        </details>
+      </article>
+    } @empty {
+      <div class="vazio card shadow-sm p-4 text-center">
+        <div class="empty-state">
+          <i class="bi bi-search text-muted" aria-hidden="true"></i>
+          <h2 class="h5">Nenhuma orientação encontrada</h2>
+          <p class="text-muted">Tente outra palavra ou selecione todos os módulos.</p>
+          <button type="button" class="btn btn-danger" (click)="limpar()">Limpar filtros</button>
+        </div>
+      </div>
+    }
+
+    <section class="card shadow-sm mt-4" aria-labelledby="duvidas">
+      <div class="card-header bg-white py-3"><h2 id="duvidas" class="h6 mb-0">Dúvidas frequentes</h2></div>
+      <div class="card-body perguntas">
+        <details><summary>Outra pessoa alterou o registro. Como continuar?</summary><p>Atualize a lista ou reabra o registro, confira os dados atuais e tente novamente.</p></details>
+        <details><summary>A conexão caiu depois de confirmar. Devo criar outro registro?</summary><p>Consulte a lista antes de abrir outra solicitação. Se o formulário permitir nova tentativa, use o mesmo envio e confira o resultado para evitar registros duplicados.</p></details>
+        <details><summary>Por que o lote tem setores pendentes?</summary><p>O PCP pode liberar apenas parte dos setores. Volte ao lote, confira a prévia e selecione os destinos restantes. Depois da primeira liberação, todos usam a mesma revisão da ficha. O lote só conclui quando todos os setores necessários forem liberados e suas ordens concluídas.</p></details>
+        <details><summary>Quando o Almoxarifado baixa o estoque?</summary><p>Na Separação de lotes, inicie a ordem e confirme cada consumo em Conferir e consumir. Liberar ou iniciar a ordem não reduz o saldo. Nas requisições, a baixa ocorre ao confirmar a entrega. Finalizar o recebimento de um caminhão também não lança produtos no estoque.</p></details>
+        <details><summary>Por que uma ação não aparece ou não pode ser concluída?</summary><p>Confira a mensagem apresentada, as informações obrigatórias e as etapas anteriores. Os botões dependem das permissões da sua conta; saídas de material também exigem saldo suficiente.</p></details>
+        <details><summary>O que são os registros DEMO?</summary><p>São dados de demonstração inseridos no ambiente de desenvolvimento. Pesquise por DEMO para encontrar os exemplos de pedidos, lotes, materiais e demais módulos. Eles não representam operações reais da fábrica.</p></details>
+      </div>
+    </section>
+  </div>
+</main>

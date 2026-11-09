@@ -3,9 +3,10 @@
 <main class="app-main">
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-5">
-    <div class="row g-4 justify-content-center">
+    <div class="row g-4 justify-content-center"><div class="col-md-6 col-lg-5" *appPermissao="'RH_AFASTAMENTOS.CONSULTAR'"><a routerLink="/recursos-humanos/ferias" class="card card-menu h-100"><div class="d-flex flex-column align-items-center justify-content-center h-100"><i class="bi bi-calendar-check icon-size"></i><h4 class="fw-bold mb-2">Férias e afastamentos</h4><p class="text-muted text-center mb-0">Períodos, análise e aprovação de afastamentos</p></div></a></div><div class="col-md-6 col-lg-5" *appPermissao="'RH_SOLICITACOES.CONSULTAR'"><a routerLink="/recursos-humanos/solicitacoes" class="card card-menu h-100"><div class="d-flex flex-column align-items-center justify-content-center h-100"><i class="bi bi-inbox icon-size"></i><h4 class="fw-bold mb-2">Solicitações do RH</h4><p class="text-muted text-center mb-0">Demandas administrativas e respostas aos funcionários</p></div></a></div>
 
-      <div class="col-md-6 col-lg-5">
+      @if (acesso.permite('RH.CONSULTAR')) {
+<div *appPermissao="'RH_PONTO.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/recursos-humanos/ponto" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-clock-history icon-size"></i>
@@ -14,8 +15,10 @@
           </div>
         </a>
       </div>
+      }
 
-      <div class="col-md-6 col-lg-5">
+      @if (acesso.permite('RH.CONSULTAR')) {
+<div *appPermissao="'RH_FUNCIONARIOS.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/recursos-humanos/funcionarios" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-people icon-size"></i>
@@ -24,8 +27,10 @@
           </div>
         </a>
       </div>
+      }
 
-      <div class="col-md-6 col-lg-5">
+      @if (acesso.permite('RH.CONSULTAR')) {
+<div *appPermissao="'RH_AFASTAMENTOS.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/recursos-humanos/ferias" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-calendar-check icon-size"></i>
@@ -34,8 +39,10 @@
           </div>
         </a>
       </div>
+      }
 
-      <div class="col-md-6 col-lg-5">
+      @if (acesso.permite('RH.CONSULTAR')) {
+<div *appPermissao="'RH_SOLICITACOES.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/recursos-humanos/solicitacoes" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-file-earmark-text icon-size"></i>
@@ -44,26 +51,19 @@
           </div>
         </a>
       </div>
+      }
 
-      <div class="col-md-6 col-lg-5">
-        <a routerLink="/recursos-humanos/usuarios" class="card card-menu h-100">
-          <div class="d-flex flex-column align-items-center justify-content-center h-100">
-            <i class="bi bi-person-gear icon-size"></i>
-            <h4 class="fw-bold mb-2">Permissões de Usuário</h4>
-            <p class="text-muted text-center mb-0">Busque um usuário e gerencie suas permissões de acesso ao sistema</p>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-md-6 col-lg-5">
+      @if (acesso.permite('ACESSOS.GERENCIAR')) {
+<div *appPermissao="'ACESSOS.GERENCIAR'" class="col-md-6 col-lg-5">
         <a routerLink="/recursos-humanos/perfil" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-shield-lock icon-size"></i>
             <h4 class="fw-bold mb-2">Perfis de Acesso</h4>
-            <p class="text-muted text-center mb-0">Crie e gerencie os perfis de permissão do sistema</p>
+            <p class="text-muted text-center mb-0">Cadastre perfis e atribua aos usuários</p>
           </div>
         </a>
       </div>
+      }
 
     </div>
   </div>

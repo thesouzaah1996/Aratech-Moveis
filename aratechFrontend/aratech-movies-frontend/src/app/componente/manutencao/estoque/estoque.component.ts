@@ -1,276 +1,239 @@
-import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
+import { PermissaoDirective } from '../../../core/permissao.directive';
+import { SessaoState } from '../../../core/services/sessao-state.service';
+import { DatePipe } from '@angular/common';
+import { Component, ElementRef, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { PecaEstoqueService } from '../../../core/services/peca-estoque.service';
-import { PecaEstoque, PecaEstoqueForm } from '../../../core/models/peca-estoque.model';
+import { PecaEstoque, PecaEstoqueForm, MovimentacaoPecaEstoque } from '../../../core/models/peca-estoque.model';
 
-declare const bootstrap: any;
+import { criarModal, ModalDaTela } from '../../../core/ui/modal';
+import { quantidadePecaValida, validarPecaEstoque } from '../../../core/models/peca-estoque-form';
 
 @Component({
-  selector: 'app-estoque-manutencao',
-  standalone: true,
-  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
-  templateUrl: './estoque.component.html',
-  styleUrl: './estoque.component.scss'
+  selector: 'app-estoque-manutencao',standalone: true,
+  imports: [PermissaoDirective,DatePipe,FormsModule,NavbarComponent,BreadcrumbComponent],
+  templateUrl: './estoque.component.html',styleUrl: './estoque.component.scss'
 })
-export class EstoqueManutencaoComponent implements OnInit, AfterViewInit {
+export class EstoqueManutencaoComponent implements OnInit,AfterViewInit,OnDestroy {
   @ViewChild('pecaModal') pecaModalEl!: ElementRef;
   @ViewChild('deleteModal') deleteModalEl!: ElementRef;
   @ViewChild('entradaModal') entradaModalEl!: ElementRef;
+  @ViewChild('historicoModal') historicoModalEl!: ElementRef;
   @ViewChild('saidaModal') saidaModalEl!: ElementRef;
-
   breadcrumb: BreadcrumbItem[] = [
-    { label: 'Início', route: '/dashboard' },
-    { label: 'Manutenção', route: '/manutencao' },
-    { label: 'Estoque' }
+    {label: 'Início',route: '/dashboard'},{label: 'Manutenção',route: '/manutencao'},{label: 'Estoque'}
   ];
-
   pecas: PecaEstoque[] = [];
   loading = false;
-  searchTerm = '';
-  isEditing = false;
-  page = 1;
-  pageSize = 8;
-  submitted = false;
+  searchQuery = '';
   successMessage = '';
   errorMessage = '';
-
+  modalError = '';
+  deleteError = '';
+  isEditing = false;
+  submitted = false;
+  saving = false;
+  movimentando = false;
+  arquivando = false;
+  page = 1;
+  pageSize = 8;
+  total = 0;
   form: PecaEstoqueForm = this.emptyForm();
   pecaParaExcluir: PecaEstoque | null = null;
   pecaMovimentacao: PecaEstoque | null = null;
   quantidadeMovimentacao: number | null = null;
+  quantidadeEnviada: number | null = null;
   movimentacaoError = '';
+  motivoMovimentacao = '';
+  motivoEnviado: string | null = null;
+  historico: MovimentacaoPecaEstoque[] = [];
+  historicoPeca: PecaEstoque | null = null;
+  historicoPage = 1;
+  historicoTotal = 0;
+  historicoLoading = false;
+  historicoError = '';
+  private historicoModal?: ModalDaTela;
+  private historicoRequest?: Subscription;
+  private chaveMovimentacao = '';
+  private pecaModal?: ModalDaTela;
+  private deleteModal?: ModalDaTela;
+  private entradaModal?: ModalDaTela;
+  private saidaModal?: ModalDaTela;
+  private request?: Subscription;
+  private mutation?: Subscription;
+  private search = new Subject<void>();
+  private searchSubscription?: Subscription;
 
-  private pecaModal?: any;
-  private deleteModal?: any;
-  private entradaModal?: any;
-  private saidaModal?: any;
+  constructor(private readonly pecaEstoqueService: PecaEstoqueService, public sessao: SessaoState = new SessaoState()) {}
 
-  constructor(private pecaEstoqueService: PecaEstoqueService) {}
+  minimoId: number | null = null;
+  minimoValor: number | null = null;
+  minimoSalvando = false;
+  private minimoRequest?: Subscription;
+  editarMinimo(item: PecaEstoque): void {
+    if (this.minimoSalvando || !this.sessao.permite('MANUTENCAO_ESTOQUE.ALTERAR')) return;
+    this.minimoId = item.id; this.minimoValor = item.quantidadeMinima ?? null; this.errorMessage = '';
+  }
+  cancelarMinimo(): void { if (!this.minimoSalvando) this.minimoId = null; }
+  salvarMinimo(item: PecaEstoque): void {
+    if (this.minimoSalvando || this.minimoId !== item.id) return;
+    const valor = this.minimoValor;
+    if (valor !== null && (!Number.isFinite(valor) || valor < 0 || Math.abs(valor * 1000 - Math.round(valor * 1000)) > 0.001 || valor > 999999999998.999)) {
+      this.errorMessage = 'Informe uma quantidade mínima válida, ou deixe vazio para desativar.'; return;
+    }
+    this.minimoSalvando = true; this.errorMessage = '';
+    this.minimoRequest = this.pecaEstoqueService.minimo(item.id, valor).subscribe({
+      next: r => { item.quantidadeMinima = r.quantidadeMinima; this.minimoSalvando = false; this.minimoId = null; this.successMessage = 'Quantidade mínima atualizada.'; },
+      error: e => { this.minimoSalvando = false; this.errorMessage = e.error?.mensagem ?? 'Não foi possível alterar a quantidade mínima.'; }
+    });
+  }
 
   ngOnInit(): void {
-    this.loading = true;
-    this.pecaEstoqueService.getAll().subscribe({
-      next: pecas => {
-        this.pecas = pecas;
-        this.loading = false;
-      },
-      error: () => {
-        this.showError('Erro ao carregar o estoque de peças.');
-        this.loading = false;
-      }
-    });
+    this.searchSubscription = this.search.pipe(debounceTime(300)).subscribe(() => this.carregar());
+
+    this.carregar();
   }
 
   ngAfterViewInit(): void {
-    this.pecaModal    = new bootstrap.Modal(this.pecaModalEl.nativeElement);
-    this.deleteModal  = new bootstrap.Modal(this.deleteModalEl.nativeElement);
-    this.entradaModal = new bootstrap.Modal(this.entradaModalEl.nativeElement);
-    this.saidaModal   = new bootstrap.Modal(this.saidaModalEl.nativeElement);
+    this.pecaModal = criarModal(this.pecaModalEl.nativeElement);
+    this.deleteModal = criarModal(this.deleteModalEl.nativeElement);
+    this.entradaModal = criarModal(this.entradaModalEl.nativeElement);
+    this.saidaModal = criarModal(this.saidaModalEl.nativeElement);
+    this.historicoModal = criarModal(this.historicoModalEl.nativeElement);
   }
 
-  get filtradas(): PecaEstoque[] {
-    const term = this.searchTerm.trim().toLowerCase();
-    if (!term) return this.pecas;
-    return this.pecas.filter(p =>
-      p.nome.toLowerCase().includes(term) ||
-      p.codigo.toLowerCase().includes(term) ||
-      p.localizacao.toLowerCase().includes(term) ||
-      p.id.toString().includes(term)
-    );
+  ngOnDestroy(): void {
+    this.minimoRequest?.unsubscribe();
+    this.request?.unsubscribe();this.mutation?.unsubscribe();this.historicoRequest?.unsubscribe();
+    this.searchSubscription?.unsubscribe();this.search.complete();
+    this.pecaModal?.dispose();this.deleteModal?.dispose();this.entradaModal?.dispose();this.saidaModal?.dispose();this.historicoModal?.dispose();
   }
 
-  get paged(): PecaEstoque[] {
-    const start = (this.page - 1) * this.pageSize;
-    return this.filtradas.slice(start, start + this.pageSize);
+  carregar(): void {
+    this.request?.unsubscribe();this.loading = true;this.errorMessage = '';
+    this.request = this.pecaEstoqueService.getAll(this.page-1,this.pageSize,this.searchQuery).subscribe({
+      next: data => {
+        this.total = data.total;
+        const ultima = Math.max(1,Math.ceil(data.total/data.tamanho));
+        if (this.page>ultima) { this.page=ultima;this.carregar();return; }
+        this.pecas = data.pecas;this.page = data.pagina+1;this.pageSize=data.tamanho;this.loading=false;
+      },
+      error: err => {this.pecas=[];this.total=0;this.loading=false;this.errorMessage=this.mensagemErro(err,'Erro ao carregar pecas.');}
+    });
   }
 
-  get totalPages(): number {
-    return Math.ceil(this.filtradas.length / this.pageSize);
-  }
-
+  onSearch(): void {this.request?.unsubscribe();this.page=1;this.loading=true;this.search.next();}
+  get totalPages(): number {return Math.ceil(this.total/this.pageSize);}
+  get inicio(): number {return this.total===0 ? 0 : (this.page-1)*this.pageSize+1;}
+  get fim(): number {return Math.min(this.page*this.pageSize,this.total);}
   get visiblePages(): number[] {
-    const half = 5;
-    const start = Math.max(1, Math.min(this.page - half, this.totalPages - 7));
-    const end = Math.min(this.totalPages, start + 7);
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    const inicio=Math.max(1,Math.min(this.page-2,this.totalPages-4));
+    return Array.from({length:Math.max(0,Math.min(5,this.totalPages))},(_,i)=>inicio+i);
   }
-
-  setPage(p: number): void { this.page = p; }
+  setPage(p: number): void {
+    if (this.loading || p<1 || p>this.totalPages || p===this.page) return;
+    this.page=p;this.carregar();
+  }
 
   openAdd(): void {
-    this.isEditing = false;
-    this.submitted = false;
-    this.form = this.emptyForm();
-    this.pecaModal.show();
+    if (this.saving || this.movimentando || this.arquivando) return;
+    this.submitted=false;this.isEditing=false;this.modalError='';this.form=this.emptyForm();this.pecaModal?.show();
   }
-
   openEdit(peca: PecaEstoque): void {
-    this.isEditing = true;
-    this.submitted = false;
-    this.form = {
-      id: peca.id,
-      nome: peca.nome,
-      codigo: peca.codigo,
-      quantidade: peca.quantidade,
-      unidade: peca.unidade,
-      localizacao: peca.localizacao,
-      descricao: peca.descricao ?? ''
-    };
-    this.pecaModal.show();
+    if (this.saving || this.movimentando || this.arquivando) return;
+    this.submitted=false;this.isEditing=true;this.modalError='';
+    this.form={id:peca.id,nome:peca.nome,codigo:peca.codigo,quantidade:peca.quantidade,unidade:peca.unidade,localizacao:peca.localizacao,descricao:peca.descricao??''};
+    this.pecaModal?.show();
   }
+  openDelete(peca: PecaEstoque): void {this.pecaParaExcluir=peca;this.deleteError='';this.deleteModal?.show();}
 
-  openDelete(peca: PecaEstoque): void {
-    this.pecaParaExcluir = peca;
-    this.deleteModal.show();
+  openEntrada(peca: PecaEstoque): void {this.prepararMovimento(peca);this.entradaModal?.show();}
+  openSaida(peca: PecaEstoque): void {this.prepararMovimento(peca);this.saidaModal?.show();}
+  private prepararMovimento(peca: PecaEstoque): void {
+    this.pecaMovimentacao=peca;this.quantidadeMovimentacao=null;this.quantidadeEnviada=null;
+    this.movimentacaoError='';this.motivoMovimentacao='';this.motivoEnviado=null;this.chaveMovimentacao=crypto.randomUUID();
   }
-
-  openEntrada(peca: PecaEstoque): void {
-    this.pecaMovimentacao = peca;
-    this.quantidadeMovimentacao = null;
-    this.movimentacaoError = '';
-    this.entradaModal.show();
-  }
-
-  openSaida(peca: PecaEstoque): void {
-    this.pecaMovimentacao = peca;
-    this.quantidadeMovimentacao = null;
-    this.movimentacaoError = '';
-    this.saidaModal.show();
-  }
-
-  confirmEntrada(): void {
-    if (!this.pecaMovimentacao) return;
-
-    if (!this.quantidadeMovimentacao || this.quantidadeMovimentacao <= 0) {
-      this.movimentacaoError = 'Informe uma quantidade válida.';
-      return;
+  confirmEntrada(): void {this.movimentar(true);}
+  confirmSaida(): void {this.movimentar(false);}
+  private movimentar(entrada: boolean): void {
+    if (!this.pecaMovimentacao || this.movimentando) return;
+    const quantidade=this.quantidadeEnviada ?? this.quantidadeMovimentacao;
+    if (!quantidadePecaValida(quantidade)) {
+      this.movimentacaoError='Informe uma quantidade positiva com ate 3 casas decimais.';return;
     }
-
-    const peca = this.pecaMovimentacao;
-    const novaQuantidade = peca.quantidade + this.quantidadeMovimentacao;
-
-    this.pecaEstoqueService.update(peca.id, this.formFromPeca(peca, novaQuantidade)).subscribe({
-      next: atualizada => {
-        const idx = this.pecas.findIndex(p => p.id === atualizada.id);
-        if (idx > -1) this.pecas[idx] = atualizada;
-        this.entradaModal.hide();
-        this.showSuccess('Entrada de estoque registrada com sucesso!');
-      },
-      error: () => this.showError('Erro ao registrar entrada de estoque.')
-    });
-  }
-
-  confirmSaida(): void {
-    if (!this.pecaMovimentacao) return;
-
-    if (!this.quantidadeMovimentacao || this.quantidadeMovimentacao <= 0) {
-      this.movimentacaoError = 'Informe uma quantidade válida.';
-      return;
-    }
-
-    if (this.quantidadeMovimentacao > this.pecaMovimentacao.quantidade) {
-      this.movimentacaoError = 'Quantidade maior que o estoque disponível.';
-      return;
-    }
-
-    const peca = this.pecaMovimentacao;
-    const novaQuantidade = peca.quantidade - this.quantidadeMovimentacao;
-
-    this.pecaEstoqueService.update(peca.id, this.formFromPeca(peca, novaQuantidade)).subscribe({
-      next: atualizada => {
-        const idx = this.pecas.findIndex(p => p.id === atualizada.id);
-        if (idx > -1) this.pecas[idx] = atualizada;
-        this.saidaModal.hide();
-        this.showSuccess('Saída de estoque registrada com sucesso!');
-      },
-      error: () => this.showError('Erro ao registrar saída de estoque.')
-    });
-  }
-
-  private formFromPeca(peca: PecaEstoque, quantidade: number): PecaEstoqueForm {
-    return {
-      id: peca.id,
-      nome: peca.nome,
-      codigo: peca.codigo,
-      quantidade,
-      unidade: peca.unidade,
-      localizacao: peca.localizacao,
-      descricao: peca.descricao ?? ''
-    };
-  }
-
-  save(): void {
-    this.submitted = true;
-    if (!this.isFormValid()) return;
-
-    if (this.isEditing && this.form.id) {
-      this.pecaEstoqueService.update(this.form.id, this.form).subscribe({
-        next: atualizada => {
-          const idx = this.pecas.findIndex(p => p.id === atualizada.id);
-          if (idx > -1) this.pecas[idx] = atualizada;
-          this.pecaModal.hide();
-          this.showSuccess('Peça atualizada com sucesso!');
-        },
-        error: (err) => this.showError(err.error?.message ?? 'Erro ao atualizar peça.')
-      });
-    } else {
-      this.pecaEstoqueService.add(this.form).subscribe({
-        next: nova => {
-          this.pecas.unshift(nova);
-          this.pecaModal.hide();
-          this.showSuccess('Peça adicionada com sucesso!');
-        },
-        error: (err) => this.showError(err.error?.message ?? 'Erro ao adicionar peça.')
-      });
-    }
-  }
-
-  confirmDelete(): void {
-    if (!this.pecaParaExcluir) return;
-    const id = this.pecaParaExcluir.id;
-    this.pecaEstoqueService.delete(id).subscribe({
+    const motivo=this.motivoEnviado ?? this.motivoMovimentacao.trim();
+    if(motivo.length<3||motivo.length>500||/[\p{Cc}\p{Cf}]/u.test(motivo.replace(/[\r\n\t]/g,''))){this.movimentacaoError='Informe o motivo da movimentacao (3 a 500 caracteres).';return;}
+    this.motivoEnviado=motivo;
+    this.quantidadeEnviada=quantidade;this.movimentando=true;this.movimentacaoError='';
+    const peca=this.pecaMovimentacao;
+    const operacao=entrada ? this.pecaEstoqueService.entrada(peca.id,quantidade!,this.chaveMovimentacao,motivo)
+      : this.pecaEstoqueService.saida(peca.id,quantidade!,this.chaveMovimentacao,motivo);
+    this.mutation=operacao.subscribe({
       next: () => {
-        this.pecas = this.pecas.filter(p => p.id !== id);
-        this.pecaParaExcluir = null;
-        this.deleteModal.hide();
-        this.showSuccess('Peça removida com sucesso!');
+        this.movimentando=false;(entrada ? this.entradaModal : this.saidaModal)?.hide();
+        this.pecaMovimentacao=null;this.successMessage='Movimentação registrada com sucesso.';this.carregar();
       },
-      error: (err) => {
-        this.deleteModal.hide();
-        this.showError(err.error?.message ?? 'Erro ao remover peça.');
+      error: err => {
+        this.movimentando=false;this.movimentacaoError=this.mensagemErro(err,'Falha ao movimentar estoque. Tente novamente.');
+        // Em falha de rede, a mesma chave e quantidade sao mantidas para repetir com seguranca.
+        if (err.status>=400 && err.status<500) {this.quantidadeEnviada=null;this.motivoEnviado=null;}
       }
     });
   }
 
-  estoqueClass(quantidade: number): string {
-    if (quantidade === 0)  return 'text-danger fw-semibold';
-    if (quantidade <= 5)   return 'text-warning fw-semibold';
-    return '';
+  save(): void {
+    if (this.saving) return;
+    this.submitted=true;this.modalError='';
+    if (!validarPecaEstoque(this.form,this.isEditing)) {
+      this.modalError='Confira nome, codigo, unidade, localizacao e quantidade com ate 3 casas decimais.';return;
+    }
+    this.saving=true;
+    const operacao=this.isEditing && this.form.id ? this.pecaEstoqueService.update(this.form.id,this.form) : this.pecaEstoqueService.add(this.form);
+    this.mutation=operacao.subscribe({
+      next: () => {this.saving=false;this.pecaModal?.hide();this.successMessage='PecaEstoque salvo com sucesso.';this.carregar();},
+      error: err => {this.saving=false;this.modalError=this.mensagemErro(err,'Erro ao salvar peca.');}
+    });
   }
 
-  private isFormValid(): boolean {
-    return !!(
-      this.form.nome?.trim() &&
-      this.form.codigo?.trim() &&
-      this.form.unidade?.trim() &&
-      this.form.localizacao?.trim()
-    );
+  confirmDelete(): void {
+    if (!this.pecaParaExcluir || this.arquivando) return;
+    this.arquivando=true;this.deleteError='';
+    this.mutation=this.pecaEstoqueService.delete(this.pecaParaExcluir.id).subscribe({
+      next: () => {this.arquivando=false;this.deleteModal?.hide();this.pecaParaExcluir=null;
+        this.successMessage='PecaEstoque arquivado; histórico preservado.';this.carregar();},
+      error: err => {this.arquivando=false;this.deleteError=this.mensagemErro(err,'Erro ao arquivar peca.');}
+    });
   }
 
-  private showSuccess(msg: string): void {
-    this.successMessage = msg;
-    this.errorMessage = '';
-    setTimeout(() => (this.successMessage = ''), 3000);
+  openHistorico(peca:PecaEstoque):void {
+    this.historicoPeca=peca;this.historicoPage=1;this.historico=[];this.historicoTotal=0;
+    this.historicoModal?.show();this.carregarHistorico();
   }
-
-  private showError(msg: string): void {
-    this.errorMessage = msg;
-    this.successMessage = '';
+  carregarHistorico():void {
+    if(!this.historicoPeca)return;
+    this.historicoRequest?.unsubscribe();this.historicoLoading=true;this.historicoError='';
+    this.historicoRequest=this.pecaEstoqueService.historico(this.historicoPeca.id,this.historicoPage-1,8).subscribe({
+      next:p=>{this.historico=p.movimentacoes;this.historicoTotal=p.total;this.historicoLoading=false;},
+      error:e=>{this.historicoLoading=false;this.historicoError=this.mensagemErro(e,'Erro ao carregar historico.');}
+    });
   }
+  get historicoPages():number{return Math.ceil(this.historicoTotal/8);}
+  paginaHistorico(p:number):void {if(p<1||p>this.historicoPages||this.historicoLoading)return;this.historicoPage=p;this.carregarHistorico();}
 
+  estoqueClass(quantidade: number): string { return quantidade === 0 ? 'text-danger fw-semibold' : quantidade <= 5 ? 'text-warning fw-semibold' : ''; }
+  cancelarCadastro(): void { if (!this.saving) this.pecaModal?.hide(); }
+  cancelarArquivo(): void { if (!this.arquivando) this.deleteModal?.hide(); }
+  cancelarEntrada(): void { if (!this.movimentando) this.entradaModal?.hide(); }
+  cancelarSaida(): void { if (!this.movimentando) this.saidaModal?.hide(); }
+  fecharHistorico(): void { this.historicoRequest?.unsubscribe(); this.historicoLoading=false; this.historicoModal?.hide(); }
+  private mensagemErro(err: any,fallback: string): string {
+    return Object.values(err.error?.erros ?? {}).join(' ') || err.error?.mensagem
+      || (err.status===0 ? 'Não foi possível conectar ao servidor.' : fallback);
+  }
   private emptyForm(): PecaEstoqueForm {
-    return { nome: '', codigo: '', quantidade: 0, unidade: 'un', localizacao: '', descricao: '' };
+    return {nome:'',codigo:'',quantidade:0,unidade:'un',localizacao:'',descricao:''};
   }
 }

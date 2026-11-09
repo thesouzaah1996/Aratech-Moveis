@@ -1,1 +1,9 @@
+# Configurações locais e segredos
 .env
+.env.*
+!.env.example
+
+# Configurações locais de automação e agentes
+.github/
+AGENTS.md
+agents.md

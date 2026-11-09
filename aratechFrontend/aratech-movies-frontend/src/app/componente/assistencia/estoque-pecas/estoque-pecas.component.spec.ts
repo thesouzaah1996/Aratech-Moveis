@@ -1,0 +1,29 @@
+import { SessaoState } from '../../../core/services/sessao-state.service';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { of, throwError, Subject } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
+import { EstoquePecasComponent } from './estoque-pecas.component';
+import { PecaAssistenciaService } from '../../../core/services/peca-assistencia.service';
+import { PecaAssistencia } from '../../../core/models/peca-assistencia.model';
+const peca:PecaAssistencia={id:42,modelo:'Milano',quantidadeMinima:2,nome:'Porta',codigo:'MNT-01',quantidade:1.5,unidade:'L',localizacao:'Prateleira A',descricao:''};
+describe('Estoque de assistencia',()=>{
+  let c:EstoquePecasComponent;let s:jasmine.SpyObj<PecaAssistenciaService>;
+  beforeEach(()=>{s=jasmine.createSpyObj('PecaAssistenciaService',['getAll','add','update','entrada','saida','delete','historico']);s.getAll.and.callFake((pagina=0,tamanho=8)=>of({status:200,pecas:[peca],pagina,tamanho,total:17,totalAbaixoMinimo:1}));s.historico.and.returnValue(of({status:200,movimentacoes:[],pagina:0,tamanho:8,total:9}));c=new EstoquePecasComponent(s);for(const n of ['pecaModal','entradaModal','saidaModal','deleteModal','historicoModal'])(c as any)[n]={show:jasmine.createSpy('show'),hide:jasmine.createSpy('hide'),dispose:()=>{}};});
+  afterEach(()=>c.ngOnDestroy());
+  it('pagina do servidor nao e recortada novamente',()=>{c.carregar();c.setPage(2);expect(s.getAll).toHaveBeenCalledWith(1,8,'',false);expect(c.pecas.length).toBe(1);expect(c.totalPages).toBe(3);});
+  it('filtra estoque minimo no servidor e preenche modelo na edicao',()=>{c.carregar();c.alternarMinimo();expect(s.getAll).toHaveBeenCalledWith(0,8,'',true);c.openEdit(peca);expect(c.form.modelo).toBe('Milano');expect(c.form.quantidadeMinima).toBe(2);});
+  it('entrada envia diferenca decimal e impede cliques duplicados',()=>{const resposta=new Subject<PecaAssistencia>();s.entrada.and.returnValue(resposta);c.openEntrada(peca);c.quantidadeMovimentacao=0.25;c.motivoMovimentacao='Recebimento';c.confirmEntrada();c.confirmEntrada();expect(s.entrada).toHaveBeenCalledOnceWith(42,0.25,jasmine.any(String),'Recebimento');resposta.next({...peca,quantidade:1.75});resposta.complete();expect((c as any).entradaModal.hide).toHaveBeenCalled();});
+  it('reenvia mesma quantidade, motivo e chave apos falha de rede',()=>{s.entrada.and.returnValue(throwError(()=>({status:0})));c.openEntrada(peca);c.quantidadeMovimentacao=0.25;c.motivoMovimentacao='Recebimento';c.confirmEntrada();const args=s.entrada.calls.mostRecent().args;c.quantidadeMovimentacao=99;c.motivoMovimentacao='Outro';s.entrada.and.returnValue(of(peca));c.confirmEntrada();expect(s.entrada.calls.mostRecent().args).toEqual(args);});
+  it('conflito de saldo permanece no modal sem alterar quantidade local',()=>{c.pecas=[peca];s.saida.and.returnValue(throwError(()=>({status:409,error:{mensagem:'Saldo insuficiente.'}})));c.openSaida(peca);c.quantidadeMovimentacao=2;c.motivoMovimentacao='Reparo';c.confirmSaida();expect(c.movimentacaoError).toBe('Saldo insuficiente.');expect(c.pecas[0].quantidade).toBe(1.5);expect((c as any).saidaModal.hide).not.toHaveBeenCalled();});
+  it('historico usa paginacao propria e arquivamento preserva erro no modal',()=>{c.openHistorico(peca);expect(c.historicoPages).toBe(2);c.paginaHistorico(2);expect(s.historico).toHaveBeenCalledWith(42,1,8);s.delete.and.returnValue(throwError(()=>({error:{mensagem:'Retire o saldo antes de arquivar.'}})));c.openDelete(peca);c.confirmDelete();expect(c.deleteError).toContain('saldo');expect((c as any).deleteModal.hide).not.toHaveBeenCalled();});
+  it('quantidade com mais de tres casas e cadastro incompleto sao rejeitados',()=>{c.openEntrada(peca);c.quantidadeMovimentacao=0.0001;c.motivoMovimentacao='Recebimento';c.confirmEntrada();expect(s.entrada).not.toHaveBeenCalled();c.openAdd();c.save();expect(s.add).not.toHaveBeenCalled();expect(c.modalError).not.toBe('');});
+});
+describe('Layout e campos proprios do estoque de assistencia',()=>{
+  let fixture:ComponentFixture<EstoquePecasComponent>;
+  beforeEach(async()=>{await TestBed.configureTestingModule({imports:[EstoquePecasComponent],providers:[provideRouter([]),{provide:AuthService,useValue:{logout:()=>{}}},{provide:PecaAssistenciaService,useValue:{getAll:()=>of({status:200,pecas:[peca],pagina:0,tamanho:8,total:1,totalAbaixoMinimo:1})}}]}).compileComponents();TestBed.inject(SessaoState).usuario.set({id:1,nome:'Operador autorizado',email:'teste@example.test',administrador:true,perfis:[],permissoes:[],trocarSenha:false}); fixture=TestBed.createComponent(EstoquePecasComponent);});
+  afterEach(()=>{fixture?.destroy();document.querySelectorAll('.modal-backdrop').forEach(e=>e.remove());document.body.classList.remove('modal-open');document.body.style.removeProperty('overflow');document.body.style.removeProperty('padding-right');});
+  it('mantem campos de manutencao e os cinco botoes do almoxarifado lado a lado',fakeAsync(()=>{
+    try{fixture.detectChanges();tick();fixture.detectChanges();const headers=Array.from(fixture.nativeElement.querySelectorAll('thead th') as NodeListOf<HTMLElement>).slice(0,8).map(e=>e.textContent?.trim());expect(headers).toEqual(['Código','Modelo','Nome','Quantidade','Mín.','Unidade','Localização','Ações']);const acoes=fixture.nativeElement.querySelector('tbody td:last-child .d-flex') as HTMLElement;expect(acoes.querySelectorAll('button').length).toBe(5);(acoes.querySelector('button[title="Editar"]') as HTMLButtonElement).click();fixture.detectChanges();tick(400);const modal=fixture.componentInstance.pecaModalEl.nativeElement as HTMLElement;expect(modal.querySelector('input[type="number"]')?.hasAttribute('disabled')).toBeTrue();fixture.componentInstance.cancelarCadastro();tick(400);}finally{fixture.destroy();tick(400);}
+  }));
+});

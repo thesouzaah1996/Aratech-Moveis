@@ -1,9 +1,19 @@
+import { LotesProducaoComponent } from './componente/fabricacao/lotes-producao.component';
+import { VariantesComponent } from './componente/fabricacao/variantes.component';
+import { OrdensSetorComponent } from './componente/fabricacao/ordens-setor.component';
+import { GestaoComponent } from './componente/gestao/gestao.component';
 import { Routes } from '@angular/router';
+import { EmbalagemComponent } from './componente/embalagem/embalagem.component';
+import { EsteirasComponent } from './componente/embalagem/esteiras.component';
+import { LotesEmbalagemComponent } from './componente/embalagem/lotes-embalagem.component';
+import { GuardaRoupasComponent } from './componente/fabricacao/guarda-roupas.component';
+import { LotesFabricacaoComponent } from './componente/fabricacao/lotes-fabricacao.component';
+import { CorteComponent } from './componente/fabricacao/corte.component';
+import { MarcacaoPontoComponent } from './componente/recursos-humanos/ponto/marcacao-ponto.component';
+import { acessoGuard } from './core/acesso.guard';
+import { TrocarSenhaComponent } from './componente/login/trocar-senha.component';
+import { AcessoNegadoComponent, FalhaConexaoComponent } from './componente/acesso-negado.component';
 import { LoginComponent } from './componente/login/login.component';
-import { RedefinirSenhaComponent } from './componente/login/redefinir-senha/redefinir-senha.component';
-import { ResetPasswordComponent } from './componente/login/reset-password/reset-password.component';
-import { SolicitarPrimeiroAcessoComponent } from './componente/login/solicitar-primeiro-acesso/solicitar-primeiro-acesso.component';
-import { ConfirmarPrimeiroAcessoComponent } from './componente/login/confirmar-primeiro-acesso/confirmar-primeiro-acesso.component';
 import { DashboardComponent } from './componente/dashboard/dashboard.component';
 
 import { AlmoxarifadoComponent } from './componente/almoxarifado/almoxarifado.component';
@@ -11,8 +21,6 @@ import { EstoqueProdutosComponent } from './componente/almoxarifado/estoque-prod
 import { CategoriasComponent } from './componente/almoxarifado/categorias/categorias.component';
 import { FornecedoresComponent } from './componente/almoxarifado/fornecedores/fornecedores.component';
 import { RecebimentoComponent } from './componente/almoxarifado/recebimento/recebimento.component';
-import { roleGuard } from './core/guards/role.guard';
-import { PRODUTOS_ALMOXARIFADO_ROLES } from './core/config/role-permissions';
 
 import { PortariaComponent } from './componente/portaria/portaria.component';
 import { ControleAcessoComponent } from './componente/portaria/controle-acesso/controle-acesso.component';
@@ -38,8 +46,9 @@ import { PontoComponent } from './componente/recursos-humanos/ponto/ponto.compon
 import { FuncionariosComponent } from './componente/recursos-humanos/funcionarios/funcionarios.component';
 import { FeriasComponent } from './componente/recursos-humanos/ferias/ferias.component';
 import { SolicitacoesRhComponent } from './componente/recursos-humanos/solicitacoes/solicitacoes.component';
-import { UsuariosComponent } from './componente/recursos-humanos/usuarios/usuarios.component';
 import { PerfilComponent } from './componente/recursos-humanos/perfil/perfil.component';
+import { PerfilMenuComponent } from './componente/recursos-humanos/perfil/perfil-menu.component';
+import { AtribuirPerfilComponent } from './componente/recursos-humanos/perfil/atribuir-perfil.component';
 
 import { PcpComponent } from './componente/pcp/pcp.component';
 import { OrdensProducaoComponent } from './componente/pcp/ordens/ordens.component';
@@ -50,7 +59,6 @@ import { KpisComponent } from './componente/pcp/kpis/kpis.component';
 import { ComprasComponent } from './componente/compras/compras.component';
 import { PedidosCompraComponent } from './componente/compras/pedidos/pedidos.component';
 import { CotacoesComponent } from './componente/compras/cotacoes/cotacoes.component';
-import { AprovacoesComponent } from './componente/compras/aprovacoes/aprovacoes.component';
 
 import { FinanceiroComponent } from './componente/financeiro/financeiro.component';
 import { ContasPagarComponent } from './componente/financeiro/contas-pagar/contas-pagar.component';
@@ -71,17 +79,39 @@ import { AcompanhamentoTiComponent } from './componente/suporte/acompanhamento/a
 
 import { MeuPerfilComponent } from './componente/meu-perfil/meu-perfil.component';
 
-export const routes: Routes = [
+const appRoutes: Routes = [
+  { path:'embalagem/ordens',component:OrdensSetorComponent,data:{caminho:'/aratech/embalagem/ordens',recurso:'EMBALAGEM_LOTES',nome:'Embalagem',volta:'/embalagem'} },
+  { path:'producao/montagem',component:OrdensSetorComponent,data:{caminho:'/aratech/producao/montagem',recurso:'PRODUCAO_MONTAGEM',nome:'Montagem',volta:'/dashboard'} },
+  { path:'producao/furacao',component:OrdensSetorComponent,data:{caminho:'/aratech/producao/furacao',recurso:'PRODUCAO_FURACAO',nome:'Furação',volta:'/dashboard'} },
+  { path:'almoxarifado/separacoes',component:OrdensSetorComponent,data:{caminho:'/aratech/almoxarifado/separacoes',recurso:'ALMOXARIFADO_REQUISICOES',nome:'Almoxarifado',volta:'/almoxarifado'} },
+  { path:'corte/ordens',component:OrdensSetorComponent,data:{caminho:'/aratech/corte/ordens',recurso:'CORTE_LOTES',nome:'Corte',volta:'/corte'} },
+  { path: 'documentacao', loadComponent: () => import('./componente/documentacao/documentacao.component').then(m => m.DocumentacaoComponent) },
+  { path: 'trocar-senha', component: TrocarSenhaComponent },
+  { path: 'sem-acesso', component: AcessoNegadoComponent },
+  { path: 'falha-conexao', component: FalhaConexaoComponent },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login',                                  component: LoginComponent },
-  { path: 'redefinir-senha',                        component: RedefinirSenhaComponent },
-  { path: 'reset-senha',                            component: ResetPasswordComponent },
-  { path: 'primeiro-acesso/solicitar',               component: SolicitarPrimeiroAcessoComponent },
-  { path: 'primeiro-acesso',                        component: ConfirmarPrimeiroAcessoComponent },
-  { path: 'dashboard',                              component: DashboardComponent },
+  { path: 'dashboard', component: DashboardComponent },
+  { path: 'embalagem', component:EmbalagemComponent },
+  { path: 'embalagem/esteiras', component:EsteirasComponent },
+  { path: 'embalagem/lotes', component:LotesEmbalagemComponent },
+  { path: 'embalagem/lotes/:id', component:LotesEmbalagemComponent },
+  { path: 'comercial', redirectTo:'corte', pathMatch:'full' },
+  { path: 'comercial/pedidos', redirectTo:'corte/lotes', pathMatch:'full' },
+  { path: 'corte', component:CorteComponent },
+  { path: 'corte/lotes', component:LotesFabricacaoComponent, data:{corte:true} },
+  { path: 'pcp/lotes', component:LotesProducaoComponent },
+  { path: 'pcp/lotes/corte-legado', component:LotesFabricacaoComponent, data:{corte:false} },
+  { path: 'administracao/guarda-roupas/variantes', component:VariantesComponent },
+  { path: 'pcp/lotes/concluidos', component:LotesComponent },
+  { path: 'pcp/linhas', component:GestaoComponent, data:{recurso:'linhas'} },
+  { path: 'pcp/requisicoes', component:GestaoComponent, data:{recurso:'requisicoesPcp'} },
+  { path: 'almoxarifado/requisicoes', component:GestaoComponent, data:{recurso:'requisicoesAlmox'} },
+  { path: 'administracao/receber-assistencia', component:GestaoComponent, data:{recurso:'recebimentoAssistencia'} },
+  { path: 'carregamento/expedicao', component:GestaoComponent, data:{recurso:'expedicao'} },
 
   { path: 'almoxarifado',                           component: AlmoxarifadoComponent },
-  { path: 'almoxarifado/estoque-produtos',          component: EstoqueProdutosComponent, canActivate: [roleGuard(PRODUTOS_ALMOXARIFADO_ROLES)] },
+  { path: 'almoxarifado/estoque-produtos',          component: EstoqueProdutosComponent },
   { path: 'almoxarifado/categorias',                component: CategoriasComponent },
   { path: 'almoxarifado/fornecedores',              component: FornecedoresComponent },
   { path: 'almoxarifado/recebimento',               component: RecebimentoComponent },
@@ -91,7 +121,8 @@ export const routes: Routes = [
 
   { path: 'carregamento',                           component: CarregamentoComponent },
   { path: 'carregamento/assistencia',               component: CarregamentoAssistenciaComponent },
-  { path: 'carregamento/aguardando-descarga',       component: CarregamentoAguardandoDescargaComponent },
+  { path: 'carregamento/aguardando-descarga', redirectTo: 'carregamento/cargas-descargas', pathMatch: 'full' },
+  { path: 'carregamento/cargas-descargas',       component: CarregamentoAguardandoDescargaComponent },
 
   { path: 'manutencao',                             component: ManutencaoComponent },
   { path: 'manutencao/solicitar-manutencao',        component: SolicitarManutencaoComponent },
@@ -110,8 +141,9 @@ export const routes: Routes = [
   { path: 'recursos-humanos/funcionarios',          component: FuncionariosComponent },
   { path: 'recursos-humanos/ferias',                component: FeriasComponent },
   { path: 'recursos-humanos/solicitacoes',          component: SolicitacoesRhComponent },
-  { path: 'recursos-humanos/usuarios',              component: UsuariosComponent },
-  { path: 'recursos-humanos/perfil',                component: PerfilComponent },
+  { path: 'recursos-humanos/perfil',                component: PerfilMenuComponent },
+  { path: 'recursos-humanos/perfil/criar',          component: PerfilComponent },
+  { path: 'recursos-humanos/perfil/atribuir',       component: AtribuirPerfilComponent },
 
   { path: 'pcp',                                    component: PcpComponent },
   { path: 'pcp/ordens',                             component: OrdensProducaoComponent },
@@ -119,10 +151,12 @@ export const routes: Routes = [
   { path: 'pcp/capacidade',                         component: CapacidadeComponent },
   { path: 'pcp/kpis',                               component: KpisComponent },
 
+  { path: 'almoxarifado/pedidos', component: PedidosCompraComponent, data: { origem: 'almoxarifado' } },
+  { path: 'manutencao/pedidos', component: PedidosCompraComponent, data: { origem: 'manutencao' } },
   { path: 'compras',                                component: ComprasComponent },
   { path: 'compras/pedidos',                        component: PedidosCompraComponent },
   { path: 'compras/cotacoes',                       component: CotacoesComponent },
-  { path: 'compras/aprovacoes',                     component: AprovacoesComponent },
+  { path: 'compras/aprovacoes', redirectTo: 'compras/pedidos', pathMatch: 'full' },
 
   { path: 'financeiro',                             component: FinanceiroComponent },
   { path: 'financeiro/contas-pagar',                component: ContasPagarComponent },
@@ -134,11 +168,18 @@ export const routes: Routes = [
   { path: 'administracao/auditoria',                component: AuditoriaComponent },
   { path: 'administracao/relatorios',               component: RelatoriosComponent },
   { path: 'administracao/parametros',               component: ParametrosComponent },
-  { path: 'administracao/lotes',                    component: LotesComponent },
+  { path: 'administracao/lotes', redirectTo:'pcp/lotes/concluidos', pathMatch:'full' },
+  { path: 'administracao/guarda-roupas', component:GuardaRoupasComponent },
 
+  { path: 'meu-ponto', component: PontoComponent },
+  { path: 'marcacao-ponto', component: MarcacaoPontoComponent },
+  { path: 'recursos-humanos/ponto/:id', component: PontoComponent },
   { path: 'meu-perfil',                             component: MeuPerfilComponent },
 
   { path: 'suporte',                                component: SuporteComponent },
   { path: 'suporte/chamado-ti',                     component: ChamadoTiComponent },
   { path: 'suporte/acompanhamento',                 component: AcompanhamentoTiComponent },
 ];
+
+const publicas = new Set(['', 'login', 'falha-conexao']);
+export const routes: Routes = appRoutes.map(route => publicas.has(route.path ?? '') || route.redirectTo ? route : { ...route, canActivate: [acessoGuard] });

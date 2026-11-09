@@ -1,20 +1,23 @@
-import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
+import { PermissaoDirective } from '../../../core/permissao.directive';
+import { Component, ElementRef, AfterViewInit, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 import { SolicitacaoPecaService } from '../../../core/services/solicitacao-peca.service';
 import { SolicitacaoPeca, SolicitacaoPecaForm } from '../../../core/models/solicitacao-peca.model';
 
-declare const bootstrap: any;
+import { Subscription } from 'rxjs';
+import { criarModal, ModalDaTela } from '../../../core/ui/modal';
+import { validarSolicitacaoPeca, normalizarSolicitacaoPeca } from '../../../core/models/solicitacao-peca-form';
 
 @Component({
   selector: 'app-solicitar-peca',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
+  imports: [PermissaoDirective,FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './solicitar-peca.component.html',
   styleUrl: './solicitar-peca.component.scss'
 })
-export class SolicitarPecaComponent implements AfterViewInit {
+export class SolicitarPecaComponent implements AfterViewInit, OnDestroy {
   @ViewChild('resultModal') resultModalEl!: ElementRef;
 
   breadcrumb: BreadcrumbItem[] = [
@@ -29,40 +32,63 @@ export class SolicitarPecaComponent implements AfterViewInit {
   solicitacaoCriada: SolicitacaoPeca | null = null;
   errorMessage = '';
 
-  private resultModal?: any;
+  salvando = false;
+  validacaoError = '';
+  cadastroPendente: SolicitacaoPecaForm | null = null;
+  private chaveOperacao = crypto.randomUUID();
+  private mutation?: Subscription;
+  private resultModal?: ModalDaTela;
 
   constructor(private solicitacaoPecaService: SolicitacaoPecaService) {}
 
   ngAfterViewInit(): void {
-    this.resultModal = new bootstrap.Modal(this.resultModalEl.nativeElement);
+    this.resultModal = criarModal(this.resultModalEl.nativeElement);
   }
 
-  submit(): void {
-    this.submitted = true;
-    if (!this.isFormValid()) return;
+  ngOnDestroy(): void { this.mutation?.unsubscribe(); this.resultModal?.dispose(); }
 
-    this.solicitacaoPecaService.add(this.form).subscribe({
-      next: solicitacao => {
-        this.solicitacaoCriada = solicitacao;
+  submit(): void {
+    if (this.salvando || this.solicitacaoCriada) return;
+    this.submitted = true;
+    if (!this.cadastroPendente) {
+      this.validacaoError = validarSolicitacaoPeca(this.form);
+      if (this.validacaoError) return;
+      this.cadastroPendente = normalizarSolicitacaoPeca(this.form);
+    }
+    this.salvando = true; this.errorMessage = ''; this.validacaoError = '';
+    this.mutation = this.solicitacaoPecaService.add(this.cadastroPendente, this.chaveOperacao).subscribe({
+      next: chamado => {
+        this.salvando = false;
+        this.cadastroPendente = null;
+        this.solicitacaoCriada = chamado;
         this.resultadoSucesso = true;
-        this.resultModal.show();
+        this.resultModal?.show();
       },
-      error: (err) => {
-        this.errorMessage = err.error?.message ?? '';
+      error: err => {
+        this.salvando = false;
+        if (err.status >= 400 && err.status < 500 && err.status !== 409) {
+          this.cadastroPendente = null;
+          this.chaveOperacao = crypto.randomUUID();
+        }
+        this.errorMessage = err.error?.mensagem || err.error?.message || 'Nao foi possivel enviar a solicitacao.';
+        if (this.cadastroPendente) this.errorMessage += ' Tente enviar novamente: os mesmos dados serao reenviados para evitar duplicidade.';
         this.resultadoSucesso = false;
-        this.resultModal.show();
+        this.resultModal?.show();
       }
     });
   }
 
   fecharResultado(): void {
-    this.resultModal.hide();
+    this.resultModal?.hide();
     if (this.resultadoSucesso) {
       this.resetForm();
     }
   }
 
   resetForm(): void {
+    if (this.salvando || this.cadastroPendente) return;
+    this.chaveOperacao = crypto.randomUUID();
+    this.validacaoError = '';
     this.submitted = false;
     this.solicitacaoCriada = null;
     this.errorMessage = '';
@@ -71,37 +97,16 @@ export class SolicitarPecaComponent implements AfterViewInit {
 
   applyPhoneMask(event: Event): void {
     const input = event.target as HTMLInputElement;
-    let digits = input.value.replace(/\D/g, '').slice(0, 11);
-    if (digits.length > 7) {
-      input.value = digits.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-    } else if (digits.length > 2) {
-      input.value = digits.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-    } else if (digits.length > 0) {
-      input.value = '(' + digits;
-    }
+    const digits = input.value.replace(/[^0-9]/g, '').slice(0, 11);
+    if (digits.length > 6) {
+      const corte = digits.length > 10 ? 7 : 6;
+      input.value = '(' + digits.slice(0, 2) + ') ' + digits.slice(2, corte) + '-' + digits.slice(corte);
+    } else if (digits.length > 2) input.value = '(' + digits.slice(0, 2) + ') ' + digits.slice(2);
+    else input.value = digits ? '(' + digits : '';
     this.form.telefone = input.value;
   }
 
-  private isFormValid(): boolean {
-    return !!(
-      this.form.nomePeca.trim() &&
-      this.form.quantidade &&
-      this.form.quantidade > 0 &&
-      this.form.unidade &&
-      this.form.equipamento.trim() &&
-      this.form.finalidade &&
-      this.form.prioridade &&
-      this.form.solicitante.trim() &&
-      this.form.setor.trim() &&
-      this.form.observacoes.trim()
-    );
-  }
-
   private emptyForm(): SolicitacaoPecaForm {
-    return {
-      nomePeca: '', codigo: '', quantidade: null, unidade: '',
-      equipamento: '', finalidade: '', prioridade: '',
-      solicitante: '', setor: '', telefone: '', observacoes: ''
-    };
+    return { nomePeca: '', codigo: '', quantidade: null, unidade: '', equipamento: '', finalidade: '', prioridade: '', solicitante: '', setor: '', telefone: '', observacoes: '' };
   }
 }

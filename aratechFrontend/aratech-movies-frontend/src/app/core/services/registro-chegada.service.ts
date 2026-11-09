@@ -1,57 +1,37 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { RegistroChegada, RegistroChegadaForm } from '../models/registro-chegada.model';
-import { environment } from '../../../environments/environment';
-
-interface ApiResponse {
-  status: number;
-  mensagem: string;
-  registroChegada?: RegistroChegada;
-  filaRegistroChegada?: RegistroChegada[];
-  historicoRegistroChegada?: RegistroChegada[];
-  autorizados?: RegistroChegada[];
-}
-
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, EMPTY, expand, reduce } from 'rxjs';
+import { RegistroChegada, RegistroChegadaForm, PaginaChegadas, ResumoFila } from '../models/registro-chegada.model';
 @Injectable({ providedIn: 'root' })
 export class RegistroChegadaService {
-  private readonly api = `${environment.apiUrl}/portaria/registro-chegada`;
-
+  private readonly url = '/aratech/portaria/chegadas';
   constructor(private http: HttpClient) {}
-
-  getFila(): Observable<RegistroChegada[]> {
-    return this.http
-      .get<ApiResponse>(`${this.api}/fila`)
-      .pipe(map(res => res.filaRegistroChegada ?? []));
+  getFila(pagina = 0, tamanho = 8): Observable<PaginaChegadas> {
+    return this.http.get<PaginaChegadas>(this.url, { params: new HttpParams().set('pagina', pagina).set('tamanho', tamanho) });
   }
-
-  getHistorico(): Observable<RegistroChegada[]> {
-    return this.http
-      .get<ApiResponse>(`${this.api}/historico`)
-      .pipe(map(res => res.historicoRegistroChegada ?? []));
+  getHistorico(pagina = 0, tamanho = 8, notaFiscal = '', data = ''): Observable<PaginaChegadas> {
+    let params = new HttpParams().set('pagina', pagina).set('tamanho', tamanho);
+    if (notaFiscal.trim()) params = params.set('notaFiscal', notaFiscal.trim());
+    if (data) params = params.set('data', data);
+    return this.http.get<PaginaChegadas>(this.url + '/historico', { params });
   }
-
-  getAutorizados(): Observable<RegistroChegada[]> {
-    return this.http
-      .get<ApiResponse>(`${this.api}/autorizados`)
-      .pipe(map(res => res.autorizados ?? []));
+  getHistoricoCompleto(notaFiscal = '', data = ''): Observable<RegistroChegada[]> {
+    return this.getHistorico(0, 100, notaFiscal, data).pipe(
+      expand(p => p.content.length > 0 && p.number + 1 < p.totalPages ? this.getHistorico(p.number + 1, 100, notaFiscal, data) : EMPTY),
+      reduce((itens, p) => [...itens, ...p.content], [] as RegistroChegada[])
+    );
   }
-
-  add(form: RegistroChegadaForm): Observable<RegistroChegada> {
-    return this.http
-      .post<ApiResponse>(`${this.api}/registrar`, form)
-      .pipe(map(res => res.registroChegada!));
+  resumo(): Observable<ResumoFila> { return this.http.get<ResumoFila>(this.url + '/resumo'); }
+  add(form: RegistroChegadaForm, chaveOperacao: string): Observable<RegistroChegada> {
+    return this.http.post<RegistroChegada>(this.url, { ...form, chaveOperacao });
   }
-
-  atualizar(form: RegistroChegadaForm): Observable<RegistroChegada> {
-    return this.http
-      .put<ApiResponse>(`${this.api}/atualizar`, form)
-      .pipe(map(res => res.registroChegada!));
+  atualizar(id: number, form: RegistroChegadaForm): Observable<RegistroChegada> {
+    return this.http.put<RegistroChegada>(`${this.url}/${id}`, form);
   }
-
-  finalizar(notaFiscal: string): Observable<RegistroChegada> {
-    return this.http
-      .put<ApiResponse>(`${this.api}/finalizar`, null, { params: { notaFiscal } })
-      .pipe(map(res => res.registroChegada!));
+  finalizar(id: number): Observable<RegistroChegada> {
+    return this.http.post<RegistroChegada>(`${this.url}/${id}/finalizar`, {});
+  }
+  confirmarEntrada(id: number): Observable<RegistroChegada> {
+    return this.http.post<RegistroChegada>(`${this.url}/${id}/entrada`, {});
   }
 }

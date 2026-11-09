@@ -5,7 +5,7 @@
   <div class="container py-5">
     <div class="row g-4 justify-content-center">
 
-      <div class="col-md-6 col-lg-5">
+      <div *appPermissao="'SUPORTE_CHAMADOS.CADASTRAR'" class="col-md-6 col-lg-5">
         <a routerLink="/suporte/chamado-ti" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-headset icon-size"></i>
@@ -15,7 +15,7 @@
         </a>
       </div>
 
-      <div class="col-md-6 col-lg-5">
+      <div *appPermissao="'SUPORTE_CHAMADOS.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/suporte/acompanhamento" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-clipboard-check icon-size"></i>

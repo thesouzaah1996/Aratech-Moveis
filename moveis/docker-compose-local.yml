@@ -1,0 +1,3 @@
+# Compatibilidade com comandos anteriores; a definicao principal esta em docker-compose.yml.
+include:
+  - path: docker-compose.yml

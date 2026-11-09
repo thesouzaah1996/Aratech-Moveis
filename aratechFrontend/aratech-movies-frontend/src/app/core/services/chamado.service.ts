@@ -1,44 +1,30 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { Chamado, ChamadoForm, StatusChamado } from '../models/chamado.model';
-import { environment } from '../../../environments/environment';
-
-interface ApiResponse {
-  status: number;
-  message: string;
-  chamado?: Chamado;
-  chamados?: Chamado[];
-}
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { EMPTY, Observable, expand, map, reduce } from 'rxjs';
+import { Chamado, ChamadoForm, ChamadoResponse, ChamadosPagina, StatusChamado } from '../models/chamado.model';
 
 @Injectable({ providedIn: 'root' })
 export class ChamadoService {
-  private readonly api = `${environment.apiUrl}/manutencao/chamado`;
+  private readonly url = '/aratech/manutencao/chamados';
+  constructor(private readonly http: HttpClient) {}
 
-  constructor(private http: HttpClient) {}
-
+  getPagina(pagina = 0, tamanho = 8, status?: StatusChamado): Observable<ChamadosPagina> {
+    let params = new HttpParams().set('pagina', pagina).set('tamanho', tamanho);
+    if (status) params = params.set('status', status);
+    return this.http.get<ChamadosPagina>(this.url, { params });
+  }
   getAll(status?: StatusChamado): Observable<Chamado[]> {
-    const params: Record<string, string> = status ? { status } : {};
-    return this.http
-      .get<ApiResponse>(`${this.api}/todos`, { params })
-      .pipe(map(res => res.chamados ?? []));
+    return this.getPagina(0, 100, status).pipe(
+      expand(p => p.chamados.length > 0 && (p.pagina + 1) * p.tamanho < p.total
+        ? this.getPagina(p.pagina + 1, 100, status) : EMPTY),
+      reduce((todos, p) => [...todos, ...p.chamados], [] as Chamado[])
+    );
+  }
+  getById(id: number): Observable<Chamado> {
+    return this.http.get<ChamadoResponse>(`${this.url}/${id}`).pipe(map(r => r.chamado));
+  }
+  add(form: ChamadoForm, chaveOperacao: string): Observable<Chamado> {
+    return this.http.post<ChamadoResponse>(this.url, { ...form, chaveOperacao }).pipe(map(r => r.chamado));
   }
 
-  add(form: ChamadoForm): Observable<Chamado> {
-    return this.http
-      .post<ApiResponse>(`${this.api}/adicionar`, form)
-      .pipe(map(res => res.chamado!));
-  }
-
-  atribuirMecanico(id: number, mecanicoId: number): Observable<Chamado> {
-    return this.http
-      .put<ApiResponse>(`${this.api}/atribuir/${id}`, { mecanicoId })
-      .pipe(map(res => res.chamado!));
-  }
-
-  concluir(id: number): Observable<Chamado> {
-    return this.http
-      .put<ApiResponse>(`${this.api}/concluir/${id}`, {})
-      .pipe(map(res => res.chamado!));
-  }
 }

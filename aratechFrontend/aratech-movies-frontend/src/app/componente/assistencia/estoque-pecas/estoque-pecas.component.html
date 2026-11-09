@@ -11,155 +11,214 @@
       </div>
     }
 
-    @if (totalAbaixoMinimo > 0) {
-      <div class="alert alert-warning d-flex align-items-center gap-2 mb-3">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <span><strong>{{ totalAbaixoMinimo }}</strong> peça(s) abaixo do estoque mínimo.</span>
-        <button class="btn btn-sm btn-warning ms-auto" (click)="apenasAbaixoMinimo = !apenasAbaixoMinimo">
-          {{ apenasAbaixoMinimo ? 'Ver todas' : 'Ver apenas estas' }}
-        </button>
+    @if (errorMessage) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>{{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
       </div>
     }
 
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4 flex-wrap">
-      <div class="input-group" style="max-width: 300px;">
+    <div class="toolbar d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mb-4">
+      <div class="input-group toolbar-search">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
         </span>
         <input type="text" class="form-control border-start-0 ps-0"
-               placeholder="Buscar por nome ou código…"
-               [(ngModel)]="searchTerm" (ngModelChange)="page = 1">
+          placeholder="Buscar por código, modelo ou nome…"
+          [(ngModel)]="searchQuery" maxlength="150"
+          (ngModelChange)="onSearch()">
       </div>
 
-      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+      <button *appPermissao="'ASSISTENCIA_ESTOQUE.CADASTRAR'" class="btn btn-danger flex-shrink-0" (click)="openAdd()">
         <i class="bi bi-plus-circle me-2"></i>Adicionar Peça
       </button>
     </div>
 
     <div class="card shadow-sm">
       <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Nome</th>
-                <th>Quantidade</th>
-                <th>Mín.</th>
-                <th>Unidade</th>
-                <th>Localização</th>
-                <th class="text-end">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (peca of paged; track peca.id) {
-                <tr>
-                  <td><span class="badge-id">{{ peca.codigo }}</span></td>
-                  <td class="fw-semibold">{{ peca.nome }}</td>
-                  <td><span [class]="estoqueClass(peca)">{{ peca.quantidade }}</span></td>
-                  <td class="text-muted">{{ peca.quantidadeMinima }}</td>
-                  <td>{{ peca.unidade }}</td>
-                  <td>{{ peca.localizacao }}</td>
-                  <td class="text-end">
-                    <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(peca)">
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="btn-action btn-action-delete ms-1" title="Remover" (click)="openDelete(peca)">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="7">
-                    <div class="empty-state">
-                      <i class="bi bi-wrench-adjustable"></i>
-                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhuma peça cadastrada.' }}</p>
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        @if (totalPages > 1) {
-          <div class="pagination-container">
-            <span class="pagination-info">Exibindo {{ paginationStart }}–{{ paginationEnd }} de {{ filtradas.length }} peça(s)</span>
-            <nav>
-              <ul class="pagination">
-                <li class="page-item" [class.disabled]="page === 1">
-                  <a class="page-link" (click)="setPage(page - 1)">‹</a>
-                </li>
-                @for (p of visiblePages; track p) {
-                  <li class="page-item" [class.active]="p === page">
-                    <a class="page-link" (click)="setPage(p)">{{ p }}</a>
-                  </li>
-                }
-                <li class="page-item" [class.disabled]="page === totalPages">
-                  <a class="page-link" (click)="setPage(page + 1)">›</a>
-                </li>
-              </ul>
-            </nav>
+        @if (loading) {
+          <div class="text-center py-5 text-muted">
+            <div class="spinner-border spinner-border-sm me-2"></div>
+            Carregando peças...
           </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Modelo</th>
+                  <th>Nome</th>
+                  <th>Quantidade</th>
+                  <th>Mín.</th>
+                  <th>Unidade</th>
+                  <th>Localização</th>
+                  <th class="text-end" style="width: 1%">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (pecas.length === 0) {
+                  <tr>
+                    <td colspan="8">
+                      <div class="empty-state">
+                        <i class="bi bi-archive"></i>
+                        <p>{{ searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhuma peça cadastrada no estoque.' }}</p>
+                      </div>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (peca of pecas; track peca.id) {
+                    <tr>
+                      <td><code>{{ peca.codigo }}</code></td>
+                      <td>{{ peca.modelo }}</td>
+                      <td class="fw-semibold">{{ peca.nome }}</td>
+                      <td><span [class]="estoqueClass(peca)">{{ peca.quantidade }}</span></td>
+                      <td class="text-muted">{{ peca.quantidadeMinima }}</td>
+                      <td>{{ peca.unidade }}</td>
+                      <td>{{ peca.localizacao }}</td>
+                      <td>
+                        <div class="d-flex justify-content-end align-items-center gap-1">
+                          <button type="button" class="btn-action" title="Historico de movimentacoes" (click)="openHistorico(peca)"><i class="bi bi-clock-history"></i></button>
+                          <button *appPermissao="'ASSISTENCIA_ESTOQUE.ALTERAR'" class="btn-action btn-action-entrada" title="Entrada de Estoque" (click)="openEntrada(peca)">
+                            <i class="bi bi-plus-circle"></i>
+                          </button>
+                          <button *appPermissao="'ASSISTENCIA_ESTOQUE.ALTERAR'" class="btn-action btn-action-saida" title="Saída de Estoque" (click)="openSaida(peca)">
+                            <i class="bi bi-dash-circle"></i>
+                          </button>
+                          <button *appPermissao="'ASSISTENCIA_ESTOQUE.ALTERAR'" class="btn-action btn-action-edit" title="Editar" (click)="openEdit(peca)">
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          <button *appPermissao="'ASSISTENCIA_ESTOQUE.ALTERAR'" class="btn-action btn-action-delete" title="Remover" (click)="openDelete(peca)">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (totalPages > 1) {
+            <div class="pagination-container">
+              <span class="pagination-info">
+                Mostrando {{ inicio }}–{{ fim }} de {{ total }}
+              </span>
+              <nav>
+                <ul class="pagination">
+                  <li class="page-item" [class.disabled]="page === 1">
+                    <a class="page-link" (click)="setPage(page - 1)">‹</a>
+                  </li>
+
+                  @if (visiblePages[0] > 1) {
+                    <li class="page-item">
+                      <a class="page-link" (click)="setPage(1)">1</a>
+                    </li>
+                    @if (visiblePages[0] > 2) {
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                  }
+
+                  @for (p of visiblePages; track p) {
+                    <li class="page-item" [class.active]="p === page">
+                      <a class="page-link" (click)="setPage(p)">{{ p }}</a>
+                    </li>
+                  }
+
+                  @if (visiblePages[visiblePages.length - 1] < totalPages) {
+                    @if (visiblePages[visiblePages.length - 1] < totalPages - 1) {
+                      <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                    <li class="page-item">
+                      <a class="page-link" (click)="setPage(totalPages)">{{ totalPages }}</a>
+                    </li>
+                  }
+
+                  <li class="page-item" [class.disabled]="page === totalPages">
+                    <a class="page-link" (click)="setPage(page + 1)">›</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          }
         }
       </div>
     </div>
+
   </div>
 </main>
 
 <div class="modal fade" #pecaModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title fw-bold">{{ isEditing ? 'Editar Peça' : 'Nova Peça' }}</h5>
       </div>
       <div class="modal-body p-4">
-        <div class="row g-3 mb-3">
+        @if (modalError) { <div class="alert alert-danger" role="alert">{{ modalError }}</div> }
+        <div class="row g-3">
+          <div class="col-12">
+            <label for="modeloPecaAssistencia" class="form-label fw-semibold">Modelo <span class="text-danger">*</span></label>
+            <input id="modeloPecaAssistencia" type="text" class="form-control" [(ngModel)]="form.modelo" maxlength="150" [disabled]="saving"
+              placeholder="Nome do guarda-roupa. Ex: Milano"
+              [class.is-invalid]="submitted && !form.modelo.trim()">
+            <div class="invalid-feedback">Informe o modelo do guarda-roupa.</div>
+          </div>
           <div class="col-md-8">
             <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.nome"
-                   [class.is-invalid]="submitted && !form.nome?.trim()">
-            <div class="invalid-feedback">Obrigatório.</div>
+            <input type="text" class="form-control" [(ngModel)]="form.nome" maxlength="150" [disabled]="saving"
+              placeholder="Ex: Porta, gaveta, puxador ou dobradiça"
+              [class.is-invalid]="submitted && !form.nome.trim()">
+            <div class="invalid-feedback">Nome é obrigatório.</div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Código <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.codigo"
-                   [class.is-invalid]="submitted && !form.codigo?.trim()">
-            <div class="invalid-feedback">Obrigatório.</div>
+            <input type="text" class="form-control" [(ngModel)]="form.codigo" maxlength="100" [disabled]="saving || isEditing"
+              placeholder="Ex: AST-0001"
+              [class.is-invalid]="submitted && !form.codigo.trim()">
+            <div class="invalid-feedback">Código é obrigatório.</div>
+            @if (isEditing) { <small class="text-muted">Código e unidade são mantidos para preservar o histórico.</small> }
           </div>
-        </div>
-        <div class="row g-3 mb-3">
-          <div class="col">
+          <div class="col-md-4">
             <label class="form-label fw-semibold">Quantidade</label>
-            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="0">
+            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="0" max="999999999999.999" step="0.001" [disabled]="saving || isEditing">
+            @if (isEditing) { <small class="text-muted">Altere o saldo pelas ações de entrada e saída.</small> }
           </div>
-          <div class="col">
+          <div class="col-md-4">
             <label class="form-label fw-semibold">Qtd Mínima</label>
-            <input type="number" class="form-control" [(ngModel)]="form.quantidadeMinima" min="0">
+            <input type="number" class="form-control" [(ngModel)]="form.quantidadeMinima" min="0" max="999999999999.999" step="0.001" [disabled]="saving">
           </div>
-          <div class="col">
+          <div class="col-md-4">
             <label class="form-label fw-semibold">Unidade <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.unidade"
-                   [class.is-invalid]="submitted && !form.unidade?.trim()">
-            <div class="invalid-feedback">Obrigatório.</div>
+            <select class="form-select" [(ngModel)]="form.unidade" [disabled]="saving || isEditing"
+              [class.is-invalid]="submitted && !form.unidade.trim()">
+              <option value="un">un (unidade)</option>
+              <option value="kg">kg</option>
+              <option value="L">L (litro)</option>
+              <option value="m">m (metro)</option>
+              <option value="cx">cx (caixa)</option>
+              <option value="par">par</option>
+            </select>
+            <div class="invalid-feedback">Unidade é obrigatória.</div>
           </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Localização <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" [(ngModel)]="form.localizacao"
-                 [class.is-invalid]="submitted && !form.localizacao?.trim()"
-                 placeholder="Ex: Prateleira A3">
-          <div class="invalid-feedback">Obrigatório.</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Descrição</label>
-          <textarea class="form-control" [(ngModel)]="form.descricao" rows="2"></textarea>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Localização <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.localizacao" maxlength="100" [disabled]="saving"
+              placeholder="Ex: Prateleira A2"
+              [class.is-invalid]="submitted && !form.localizacao.trim()">
+            <div class="invalid-feedback">Localização é obrigatória.</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Descrição</label>
+            <textarea class="form-control" [(ngModel)]="form.descricao" maxlength="2000" [disabled]="saving" rows="3"
+              placeholder="Descrição opcional da peça"></textarea>
+          </div>
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="save()">
+        <button type="button" class="btn btn-cancelar" (click)="cancelarCadastro()" [disabled]="saving">Cancelar</button>
+        <button *appPermissao="isEditing ? 'ASSISTENCIA_ESTOQUE.ALTERAR' : 'ASSISTENCIA_ESTOQUE.CADASTRAR'" type="button" class="btn btn-danger" (click)="save()" [disabled]="saving">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>
@@ -176,15 +235,20 @@
         </h5>
       </div>
       <div class="modal-body text-center p-4">
+        @if (deleteError) { <div class="alert alert-danger" role="alert">{{ deleteError }}</div> }
         <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
         <h5 class="mt-3">Deseja remover esta peça?</h5>
+        <p class="text-muted">O saldo deve estar zerado. O histórico e o código serão preservados.</p>
         @if (pecaParaExcluir) {
-          <p class="text-danger fw-bold mt-2">{{ pecaParaExcluir.nome }}</p>
+          <div class="delete-warning">
+            <p class="mb-1"><strong>Peça:</strong> {{ pecaParaExcluir.nome }}</p>
+            <p class="mb-0"><strong>Código:</strong> {{ pecaParaExcluir.codigo }}</p>
+          </div>
         }
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+        <button type="button" class="btn btn-cancelar" (click)="cancelarArquivo()" [disabled]="saving || movimentando || arquivando">Cancelar</button>
+        <button *appPermissao="'ASSISTENCIA_ESTOQUE.ALTERAR'" type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="arquivando">
           <i class="bi bi-trash me-1"></i>Remover
         </button>
       </div>
@@ -192,3 +256,76 @@
   </div>
 </div>
 
+<div class="modal fade" #entradaModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-plus-circle me-2"></i>Entrada de Estoque
+        </h5>
+      </div>
+      <div class="modal-body p-4">
+        @if (pecaMovimentacao) {
+          <p class="mb-1"><strong>Peça:</strong> {{ pecaMovimentacao.nome }}</p>
+          <p class="mb-3 text-muted">Quantidade atual: {{ pecaMovimentacao.quantidade }} {{ pecaMovimentacao.unidade }}</p>
+        }
+        <label class="form-label fw-semibold">Quantidade recebida <span class="text-danger">*</span></label>
+        <input type="number" class="form-control" min="0.001" max="999999999999.999" step="0.001" [disabled]="movimentando || quantidadeEnviada !== null" [(ngModel)]="quantidadeMovimentacao"
+          [class.is-invalid]="!!movimentacaoError"
+          (input)="movimentacaoError = ''">
+        <label class="form-label mt-3">Motivo da movimentação *</label>
+        <textarea class="form-control" rows="2" maxlength="500" [(ngModel)]="motivoMovimentacao" [disabled]="movimentando || quantidadeEnviada !== null" placeholder="Ex.: recebimento de compra ou reposição de porta do guarda-roupa"></textarea>
+        @if (movimentacaoError) {
+          <div class="invalid-feedback d-block">{{ movimentacaoError }}</div>
+        }
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" (click)="cancelarEntrada()" [disabled]="saving || movimentando || arquivando">Cancelar</button>
+        <button *appPermissao="'ASSISTENCIA_ESTOQUE.ALTERAR'" type="button" class="btn btn-danger" (click)="confirmEntrada()" [disabled]="movimentando">
+          <i class="bi bi-check-circle me-1"></i>Confirmar Entrada
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" #saidaModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-dash-circle me-2"></i>Saída de Estoque
+        </h5>
+      </div>
+      <div class="modal-body p-4">
+        @if (pecaMovimentacao) {
+          <p class="mb-1"><strong>Peça:</strong> {{ pecaMovimentacao.nome }}</p>
+          <p class="mb-3 text-muted">Quantidade atual: {{ pecaMovimentacao.quantidade }} {{ pecaMovimentacao.unidade }}</p>
+        }
+        <label class="form-label fw-semibold">Quantidade retirada <span class="text-danger">*</span></label>
+        <input type="number" class="form-control" min="0.001" max="999999999999.999" step="0.001" [disabled]="movimentando || quantidadeEnviada !== null" [(ngModel)]="quantidadeMovimentacao"
+          [class.is-invalid]="!!movimentacaoError"
+          (input)="movimentacaoError = ''">
+        <label class="form-label mt-3">Motivo da movimentação *</label>
+        <textarea class="form-control" rows="2" maxlength="500" [(ngModel)]="motivoMovimentacao" [disabled]="movimentando || quantidadeEnviada !== null" placeholder="Ex.: recebimento de compra ou reposição de porta do guarda-roupa"></textarea>
+        @if (movimentacaoError) {
+          <div class="invalid-feedback d-block">{{ movimentacaoError }}</div>
+        }
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-cancelar" (click)="cancelarSaida()" [disabled]="saving || movimentando || arquivando">Cancelar</button>
+        <button *appPermissao="'ASSISTENCIA_ESTOQUE.ALTERAR'" type="button" class="btn btn-danger" (click)="confirmSaida()" [disabled]="movimentando">
+          <i class="bi bi-check-circle me-1"></i>Confirmar Saída
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" #historicoModal tabindex="-1" data-bs-backdrop="static"><div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5>Histórico de movimentações · {{historicoPeca?.nome}}</h5></div><div class="modal-body">
+@if(historicoError){<div class="alert alert-danger" role="alert">{{historicoError}} <button class="btn btn-sm btn-outline-danger" (click)="carregarHistorico()">Tentar novamente</button></div>}
+@if(historicoLoading){<p role="status">Carregando movimentações...</p>}@else{<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Data e hora</th><th>Tipo</th><th>Quantidade</th><th>Saldo anterior</th><th>Saldo posterior</th><th>Responsável</th><th>Motivo</th></tr></thead><tbody>
+@for(m of historico;track m.id){<tr><td class="text-nowrap">{{m.criadoEm|date:'dd/MM/yyyy HH:mm'}}</td><td><span class="badge" [class.bg-success]="m.tipo==='ENTRADA'" [class.bg-danger]="m.tipo==='SAIDA'" [class.bg-secondary]="m.tipo==='INICIAL'">{{m.tipo==='INICIAL'?'Saldo inicial':m.tipo==='ENTRADA'?'Entrada':'Saída'}}</span></td><td>{{m.quantidade}}</td><td>{{m.saldoAnterior}}</td><td>{{m.saldoPosterior}}</td><td>{{m.responsavelNome}}</td><td style="white-space:pre-wrap;min-width:180px">{{m.motivo}}</td></tr>}
+@empty{<tr><td colspan="7">Nenhuma movimentação registrada.</td></tr>}
+</tbody></table></div><div class="d-flex justify-content-between align-items-center"><span>{{historicoTotal}} movimentações · Página {{historicoPage}} de {{historicoPages||1}}</span><div><button class="btn btn-sm btn-outline-secondary me-2" [disabled]="historicoPage===1" (click)="paginaHistorico(historicoPage-1)">Anterior</button><button class="btn btn-sm btn-outline-secondary" [disabled]="historicoPage>=historicoPages" (click)="paginaHistorico(historicoPage+1)">Próxima</button></div></div>}
+</div><div class="modal-footer"><button class="btn btn-secondary" (click)="fecharHistorico()">Fechar</button></div></div></div></div>

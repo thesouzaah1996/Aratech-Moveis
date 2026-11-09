@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription, interval } from 'rxjs';
+import { ChamadoService } from '../../../core/services/chamado.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
-import { ChamadoService } from '../../../core/services/chamado.service';
 import {
   Chamado,
   StatusChamado,
@@ -21,7 +22,7 @@ const PRIORIDADE_ORDEM: Record<string, number> = { ALTA: 0, MEDIA: 1, BAIXA: 2 }
   templateUrl: './acompanhamento.component.html',
   styleUrl: './acompanhamento.component.scss'
 })
-export class AcompanhamentoComponent implements OnInit {
+export class AcompanhamentoComponent implements OnInit, OnDestroy {
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
     { label: 'Manutenção', route: '/manutencao' },
@@ -39,13 +40,40 @@ export class AcompanhamentoComponent implements OnInit {
   errorMessage = '';
 
   ordens: Chamado[] = [];
+  loading = false;
+  carregado = false;
+  private request?: Subscription;
+  private polling?: Subscription;
 
-  constructor(private chamadoService: ChamadoService) {}
+  constructor(private readonly chamadoService: ChamadoService) {}
 
   ngOnInit(): void {
-    this.chamadoService.getAll().subscribe({
-      next: ordens => this.ordens = ordens,
-      error: () => this.errorMessage = 'Erro ao carregar as ordens de manutenção.'
+    this.carregar();
+    this.polling = interval(5000).subscribe(() => {
+      if (!this.loading) this.carregar();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.request?.unsubscribe();
+    this.polling?.unsubscribe();
+  }
+
+  carregar(): void {
+    this.request?.unsubscribe();
+    this.loading = true;
+    this.request = this.chamadoService.getAll().subscribe({
+      next: ordens => {
+        this.ordens = ordens;
+        this.loading = false;
+        this.carregado = true;
+        this.errorMessage = '';
+        this.page = Math.min(this.page, Math.max(1, this.totalPages));
+      },
+      error: e => {
+        this.loading = false;
+        this.errorMessage = e.error?.mensagem || 'Não foi possível atualizar as ordens. Tente novamente. Os dados exibidos podem estar desatualizados.';
+      }
     });
   }
 

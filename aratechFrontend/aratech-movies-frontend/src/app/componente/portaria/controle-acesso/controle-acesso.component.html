@@ -11,10 +11,10 @@
       </div>
     }
 
-    @if (errorMessage) {
+    @if (errorMessage || atualizacaoError) {
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
-        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage || atualizacaoError }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''; atualizacaoError = ''"></button>
       </div>
     }
 
@@ -32,47 +32,58 @@
         <div class="row g-3">
           <div class="col-md-3">
             <label class="form-label fw-semibold">Nota Fiscal</label>
-            <input type="text" class="form-control" [(ngModel)]="form.notaFiscal" placeholder="Número da NF"
-              [class.is-invalid]="submitted && !form.notaFiscal.trim()">
+            <input type="text" class="form-control" [(ngModel)]="form.notaFiscal" placeholder="Número ou chave da NF-e" inputmode="numeric"
+              [class.is-invalid]="submitted && !form.notaFiscal.trim()" [disabled]="salvando || cadastroPendente !== null" maxlength="44">
             <div class="invalid-feedback">Nota fiscal é obrigatória.</div>
           </div>
           <div class="col-md-3">
             <label class="form-label fw-semibold">Empresa</label>
             <input type="text" class="form-control" [(ngModel)]="form.empresa" placeholder="Nome da empresa"
-              [class.is-invalid]="submitted && !form.empresa.trim()">
+              [class.is-invalid]="submitted && !form.empresa.trim()" [disabled]="salvando || cadastroPendente !== null" maxlength="150">
             <div class="invalid-feedback">Empresa é obrigatória.</div>
           </div>
           <div class="col-md-2">
             <label class="form-label fw-semibold">Motorista</label>
             <input type="text" class="form-control" [(ngModel)]="form.nomeMotorista" placeholder="Nome do motorista"
-              [class.is-invalid]="submitted && !form.nomeMotorista.trim()">
+              [class.is-invalid]="submitted && !form.nomeMotorista.trim()" [disabled]="salvando || cadastroPendente !== null" maxlength="150">
             <div class="invalid-feedback">Motorista é obrigatório.</div>
           </div>
           <div class="col-md-2">
             <label class="form-label fw-semibold">Placa</label>
-            <input type="text" class="form-control" [(ngModel)]="form.placa" placeholder="Ex: ABC-1234"
-              [class.is-invalid]="submitted && !form.placa.trim()">
+            <input type="text" class="form-control" [(ngModel)]="form.placa" placeholder="Ex: ABC1D23"
+              [class.is-invalid]="submitted && !form.placa.trim()" [disabled]="salvando || cadastroPendente !== null" maxlength="8">
             <div class="invalid-feedback">Placa é obrigatória.</div>
           </div>
           <div class="col-md-2">
             <label class="form-label fw-semibold">Setor Responsável</label>
             <select class="form-select" [(ngModel)]="form.setorResponsavel"
-              [class.is-invalid]="submitted && !form.setorResponsavel">
+              [class.is-invalid]="submitted && !form.setorResponsavel" [disabled]="salvando || cadastroPendente !== null">
               <option value="" disabled>Selecione</option>
               <option value="ALMOXARIFADO">Almoxarifado</option>
               <option value="CARREGAMENTO">Carregamento</option>
-              <option value="PCP">PCP</option>
+              <option value="PCP" disabled>PCP</option>
             </select>
             <div class="invalid-feedback">Setor é obrigatório.</div>
           </div>
+          @if (form.setorResponsavel === 'CARREGAMENTO') {
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Operação</label>
+              <select class="form-select" [(ngModel)]="form.tipoOperacao" [class.is-invalid]="submitted && !form.tipoOperacao" [disabled]="salvando || cadastroPendente !== null">
+                <option [ngValue]="undefined" disabled>Selecione</option>
+                <option value="CARREGAR">Carregar</option>
+                <option value="DESCARREGAR">Descarregar</option>
+              </select>
+              <div class="invalid-feedback">Selecione a operação.</div>
+            </div>
+          }
           <div class="col-12">
             <label class="form-label fw-semibold">Descrição da Carga</label>
             <textarea class="form-control" rows="3" [(ngModel)]="form.descricaoCarga" placeholder="Detalhe o que está sendo transportado"
-              [class.is-invalid]="submitted && !form.descricaoCarga.trim()"></textarea>
+              [class.is-invalid]="submitted && !form.descricaoCarga.trim()" [disabled]="salvando || cadastroPendente !== null" maxlength="1000"></textarea>
             <div class="invalid-feedback">Descrição da carga é obrigatória.</div>
           </div>
           <div class="col-12 d-flex justify-content-end">
-            <button class="btn btn-danger px-4" (click)="registrarChegada()">
+            <button *appPermissao="'PORTARIA_CONTROLE.CADASTRAR'" class="btn btn-danger px-4" [disabled]="salvando" (click)="registrarChegada()">
               <i class="bi bi-check-circle me-2"></i>Registrar Chegada
             </button>
           </div>
@@ -92,6 +103,7 @@
                 <th>Placa</th>
                 <th>Descrição da Carga</th>
                 <th>Setor</th>
+                <th>Operação</th>
                 <th>Status</th>
                 <th class="text-end">Ações</th>
               </tr>
@@ -99,7 +111,7 @@
             <tbody>
               @if (fila.length === 0) {
                 <tr>
-                  <td colspan="8">
+                  <td colspan="9">
                     <div class="empty-state">
                       <i class="bi bi-truck"></i>
                       <p>Nenhum caminhão na fila de espera.</p>
@@ -115,17 +127,20 @@
                     <td>{{ item.placa }}</td>
                     <td>{{ item.descricaoCarga }}</td>
                     <td>{{ setorLabels[item.setorResponsavel] }}</td>
+                    <td>{{ item.setorResponsavel === 'CARREGAMENTO' ? (item.tipoOperacao === 'CARREGAR' ? 'Carregar' : item.tipoOperacao === 'DESCARREGAR' ? 'Descarregar' : 'Não informado') : '—' }}</td>
                     <td>
                       <span class="badge {{ badgeClass(item.status) }}">{{ statusLabels[item.status] }}</span>
                     </td>
                     <td class="text-end text-nowrap action-buttons">
-                      <button class="btn-action btn-action-edit"
-                              title="Confirmar entrada"
-                              (click)="abrirConfirmacaoEntrada(item.notaFiscal)">
-                        <i class="bi bi-unlock"></i>
+                      <button *appPermissao="'PORTARIA_CONTROLE.FINALIZAR'" class="btn-action btn-action-edit"
+                              [title]="item.status === 'EM_RECEBIMENTO' ? 'Finalizar e enviar ao histórico' : 'Liberar entrada'"
+                              [disabled]="confirmando"
+                              (click)="abrirConfirmacaoEntrada(item)">
+                        <i [class]="item.status === 'EM_RECEBIMENTO' ? 'bi bi-check2-circle' : 'bi bi-unlock'"></i>
                       </button>
-                      <button class="btn-action btn-action-edit ms-1"
+                      <button *appPermissao="'PORTARIA_CONTROLE.ALTERAR'" class="btn-action btn-action-edit ms-1"
                               title="Editar registro"
+                              [disabled]="item.status !== 'AGUARDANDO' || editando"
                               (click)="abrirEdicao(item)">
                         <i class="bi bi-pencil"></i>
                       </button>
@@ -140,7 +155,7 @@
         @if (totalPages > 1) {
           <div class="pagination-container">
             <span class="pagination-info">
-              Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ fila.length }} caminhão(ões)
+              Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ total }} caminhão(ões)
             </span>
             <nav>
               <ul class="pagination">
@@ -194,14 +209,15 @@
         </h5>
       </div>
       <div class="modal-body">
+        @if (historicoError) { <div class="alert alert-danger" role="alert">{{ historicoError }}</div> }
         <div class="row g-3 mb-4">
           <div class="col-md-5">
             <label class="form-label fw-semibold">Buscar por Nota Fiscal</label>
-            <input type="text" class="form-control" [(ngModel)]="filtroNF" placeholder="Digite a NF">
+            <input type="text" class="form-control" maxlength="44" [(ngModel)]="filtroNF" (ngModelChange)="onFiltroHistorico()" placeholder="Digite a NF">
           </div>
           <div class="col-md-5">
             <label class="form-label fw-semibold">Filtrar por Data</label>
-            <input type="date" class="form-control" [(ngModel)]="filtroData">
+            <input type="date" class="form-control" [(ngModel)]="filtroData" (ngModelChange)="onFiltroHistorico()">
           </div>
           <div class="col-md-2 d-flex align-items-end">
             <button class="btn btn-outline-secondary w-100" (click)="limparFiltros()">
@@ -219,17 +235,18 @@
                 <th>Placa</th>
                 <th>Descrição da Carga</th>
                 <th>Setor</th>
-                <th>Data/Hora Entrada</th>
+                <th>Operação</th>
                 <th>Status</th>
+                <th>Data/Hora Entrada</th>
               </tr>
             </thead>
             <tbody>
               @if (historicoFiltrado.length === 0) {
                 <tr>
-                  <td colspan="8">
+                  <td colspan="9">
                     <div class="empty-state">
                       <i class="bi bi-inbox"></i>
-                      <p>Nenhum registro encontrado.</p>
+                      <p>{{ historicoLoading ? 'Carregando hist\u00f3rico...' : 'Nenhum registro encontrado.' }}</p>
                     </div>
                   </td>
                 </tr>
@@ -242,10 +259,11 @@
                     <td>{{ item.placa }}</td>
                     <td>{{ item.descricaoCarga }}</td>
                     <td>{{ setorLabels[item.setorResponsavel] }}</td>
-                    <td>{{ item.dataChegada | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>{{ item.setorResponsavel === 'CARREGAMENTO' ? (item.tipoOperacao === 'CARREGAR' ? 'Carregar' : item.tipoOperacao === 'DESCARREGAR' ? 'Descarregar' : 'Não informado') : '—' }}</td>
                     <td>
-                      <span class="badge {{ badgeClass(item.status) }}">{{ statusLabels[item.status] }}</span>
+                      <span class="badge bg-success">Entrada autorizada</span>
                     </td>
+                    <td>{{ item.dataEntrada | date:'dd/MM/yyyy HH:mm' }}</td>
                   </tr>
                 }
               }
@@ -254,7 +272,7 @@
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button class="btn btn-cancelar" data-bs-dismiss="modal">Fechar</button>
+        <button class="btn btn-cancelar" data-bs-dismiss="modal" (click)="fecharHistorico()">Fechar</button>
       </div>
     </div>
   </div>
@@ -265,17 +283,18 @@
     <div class="modal-content">
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title fw-bold">
-          <i class="bi bi-unlock-fill me-2"></i>Confirmar Entrada
+          <i class="bi bi-unlock-fill me-2"></i>{{ finalizandoEntrada ? 'Finalizar registro' : 'Confirmar Entrada' }}
         </h5>
       </div>
       <div class="modal-body text-center p-4">
+        @if (entradaError) { <div class="alert alert-danger" role="alert">{{ entradaError }}</div> }
         <i class="bi bi-unlock-fill text-success" style="font-size: 3rem;"></i>
-        <h5 class="mt-3">Deseja confirmar a entrada deste caminhão?</h5>
-        <p class="text-muted mb-0">O registro será movido para o histórico de entregas.</p>
+        <h5 class="mt-3">{{ finalizandoEntrada ? 'Deseja finalizar este registro?' : 'Deseja confirmar a entrada deste caminhão?' }}</h5>
+        <p class="text-muted mb-0">{{ finalizandoEntrada ? 'O registro será enviado ao histórico da portaria e do almoxarifado.' : 'A entrada será liberada. Depois, finalize o registro para enviá-lo ao histórico.' }}</p>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-success px-4" (click)="confirmarEntrada()">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="confirmando" (click)="cancelarEntrada()">Cancelar</button>
+        <button *appPermissao="'PORTARIA_CONTROLE.FINALIZAR'" type="button" class="btn btn-success px-4" [disabled]="confirmando" (click)="confirmarEntrada()">
           <i class="bi bi-unlock me-1"></i>Confirmar
         </button>
       </div>
@@ -292,53 +311,65 @@
         </h5>
       </div>
       <div class="modal-body p-4">
+        @if (editError) { <div class="alert alert-danger" role="alert">{{ editError }}</div> }
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label fw-semibold">Nota Fiscal</label>
             <input type="text" class="form-control" [(ngModel)]="editForm.notaFiscal"
-              [class.is-invalid]="editSubmitted && !editForm.notaFiscal.trim()">
+              [class.is-invalid]="editSubmitted && !editForm.notaFiscal.trim()" [disabled]="editando" maxlength="44">
             <div class="invalid-feedback">Nota fiscal é obrigatória.</div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Empresa</label>
             <input type="text" class="form-control" [(ngModel)]="editForm.empresa"
-              [class.is-invalid]="editSubmitted && !editForm.empresa.trim()">
+              [class.is-invalid]="editSubmitted && !editForm.empresa.trim()" [disabled]="editando" maxlength="150">
             <div class="invalid-feedback">Empresa é obrigatória.</div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Motorista</label>
             <input type="text" class="form-control" [(ngModel)]="editForm.nomeMotorista"
-              [class.is-invalid]="editSubmitted && !editForm.nomeMotorista.trim()">
+              [class.is-invalid]="editSubmitted && !editForm.nomeMotorista.trim()" [disabled]="editando" maxlength="150">
             <div class="invalid-feedback">Motorista é obrigatório.</div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Placa</label>
             <input type="text" class="form-control" [(ngModel)]="editForm.placa"
-              [class.is-invalid]="editSubmitted && !editForm.placa.trim()">
+              [class.is-invalid]="editSubmitted && !editForm.placa.trim()" [disabled]="editando" maxlength="8">
             <div class="invalid-feedback">Placa é obrigatória.</div>
           </div>
           <div class="col-md-4">
             <label class="form-label fw-semibold">Setor Responsável</label>
             <select class="form-select" [(ngModel)]="editForm.setorResponsavel"
-              [class.is-invalid]="editSubmitted && !editForm.setorResponsavel">
+              [class.is-invalid]="editSubmitted && !editForm.setorResponsavel" [disabled]="editando">
               <option value="" disabled>Selecione</option>
               <option value="ALMOXARIFADO">Almoxarifado</option>
               <option value="CARREGAMENTO">Carregamento</option>
-              <option value="PCP">PCP</option>
+              <option value="PCP" disabled>PCP</option>
             </select>
             <div class="invalid-feedback">Setor é obrigatório.</div>
           </div>
+          @if (editForm.setorResponsavel === 'CARREGAMENTO') {
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Operação</label>
+              <select class="form-select" [(ngModel)]="editForm.tipoOperacao" [class.is-invalid]="editSubmitted && !editForm.tipoOperacao" [disabled]="editando">
+                <option [ngValue]="undefined" disabled>Selecione</option>
+                <option value="CARREGAR">Carregar</option>
+                <option value="DESCARREGAR">Descarregar</option>
+              </select>
+              <div class="invalid-feedback">Selecione a operação.</div>
+            </div>
+          }
           <div class="col-12">
             <label class="form-label fw-semibold">Descrição da Carga</label>
             <textarea class="form-control" rows="3" [(ngModel)]="editForm.descricaoCarga"
-              [class.is-invalid]="editSubmitted && !editForm.descricaoCarga.trim()"></textarea>
+              [class.is-invalid]="editSubmitted && !editForm.descricaoCarga.trim()" [disabled]="editando" maxlength="1000"></textarea>
             <div class="invalid-feedback">Descrição da carga é obrigatória.</div>
           </div>
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger px-4" (click)="salvarEdicao()">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="editando" (click)="cancelarEdicao()">Cancelar</button>
+        <button *appPermissao="'PORTARIA_CONTROLE.ALTERAR'" type="button" class="btn btn-danger px-4" [disabled]="editando" (click)="salvarEdicao()">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>

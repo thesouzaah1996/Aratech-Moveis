@@ -45,3 +45,30 @@ export interface FuncionarioForm {
   tipoConta: string;
   pix?: string;
 }
+
+export interface ArquivosFuncionario {
+  rg: File | null;
+  ctps: File | null;
+  aso: File | null;
+  compResidencia: File | null;
+  tituloEleitor: File | null;
+  reservista: File | null;
+  diplomaEscolar: File | null;
+  certidaoCasamento: File | null;
+  certidaoNascimento: File | null;
+}
+
+export interface CadastroFuncionarioResponse {
+  status: number;
+  mensagem: string;
+  funcionarioId: number;
+  nomeCompleto: string;
+  ativo: boolean;
+}
+
+export interface FuncionarioResumoApi {
+  id: number; nomeCompleto: string; email: string; cargo: string; setor: string; telefoneFixo?: string; ativo: boolean;
+}
+export interface FuncionariosPagina {
+  status: number; funcionarios: FuncionarioResumoApi[]; pagina: number; tamanho: number; total: number;
+}

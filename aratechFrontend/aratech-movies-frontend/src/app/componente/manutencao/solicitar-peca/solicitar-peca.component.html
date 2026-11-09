@@ -10,6 +10,7 @@
           <p class="text-muted mb-0 small">Preencha os dados abaixo para requisitar uma peça ou componente</p>
         </div>
 
+        @if (validacaoError) { <div class="alert alert-danger" role="alert">{{ validacaoError }}</div> }
         <div class="card shadow-sm">
           <div class="card-body p-4">
 
@@ -17,26 +18,26 @@
             <div class="row g-3 mb-4">
               <div class="col-12">
                 <label class="form-label fw-semibold">Nome da Peça / Componente <span class="text-danger">*</span></label>
-                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.nomePeca"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg" [(ngModel)]="form.nomePeca" maxlength="150"
                   placeholder="Ex: Rolamento 6205, Correia dentada B54, Válvula de pressão..."
                   [class.is-invalid]="submitted && !form.nomePeca.trim()">
                 <div class="invalid-feedback">Nome da peça é obrigatório.</div>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Código / Referência</label>
-                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.codigo"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg" [(ngModel)]="form.codigo" maxlength="100"
                   placeholder="Ex: SKF-6205 (opcional)">
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Quantidade <span class="text-danger">*</span></label>
-                <input type="number" class="form-control form-control-lg" [(ngModel)]="form.quantidade"
-                  placeholder="0" min="1"
+                <input [disabled]="salvando || cadastroPendente !== null" type="number" class="form-control form-control-lg" [(ngModel)]="form.quantidade"
+                  placeholder="0" min="0.001" step="0.001" max="999999999999.999"
                   [class.is-invalid]="submitted && (!form.quantidade || form.quantidade <= 0)">
                 <div class="invalid-feedback">Informe uma quantidade válida.</div>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-semibold">Unidade <span class="text-danger">*</span></label>
-                <select class="form-select form-select-lg" [(ngModel)]="form.unidade"
+                <select [disabled]="salvando || cadastroPendente !== null" class="form-select form-select-lg" [(ngModel)]="form.unidade"
                   [class.is-invalid]="submitted && !form.unidade">
                   <option value="">Selecione...</option>
                   <option value="un">un (unidade)</option>
@@ -55,14 +56,14 @@
             <div class="row g-3 mb-4">
               <div class="col-12">
                 <label class="form-label fw-semibold">Equipamento Destino <span class="text-danger">*</span></label>
-                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.equipamento"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg" [(ngModel)]="form.equipamento" maxlength="150"
                   placeholder="Ex: Prensa Hidráulica 01, Empilhadeira 03..."
                   [class.is-invalid]="submitted && !form.equipamento.trim()">
                 <div class="invalid-feedback">Equipamento é obrigatório.</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Finalidade <span class="text-danger">*</span></label>
-                <select class="form-select form-select-lg" [(ngModel)]="form.finalidade"
+                <select [disabled]="salvando || cadastroPendente !== null" class="form-select form-select-lg" [(ngModel)]="form.finalidade"
                   [class.is-invalid]="submitted && !form.finalidade">
                   <option value="">Selecione a finalidade...</option>
                   <option value="CORRETIVA">Corretiva — reparo de falha</option>
@@ -74,7 +75,7 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Prioridade <span class="text-danger">*</span></label>
-                <select class="form-select form-select-lg" [(ngModel)]="form.prioridade"
+                <select [disabled]="salvando || cadastroPendente !== null" class="form-select form-select-lg" [(ngModel)]="form.prioridade"
                   [class.is-invalid]="submitted && !form.prioridade">
                   <option value="">Selecione a prioridade...</option>
                   <option value="BAIXA">Baixa — pode aguardar</option>
@@ -90,22 +91,22 @@
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Nome do Solicitante <span class="text-danger">*</span></label>
-                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.solicitante"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg" [(ngModel)]="form.solicitante" maxlength="150"
                   placeholder="Seu nome completo"
                   [class.is-invalid]="submitted && !form.solicitante.trim()">
                 <div class="invalid-feedback">Nome do solicitante é obrigatório.</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Setor / Departamento <span class="text-danger">*</span></label>
-                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.setor"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg" [(ngModel)]="form.setor" maxlength="100"
                   placeholder="Ex: Produção, Logística, Utilidades..."
                   [class.is-invalid]="submitted && !form.setor.trim()">
                 <div class="invalid-feedback">Setor é obrigatório.</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Telefone para Contato</label>
-                <input type="text" class="form-control form-control-lg"
-                  [value]="form.telefone"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg"
+                  [value]="form.telefone" maxlength="15" inputmode="tel"
                   (input)="applyPhoneMask($event)"
                   placeholder="(XX) XXXXX-XXXX">
               </div>
@@ -116,7 +117,7 @@
             <div class="row g-3">
               <div class="col-12">
                 <label class="form-label fw-semibold">Justificativa / Observações <span class="text-danger">*</span></label>
-                <textarea class="form-control" [(ngModel)]="form.observacoes" rows="5"
+                <textarea [disabled]="salvando || cadastroPendente !== null" class="form-control" [(ngModel)]="form.observacoes" maxlength="3000" rows="5"
                   placeholder="Descreva a necessidade da peça, onde será aplicada, sintomas do problema, informações adicionais para o almoxarifado, etc."
                   [class.is-invalid]="submitted && !form.observacoes.trim()"></textarea>
                 <div class="invalid-feedback">Justificativa é obrigatória.</div>
@@ -126,11 +127,12 @@
           </div>
           <div class="card-footer border-0 bg-light px-4 py-3">
             <div class="d-flex justify-content-end gap-2">
-              <button type="button" class="btn btn-cancelar" (click)="resetForm()">
+              <button type="button" class="btn btn-cancelar" (click)="resetForm()" [disabled]="salvando || cadastroPendente !== null">
                 <i class="bi bi-arrow-counterclockwise me-1"></i>Limpar
               </button>
-              <button type="button" class="btn btn-danger btn-lg px-4" (click)="submit()">
-                <i class="bi bi-send me-2"></i>Enviar Solicitação
+              <button *appPermissao="'MANUTENCAO_PECAS.CADASTRAR'" type="button" class="btn btn-danger btn-lg px-4" (click)="submit()" [disabled]="salvando || solicitacaoCriada !== null" [attr.aria-busy]="salvando">
+                @if (salvando) { <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Enviando... }
+                @else { <i class="bi bi-send me-2"></i>Enviar Solicitação }
               </button>
             </div>
           </div>
@@ -154,7 +156,7 @@
         @if (resultadoSucesso) {
           <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
           <h5 class="mt-3 fw-bold">Requisição registrada com sucesso!</h5>
-          <p class="text-muted mb-3">Sua solicitação foi recebida pelo almoxarifado e será processada em breve.</p>
+          <p class="text-muted mb-3">Sua solicitação foi encaminhada diretamente para Compras. Acompanhe a decisão em Manutenção → Pedidos.</p>
           <div class="delete-warning">
             <p class="mb-1 small text-muted">Número da requisição</p>
             <p class="fw-bold fs-4 mb-0 text-danger">#{{ solicitacaoCriada?.id }}</p>

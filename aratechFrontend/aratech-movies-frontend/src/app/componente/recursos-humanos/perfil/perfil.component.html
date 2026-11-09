@@ -1,147 +1,84 @@
 <app-navbar />
-
 <main class="app-main">
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-4">
-
-    @if (successMessage) {
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
-        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+    @if (successMessage) { <div class="alert alert-success" role="status">{{ successMessage }}<button type="button" class="btn-close float-end" aria-label="Fechar" (click)="successMessage = ''"></button></div> }
+    @if (errorMessage) { <div class="alert alert-danger" role="alert">{{ errorMessage }}<button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="carregar()">Tentar novamente</button></div> }
+    <div class="access-toolbar d-flex justify-content-between align-items-center gap-3 mb-4">
+      <div class="input-group access-search">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="search" class="form-control" aria-label="Buscar perfis" maxlength="100" placeholder="Buscar por nome..." [(ngModel)]="searchQuery" (ngModelChange)="onSearch()">
       </div>
-    }
-
-    @if (errorMessage) {
-      <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-circle-fill me-2"></i>{{ errorMessage }}
-        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
-      </div>
-    }
-
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
-      <div class="input-group" style="max-width: 300px;">
-        <span class="input-group-text bg-white border-end-0">
-          <i class="bi bi-search text-muted"></i>
-        </span>
-        <input type="text" class="form-control border-start-0 ps-0"
-          placeholder="Buscar por nome…"
-          [(ngModel)]="searchQuery"
-          (ngModelChange)="page = 1">
-      </div>
-
-      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
-        <i class="bi bi-plus-circle me-2"></i>Novo Perfil
-      </button>
+      <button type="button" class="btn btn-danger flex-shrink-0" (click)="openAdd()"><i class="bi bi-plus-circle me-2"></i>Novo Perfil</button>
     </div>
+    <div class="card shadow-sm"><div class="card-body">
+      @if (loading) {
+        <div class="text-center py-5 text-muted" role="status"><span class="spinner-border spinner-border-sm me-2"></span>Carregando perfis...</div>
+      } @else {
+        <div class="table-responsive"><table class="table table-hover align-middle">
+          <thead><tr><th>Perfil</th><th class="text-end">Ações</th></tr></thead>
+          <tbody>
+            @for (p of perfis; track p.id) {
+              <tr>
+                <td class="fw-semibold">{{ p.nome }}</td>
+                <td class="text-end text-nowrap">
+                  <button type="button" class="btn-action btn-action-edit" title="Editar perfil" aria-label="Editar perfil" [disabled]="salvando" (click)="openEdit(p)"><i class="bi bi-pencil"></i></button>
+                  <button type="button" class="btn-action btn-action-edit ms-1" title="Permissões do perfil" aria-label="Permissões do perfil" [disabled]="salvandoPermissoes" (click)="abrirPermissoes(p)"><i class="bi bi-shield-lock"></i></button>
 
-    <div class="card shadow-sm">
-      <div class="card-body">
-        @if (loading) {
-          <div class="text-center py-5 text-muted">
-            <div class="spinner-border spinner-border-sm me-2"></div>
-            Carregando perfis...
-          </div>
-        } @else {
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>Status</th>
-                  <th class="text-end" style="width: 1%">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                @if (paged.length === 0) {
-                  <tr>
-                    <td colspan="3">
-                      <div class="empty-state">
-                        <i class="bi bi-shield-lock"></i>
-                        <p>{{ searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhum perfil cadastrado.' }}</p>
-                      </div>
-                    </td>
-                  </tr>
-                } @else {
-                  @for (perfil of paged; track perfil.id) {
-                    <tr>
-                      <td class="fw-semibold">{{ perfil.nome }}</td>
-                      <td>
-                        @if (perfil.ativo) {
-                          <span class="badge bg-success-subtle text-success border border-success-subtle">Ativo</span>
-                        } @else {
-                          <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inativo</span>
-                        }
-                      </td>
-                      <td>
-                        <div class="d-flex justify-content-end align-items-center gap-1">
-                          <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(perfil)">
-                            <i class="bi bi-pencil"></i>
-                          </button>
-                          <button class="btn-action" [class.btn-action-delete]="perfil.ativo"
-                            [title]="perfil.ativo ? 'Desativar' : 'Ativar'"
-                            (click)="alternarStatus(perfil)">
-                            <i class="bi" [class.bi-toggle-on]="perfil.ativo" [class.bi-toggle-off]="!perfil.ativo"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  }
-                }
-              </tbody>
-            </table>
-          </div>
-
-          @if (totalPages > 1) {
-            <div class="pagination-container">
-              <span class="pagination-info">
-                Mostrando {{ (page - 1) * pageSize + 1 }}–{{ page * pageSize > filtered.length ? filtered.length : page * pageSize }}
-                de {{ filtered.length }}
-              </span>
-              <nav>
-                <ul class="pagination">
-                  <li class="page-item" [class.disabled]="page === 1">
-                    <a class="page-link" (click)="setPage(page - 1)">‹</a>
-                  </li>
-                  @for (p of pages; track p) {
-                    <li class="page-item" [class.active]="p === page">
-                      <a class="page-link" (click)="setPage(p)">{{ p }}</a>
-                    </li>
-                  }
-                  <li class="page-item" [class.disabled]="page === totalPages">
-                    <a class="page-link" (click)="setPage(page + 1)">›</a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-          }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="2"><div class="empty-state"><i class="bi bi-shield-lock"></i><p>{{ errorMessage ? 'Lista indisponível.' : searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhum perfil cadastrado.' }}</p></div></td></tr>
+            }
+          </tbody>
+        </table></div>
+      <div class="pagination-container">
+        <span class="pagination-info">Mostrando {{ inicio }}–{{ fim }} de {{ total }}</span>
+        @if (totalPages > 1) {
+          <nav aria-label="Páginas de perfis"><ul class="pagination mb-0">
+            <li class="page-item" [class.disabled]="page === 1"><button type="button" class="page-link" aria-label="Página anterior" [disabled]="page === 1 || loading" (click)="setPage(page - 1)">&lsaquo;</button></li>
+            @for (p of pages; track p) {
+              <li class="page-item" [class.active]="p === page"><button type="button" class="page-link" [disabled]="loading" [attr.aria-current]="p === page ? 'page' : null" (click)="setPage(p)">{{ p }}</button></li>
+            }
+            <li class="page-item" [class.disabled]="page >= totalPages"><button type="button" class="page-link" aria-label="Próxima página" [disabled]="page >= totalPages || loading" (click)="setPage(page + 1)">&rsaquo;</button></li>
+          </ul></nav>
         }
       </div>
-    </div>
-
+      }
+    </div></div>
   </div>
 </main>
-
-<div class="modal fade" #perfilModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">{{ isEditing ? 'Editar Perfil' : 'Novo Perfil' }}</h5>
-      </div>
-      <div class="modal-body p-4">
-        <label class="form-label fw-semibold">Nome</label>
-        <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome do perfil" maxlength="100">
-      </div>
-      <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="save()" [disabled]="salvando || !form.nome?.trim()">
-          @if (salvando) {
-            <span class="spinner-border spinner-border-sm me-1"></span>
-          } @else {
-            <i class="bi bi-check-circle me-1"></i>
+<div class="modal fade" #permissoesModal tabindex="-1" aria-labelledby="permissoes-titulo" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header bg-danger text-white"><h5 id="permissoes-titulo" class="modal-title fw-bold"><i class="bi bi-shield-lock me-2"></i>Permissões — {{ perfilPermissoes?.nome }}</h5></div>
+    <div class="modal-body p-4">
+      @if (erroPermissoes) { <div class="alert alert-danger" role="alert">{{ erroPermissoes }}</div> }
+      @if (carregandoPermissoes) { <p role="status">Carregando permissões...</p> } @else {
+        <p class="text-muted">Marque as operações permitidas para este perfil. Cadastrar, alterar e finalizar também habilitam a consulta da tela. Permissões do setor inteiro liberam todas as suas telas; para restringir, marque somente as telas específicas.</p>
+        <label for="setor-permissao" class="form-label">Setor</label><select id="setor-permissao" class="form-select mb-3" [(ngModel)]="filtroSetorPermissao">@for(setor of setoresPermissao;track setor){<option [value]="setor">{{nomesModulos[setor]||setor}}</option>}</select>
+        <div class="table-responsive"><table class="table align-middle"><thead><tr><th>Tela</th><th>Consultar</th><th>Cadastrar</th><th>Alterar</th><th>Finalizar</th></tr></thead><tbody>
+          @for (modulo of modulosPermissao; track modulo) {
+            <tr><td>{{ nomeModulo(modulo) }}</td>@for (acao of acoesPermissao; track acao) { <td><input type="checkbox" class="form-check-input" [attr.aria-label]="modulo + ': ' + acao" [checked]="permissoesSelecionadas.has(modulo + '.' + acao)" [disabled]="salvandoPermissoes" (change)="alternarPermissao(modulo + '.' + acao, $any($event.target).checked)"></td> }</tr>
           }
-          Salvar
-        </button>
-      </div>
+        </tbody></table></div>
+        <label class="form-check"><input type="checkbox" class="form-check-input" [checked]="permissoesSelecionadas.has('ACESSOS.GERENCIAR')" [disabled]="salvandoPermissoes" (change)="alternarPermissao('ACESSOS.GERENCIAR', $any($event.target).checked)"><span class="form-check-label">Gerenciar perfis, atribuições e credenciais de acesso</span></label>
+      }
     </div>
-  </div>
+    <div class="modal-footer border-0 bg-light"><button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="salvandoPermissoes">Cancelar</button><button type="button" class="btn btn-danger" [disabled]="!permissoesCarregadas || carregandoPermissoes || salvandoPermissoes" (click)="salvarPermissoes()">{{ salvandoPermissoes ? 'Salvando...' : 'Salvar' }}</button></div>
+  </div></div>
+</div>
+<div class="modal fade" #perfilModal tabindex="-1" aria-labelledby="perfil-titulo" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header bg-danger text-white"><h5 id="perfil-titulo" class="modal-title fw-bold mb-0">{{ isEditing ? 'Editar Perfil' : 'Novo Perfil' }}</h5></div>
+    <div class="modal-body p-4">
+      @if (modalError) { <div class="alert alert-danger" role="alert">{{ modalError }}</div> }
+      <label class="form-label fw-semibold" for="perfil-nome">Nome do perfil</label>
+      <input id="perfil-nome" class="form-control mb-4" maxlength="100" placeholder="Nome do perfil" [(ngModel)]="form.nome" [disabled]="salvando">
+      <small class="text-muted">De 3 a 100 caracteres. Informe apenas o nome do perfil.</small>
+    </div>
+    <div class="modal-footer border-0 bg-light">
+      <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="salvando">Cancelar</button>
+      <button type="button" class="btn btn-danger" (click)="save()" [disabled]="salvando">@if (salvando) { <span class="spinner-border spinner-border-sm me-2"></span> } @else { <i class="bi bi-check-circle me-2"></i> }{{ salvando ? 'Salvando...' : 'Salvar' }}</button>
+    </div>
+  </div></div>
 </div>

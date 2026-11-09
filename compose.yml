@@ -1,0 +1,3 @@
+name: moveis
+include:
+  - path: ./moveis/docker-compose.yml

@@ -1,0 +1,15 @@
+server:
+  port: 8080
+  forward-headers-strategy: framework
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST_PROD:localhost}:${DB_PORT_PROD:5434}/${POSTGRES_DB_PROD}
+    username: ${APP_USER_PROD}
+    password: ${APP_PASSWORD_PROD}
+
+minio:
+  url: ${MINIO_URL_PROD}
+  access-key: ${MINIO_ACCESS_KEY_PROD}
+  secret-key: ${MINIO_SECRET_KEY_PROD}
+  bucket-name: ${MINIO_BUCKET_PROD:aratechmoveis}

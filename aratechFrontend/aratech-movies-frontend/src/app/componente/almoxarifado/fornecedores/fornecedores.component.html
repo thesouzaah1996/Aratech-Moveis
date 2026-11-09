@@ -18,24 +18,24 @@
       </div>
     }
 
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4 flex-wrap">
       <div class="input-group" style="max-width: 340px;">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
         </span>
         <input type="text" class="form-control border-start-0 ps-0"
           placeholder="Buscar por nome ou ID…"
-          [(ngModel)]="searchTerm"
+          maxlength="150" [(ngModel)]="searchTerm"
           (ngModelChange)="onSearch()">
       </div>
 
-      <div class="filtro-status flex-shrink-0">
-        <button type="button" [class.ativo]="filtroStatus === 'todos'" (click)="setFiltroStatus('todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'ativos'" (click)="setFiltroStatus('ativos')">Ativos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'inativos'" (click)="setFiltroStatus('inativos')">Inativos</button>
+      <div class="filtro-status" role="group" aria-label="Filtrar por status">
+        <button type="button" [class.ativo]="filtroStatus === 'todos'" [attr.aria-pressed]="filtroStatus === 'todos'" (click)="setFiltroStatus('todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ativos'" [attr.aria-pressed]="filtroStatus === 'ativos'" (click)="setFiltroStatus('ativos')">Ativos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'inativos'" [attr.aria-pressed]="filtroStatus === 'inativos'" (click)="setFiltroStatus('inativos')">Inativos</button>
       </div>
 
-      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+      <button *appPermissao="'ALMOXARIFADO_FORNECEDORES.CADASTRAR'" class="btn btn-danger flex-shrink-0" (click)="openAdd()">
         <i class="bi bi-plus-circle me-2"></i>Novo Fornecedor
       </button>
     </div>
@@ -62,7 +62,7 @@
                 </tr>
               </thead>
               <tbody>
-                @if (paged.length === 0) {
+                @if (fornecedores.length === 0) {
                   <tr>
                     <td colspan="7">
                       <div class="empty-state">
@@ -72,17 +72,17 @@
                     </td>
                   </tr>
                 } @else {
-                  @for (f of paged; track f.id) {
+                  @for (f of fornecedores; track f.id) {
                     <tr>
                       <td><span class="badge-id">#{{ f.id }}</span></td>
                       <td class="fw-semibold">{{ f.nome }}</td>
                       <td>{{ f.email }}</td>
                       <td>{{ f.telefone }}</td>
-                      <td>{{ f.representante?.nomeRepresentante ?? '—' }}</td>
+                      <td>{{ f.representante.nomeRepresentante }}</td>
                       <td>
                         <div class="form-check form-switch mb-0">
-                          <input class="form-check-input" type="checkbox" role="switch"
-                            [checked]="f.ativo"
+                          <input *appPermissao="'ALMOXARIFADO_FORNECEDORES.ALTERAR'" class="form-check-input" type="checkbox" role="switch"
+                            [checked]="f.ativo" [disabled]="changingStatus"
                             [title]="f.ativo ? 'Clique para desativar' : 'Clique para ativar'"
                             (click)="onSwitchClick($event, f)">
                         </div>
@@ -91,7 +91,7 @@
                         <button class="btn-action btn-action-edit" title="Visualizar" (click)="openView(f)">
                           <i class="bi bi-eye"></i>
                         </button>
-                        <button class="btn-action btn-action-edit ms-1" title="Editar" (click)="openEditModal(f)">
+                        <button *appPermissao="'ALMOXARIFADO_FORNECEDORES.ALTERAR'" class="btn-action btn-action-edit ms-1" title="Editar" (click)="openEditModal(f)">
                           <i class="bi bi-pencil"></i>
                         </button>
                       </td>
@@ -105,7 +105,7 @@
           @if (totalPages > 1) {
             <div class="pagination-container">
               <span class="pagination-info">
-                Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ filtrados.length }} fornecedor(es)
+                Mostrando {{ paginationStart }}–{{ paginationEnd }} de {{ total }} fornecedor(es)
               </span>
               <nav>
                 <ul class="pagination">
@@ -158,11 +158,12 @@
         <h5 class="modal-title fw-bold">Novo Fornecedor</h5>
       </div>
       <div class="modal-body p-4">
+        @if (modalError) { <div class="alert alert-danger" role="alert">{{ modalError }}</div> }
         <h6 class="text-danger fw-bold mb-3">Dados do Fornecedor</h6>
         <div class="row g-3 mb-3">
           <div class="col-12">
             <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome da empresa"
+            <input type="text" class="form-control" maxlength="150" [(ngModel)]="form.nome" placeholder="Nome da empresa"
               [class.is-invalid]="submitted && !form.nome.trim()">
             <div class="invalid-feedback">Nome é obrigatório.</div>
           </div>
@@ -177,7 +178,7 @@
             </div>
           </div>
           <div class="col-md-5">
-            <label class="form-label fw-semibold">Telefone Fixo <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">Telefone (10 ou 11 dígitos) <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [value]="form.telefone"
               (input)="applyPhoneMask($event, 10)" placeholder="(XX) XXXX-XXXX"
               [class.is-invalid]="submitted && !form.telefone.trim()">
@@ -215,8 +216,8 @@
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="save()">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="saving || changingStatus">Cancelar</button>
+        <button *appPermissao="'ALMOXARIFADO_FORNECEDORES.CADASTRAR'" type="button" class="btn btn-danger" (click)="save()" [disabled]="saving">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>
@@ -264,15 +265,15 @@
           <div class="row g-3">
             <div class="col-12">
               <p class="text-muted small mb-1">Nome</p>
-              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.representante?.nomeRepresentante || '—' }}</p>
+              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.representante.nomeRepresentante || '—' }}</p>
             </div>
             <div class="col-md-5">
               <p class="text-muted small mb-1">Telefone</p>
-              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.representante?.telefoneRepresentante || '—' }}</p>
+              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.representante.telefoneRepresentante || '—' }}</p>
             </div>
             <div class="col-md-7">
               <p class="text-muted small mb-1">E-mail</p>
-              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.representante?.emailRepresentante || '—' }}</p>
+              <p class="fw-semibold mb-0">{{ fornecedorEmVisualizacao.representante.emailRepresentante || '—' }}</p>
             </div>
           </div>
         </div>
@@ -292,11 +293,12 @@
         <h5 class="modal-title fw-bold">Editar Fornecedor</h5>
       </div>
       <div class="modal-body p-4">
+        @if (editError) { <div class="alert alert-danger" role="alert">{{ editError }}</div> }
         <h6 class="text-danger fw-bold mb-3">Dados do Fornecedor</h6>
         <div class="row g-3 mb-3">
           <div class="col-12">
             <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="formEdit.nome" placeholder="Nome da empresa"
+            <input type="text" class="form-control" maxlength="150" [(ngModel)]="formEdit.nome" placeholder="Nome da empresa"
               [class.is-invalid]="submittedEdit && !formEdit.nome.trim()">
             <div class="invalid-feedback">Nome é obrigatório.</div>
           </div>
@@ -311,7 +313,7 @@
             </div>
           </div>
           <div class="col-md-5">
-            <label class="form-label fw-semibold">Telefone Fixo <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">Telefone (10 ou 11 dígitos) <span class="text-danger">*</span></label>
             <input type="text" class="form-control" [value]="formEdit.telefone"
               (input)="applyPhoneMask($event, 10, true)" placeholder="(XX) XXXX-XXXX"
               [class.is-invalid]="submittedEdit && !formEdit.telefone.trim()">
@@ -349,8 +351,8 @@
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="saveEdit()">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="saving || changingStatus">Cancelar</button>
+        <button *appPermissao="'ALMOXARIFADO_FORNECEDORES.ALTERAR'" type="button" class="btn btn-danger" (click)="saveEdit()" [disabled]="saving">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>
@@ -367,6 +369,7 @@
         </h5>
       </div>
       <div class="modal-body text-center p-4">
+        @if (statusError) { <div class="alert alert-danger" role="alert">{{ statusError }}</div> }
         <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
         <h5 class="mt-3">Tem certeza que deseja desativar?</h5>
         @if (fornecedorParaDesativar) {
@@ -381,8 +384,8 @@
         }
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirmDesativar()">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="saving || changingStatus">Cancelar</button>
+        <button *appPermissao="'ALMOXARIFADO_FORNECEDORES.ALTERAR'" type="button" class="btn btn-danger" (click)="confirmDesativar()" [disabled]="changingStatus">
           <i class="bi bi-slash-circle me-1"></i>Desativar Fornecedor
         </button>
       </div>

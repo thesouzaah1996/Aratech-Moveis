@@ -48,6 +48,16 @@
   cursor: pointer;
 }
 
+.table td.quantidade-minima {
+  transition: background-color 0.2s ease;
+
+  &:not(.quantidade-minima-editando):hover,
+  &:not(.quantidade-minima-editando):focus-within {
+    background-color: #e9ecef;
+    --bs-table-bg-state: #e9ecef;
+  }
+}
+
 .btn-action {
   width: 36px;
   height: 36px;

@@ -1,0 +1,74 @@
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    baseline-version: 0
+    validate-on-migrate: true
+    validate-migration-naming: true
+    clean-disabled: true
+    out-of-order: false
+    encoding: UTF-8
+    default-schema: public
+    schemas: public
+    create-schemas: false
+    ignore-migration-patterns: []
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  datasource:
+    hikari:
+      connection-init-sql: SET TIME ZONE 'America/Sao_Paulo'
+  application:
+    name: moveis
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 21MB
+
+  profiles:
+    active: dev
+    group:
+      hologo: homolog
+
+  config:
+    import:
+      - optional:file:moveis/.env[.properties]
+      - optional:file:.env[.properties]
+
+
+minio:
+  url: 'http://localhost:9000'
+  access-key: minioadmin
+  secret-key: minioadmin123
+  bucket-name: aratechmoveis
+
+server:
+  servlet:
+    session:
+      timeout: 15m
+      tracking-modes: cookie
+      cookie:
+        name: ARATECHSESSION
+        http-only: true
+        secure: true
+        same-site: strict
+        path: /
+  error:
+    include-message: never
+    include-stacktrace: never
+
+springdoc:
+  api-docs:
+    enabled: ${ARATECH_DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${ARATECH_DOCS_ENABLED:false}
+    disable-swagger-default-url: true
+    persist-authorization: false
+  use-fqn: true
+  override-with-generic-response: false
+  packages-to-scan: com.aratech.moveis

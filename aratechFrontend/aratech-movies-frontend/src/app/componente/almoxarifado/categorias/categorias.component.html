@@ -1,160 +1,90 @@
 <app-navbar />
-
 <main class="app-main">
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-4">
-
     @if (successMessage) {
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
-        <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+      <div class="alert alert-success" role="status">{{ successMessage }}
+        <button type="button" class="btn-close float-end" aria-label="Fechar" (click)="successMessage = ''"></button>
       </div>
     }
-
     @if (errorMessage) {
-      <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-circle-fill me-2"></i>{{ errorMessage }}
-        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      <div class="alert alert-danger" role="alert">{{ errorMessage }}
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="carregar()">Tentar novamente</button>
       </div>
     }
-
     <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
       <div class="input-group" style="max-width: 300px;">
-        <span class="input-group-text bg-white border-end-0">
-          <i class="bi bi-search text-muted"></i>
-        </span>
-        <input type="text" class="form-control border-start-0 ps-0"
-          placeholder="Buscar por nome…"
-          [(ngModel)]="searchQuery"
-          (ngModelChange)="page = 1">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="search" class="form-control" placeholder="Buscar por nome..." aria-label="Buscar categorias"
+          maxlength="100" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()">
       </div>
-
-      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
-        <i class="bi bi-plus-circle me-2"></i>Nova Categoria
-      </button>
+      <button *appPermissao="'ALMOXARIFADO_CATEGORIAS.CADASTRAR'" type="button" class="btn btn-danger" (click)="openAdd()"><i class="bi bi-plus-circle me-2"></i>Nova Categoria</button>
     </div>
-
-    <div class="card shadow-sm">
-      <div class="card-body">
-        @if (loading) {
-          <div class="text-center py-5 text-muted">
-            <div class="spinner-border spinner-border-sm me-2"></div>
-            Carregando categorias...
-          </div>
-        } @else {
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th class="text-end" style="width: 1%">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                @if (paged.length === 0) {
-                  <tr>
-                    <td colspan="2">
-                      <div class="empty-state">
-                        <i class="bi bi-grid"></i>
-                        <p>{{ searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhuma categoria cadastrada.' }}</p>
-                      </div>
-                    </td>
-                  </tr>
-                } @else {
-                  @for (cat of paged; track cat.id) {
-                    <tr>
-                      <td class="fw-semibold">{{ cat.nome }}</td>
-                      <td>
-                        <div class="d-flex justify-content-end align-items-center gap-1">
-                          <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(cat)">
-                            <i class="bi bi-pencil"></i>
-                          </button>
-                          <button class="btn-action btn-action-delete" title="Excluir" (click)="openDelete(cat)">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  }
-                }
-              </tbody>
-            </table>
-          </div>
-
+    <div class="card shadow-sm"><div class="card-body">
+      @if (loading) {
+        <div class="text-center py-5 text-muted" role="status"><span class="spinner-border spinner-border-sm me-2"></span>Carregando categorias...</div>
+      } @else {
+        <div class="table-responsive"><table class="table table-hover align-middle">
+          <thead><tr><th>Nome</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
+          <tbody>
+            @for (cat of categorias; track cat.id) {
+              <tr>
+                <td class="fw-semibold">{{ cat.nome }}</td>
+                <td><span class="badge" [class.bg-success]="cat.ativo" [class.bg-secondary]="!cat.ativo">{{ cat.ativo ? 'Ativa' : 'Inativa' }}</span></td>
+                <td class="text-end">
+                  <button *appPermissao="'ALMOXARIFADO_CATEGORIAS.ALTERAR'" type="button" class="btn-action btn-action-edit" title="Editar" (click)="openEdit(cat)"><i class="bi bi-pencil"></i></button>
+                  <button *appPermissao="'ALMOXARIFADO_CATEGORIAS.ALTERAR'" type="button" class="btn btn-sm btn-outline-secondary ms-2" (click)="openStatus(cat)">{{ cat.ativo ? 'Desativar' : 'Ativar' }}</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="text-center py-4">{{ errorMessage ? 'Lista indisponível.' : searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhuma categoria cadastrada.' }}</td></tr>
+            }
+          </tbody>
+        </table></div>
+        <div class="pagination-container">
+          <span class="pagination-info">Mostrando {{ inicio }}–{{ fim }} de {{ total }}</span>
           @if (totalPages > 1) {
-            <div class="pagination-container">
-              <span class="pagination-info">
-                Mostrando {{ (page - 1) * pageSize + 1 }}–{{ page * pageSize > filtered.length ? filtered.length : page * pageSize }}
-                de {{ filtered.length }}
-              </span>
-              <nav>
-                <ul class="pagination">
-                  <li class="page-item" [class.disabled]="page === 1">
-                    <a class="page-link" (click)="setPage(page - 1)">‹</a>
-                  </li>
-                  @for (p of pages; track p) {
-                    <li class="page-item" [class.active]="p === page">
-                      <a class="page-link" (click)="setPage(p)">{{ p }}</a>
-                    </li>
-                  }
-                  <li class="page-item" [class.disabled]="page === totalPages">
-                    <a class="page-link" (click)="setPage(page + 1)">›</a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+            <nav aria-label="Páginas de categorias"><ul class="pagination mb-0">
+              <li class="page-item" [class.disabled]="page === 1"><button type="button" class="page-link" [disabled]="page === 1" aria-label="Página anterior" (click)="setPage(page - 1)">&lsaquo;</button></li>
+              @for (p of pages; track p) {
+                <li class="page-item" [class.active]="p === page"><button type="button" class="page-link" [attr.aria-current]="p === page ? 'page' : null" (click)="setPage(p)">{{ p }}</button></li>
+              }
+              <li class="page-item" [class.disabled]="page === totalPages"><button type="button" class="page-link" [disabled]="page === totalPages" aria-label="Próxima página" (click)="setPage(page + 1)">&rsaquo;</button></li>
+            </ul></nav>
           }
-        }
-      </div>
-    </div>
-
+        </div>
+      }
+    </div></div>
   </div>
 </main>
-
 <div class="modal fade" #categoryModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">{{ isEditing ? 'Editar Categoria' : 'Nova Categoria' }}</h5>
-      </div>
-      <div class="modal-body p-4">
-        <label class="form-label fw-semibold">Nome</label>
-        <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome da categoria">
-      </div>
-      <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="save()">
-          <i class="bi bi-check-circle me-1"></i>Salvar
-        </button>
-      </div>
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header bg-danger text-white"><h5 class="modal-title">{{ isEditing ? 'Editar Categoria' : 'Nova Categoria' }}</h5></div>
+    <div class="modal-body p-4">
+      @if (modalError) { <div class="alert alert-danger" role="alert">{{ modalError }}</div> }
+      <label for="categoria-nome" class="form-label fw-semibold">Nome</label>
+      <input id="categoria-nome" type="text" class="form-control" [(ngModel)]="form.nome" maxlength="100" [disabled]="saving" placeholder="Nome da categoria">
+      <small class="text-muted">De 2 a 100 caracteres.</small>
     </div>
-  </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="saving">Cancelar</button>
+      <button *appPermissao="isEditing ? 'ALMOXARIFADO_CATEGORIAS.ALTERAR' : 'ALMOXARIFADO_CATEGORIAS.CADASTRAR'" type="button" class="btn btn-danger" (click)="save()" [disabled]="saving">{{ saving ? 'Salvando...' : 'Salvar' }}</button>
+    </div>
+  </div></div>
 </div>
-
-<div class="modal fade" #deleteModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title fw-bold">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Exclusão
-        </h5>
-      </div>
-      <div class="modal-body text-center p-4">
-        <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
-        <h5 class="mt-3">Deseja realmente excluir esta categoria?</h5>
-        <p class="text-muted">Esta ação não poderá ser desfeita.</p>
-        @if (categoriaParaExcluir) {
-          <div class="delete-warning">
-            <p class="mb-0"><strong>Categoria:</strong> {{ categoriaParaExcluir.nome }}</p>
-          </div>
-        }
-      </div>
-      <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
-          <i class="bi bi-trash me-1"></i>Excluir
-        </button>
-      </div>
+<div class="modal fade" #statusModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header bg-danger text-white"><h5 class="modal-title">Confirmar alteração de status</h5></div>
+    <div class="modal-body p-4">
+      @if (statusError) { <div class="alert alert-danger" role="alert">{{ statusError }}</div> }
+      @if (categoriaParaStatus) {
+        <p>Deseja {{ categoriaParaStatus.ativo ? 'desativar' : 'ativar' }} a categoria <strong>{{ categoriaParaStatus.nome }}</strong>?</p>
+        <p class="text-muted mb-0">A categoria será mantida no sistema. Você pode alterar o status novamente depois.</p>
+      }
     </div>
-  </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="changingStatus">Cancelar</button>
+      <button *appPermissao="'ALMOXARIFADO_CATEGORIAS.ALTERAR'" type="button" class="btn btn-danger" (click)="confirmStatus()" [disabled]="changingStatus">{{ changingStatus ? 'Salvando...' : 'Confirmar' }}</button>
+    </div>
+  </div></div>
 </div>

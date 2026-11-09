@@ -1,3 +1,5 @@
+@use './app/componente/embalagem/embalagem';
+@use './app/componente/fabricacao/fabricacao';
 :root {
   --brand-900: #7d0000;
   --brand-700: #b60000;
@@ -94,34 +96,82 @@ app-root {
 }
 
 .filtro-status {
-  display: inline-flex;
+  --filtro-opcoes: 4;
+  --filtro-indice: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--filtro-opcoes), minmax(0, 1fr));
+  width: 100%;
+  max-width: calc(var(--filtro-opcoes) * 135px);
   background: #f1f3f5;
   border-radius: 40px;
   padding: 4px;
-  gap: 2px;
+  gap: 0;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / var(--filtro-opcoes));
+    border-radius: 36px;
+    background: var(--brand-700);
+    pointer-events: none;
+    transform: translateX(calc(var(--filtro-indice) * 100%));
+    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  // Follow each page's existing active button without changing its filters.
+  @for $opcao from 1 through 8 {
+    &:has(> button:nth-of-type(#{$opcao}):last-of-type) {
+      --filtro-opcoes: #{$opcao};
+    }
+    &:has(> button:nth-of-type(#{$opcao}).ativo) {
+      --filtro-indice: #{$opcao - 1};
+    }
+  }
 
   button {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
     border: none;
-    background: transparent;
     border-radius: 36px;
-    padding: 0.35rem 1rem;
+    padding: 0.45rem 0.5rem;
     font-size: 0.875rem;
     font-weight: 500;
     color: #6c757d;
     cursor: pointer;
-    transition: background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
     white-space: nowrap;
+    transition: color 180ms ease;
 
-    &.ativo {
-      background: var(--brand-700);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(182, 0, 0, 0.28);
+    &,
+    &.ativo,
+    &:not(.ativo):hover,
+    &:focus,
+    &:active {
+      background: transparent;
+      box-shadow: none;
     }
+    &.ativo { color: #fff; }
+    &:not(.ativo):hover { color: #343a40; }
+    &:focus-visible {
+      outline: 2px solid var(--brand-700);
+      outline-offset: 3px;
+    }
+  }
+}
 
-    &:not(.ativo):hover {
-      background: #e2e6ea;
-      color: #343a40;
-    }
+@media (max-width: 575.98px) {
+  .filtro-status button { white-space: normal; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filtro-status::before,
+  .filtro-status button {
+    transition: none;
   }
 }
 

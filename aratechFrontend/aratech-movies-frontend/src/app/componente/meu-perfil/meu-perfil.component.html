@@ -3,6 +3,9 @@
 <main class="app-main">
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-4">
+    @if(loading){<div class="text-muted mb-3" role="status">Carregando seus dados...</div>}
+    @if(erro){<div class="alert alert-danger" role="alert">{{ erro }} <button type="button" class="btn btn-sm btn-outline-danger" (click)="carregar()">Tentar novamente</button></div>}
+    @if(!tecnico){<div class="d-flex justify-content-end mb-3"><a class="btn btn-danger" routerLink="/meu-ponto"><i class="bi bi-clock-history me-2"></i>Meu ponto</a></div>}
 
     <div class="perfil-hero card shadow-sm mb-4">
       <div class="card-body p-4">
@@ -76,12 +79,8 @@
               <span class="info-value">{{ dados.setor || '——' }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Gestor Direto</span>
-              <span class="info-value">{{ dados.gestor || '——' }}</span>
-            </div>
-            <div class="info-item">
               <span class="info-label">Data de Admissão</span>
-              <span class="info-value">{{ dados.dataAdmissao || '——' }}</span>
+              <span class="info-value">{{ (dados.dataAdmissao | date:'dd/MM/yyyy') || '——' }}</span>
             </div>
             <div class="info-item mb-0">
               <span class="info-label">Tipo de Contrato</span>
@@ -109,8 +108,8 @@
               </span>
             </div>
             <div class="info-item mb-0">
-              <span class="info-label">Último Acesso</span>
-              <span class="info-value">{{ dados.ultimoAcesso || '——' }}</span>
+              <span class="info-label">Acesso atual</span>
+              <span class="info-value">{{ (acessoAtual | date:'dd/MM/yyyy HH:mm') || '——' }}</span>
             </div>
           </div>
         </div>

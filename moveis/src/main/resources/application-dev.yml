@@ -1,0 +1,19 @@
+server:
+  port: 8082
+  servlet:
+    session:
+      cookie:
+        secure: false
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST_DEV:localhost}:${DB_PORT_DEV:5435}/${POSTGRES_DB_DEV}
+    username: ${APP_USER_DEV}
+    password: ${APP_PASSWORD_DEV}
+
+
+springdoc:
+  api-docs:
+    enabled: ${ARATECH_DOCS_ENABLED:true}
+  swagger-ui:
+    enabled: ${ARATECH_DOCS_ENABLED:true}

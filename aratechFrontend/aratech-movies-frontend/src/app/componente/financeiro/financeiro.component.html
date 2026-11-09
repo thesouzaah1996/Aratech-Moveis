@@ -5,7 +5,7 @@
   <div class="container py-5">
     <div class="row g-4 justify-content-center">
 
-      <div class="col-md-6 col-lg-5">
+      <div *appPermissao="'FINANCEIRO_PAGAR.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/financeiro/contas-pagar" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-arrow-up-circle icon-size"></i>
@@ -15,7 +15,7 @@
         </a>
       </div>
 
-      <div class="col-md-6 col-lg-5">
+      <div *appPermissao="'FINANCEIRO_RECEBER.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/financeiro/contas-receber" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-arrow-down-circle icon-size"></i>
@@ -25,7 +25,7 @@
         </a>
       </div>
 
-      <div class="col-md-6 col-lg-5">
+      <div *appPermissao="'FINANCEIRO_CAIXA.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/financeiro/fluxo-caixa" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-graph-up-arrow icon-size"></i>
@@ -35,7 +35,7 @@
         </a>
       </div>
 
-      <div class="col-md-6 col-lg-5">
+      <div *appPermissao="'FINANCEIRO_NOTAS.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/financeiro/baixa-notas" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-receipt icon-size"></i>

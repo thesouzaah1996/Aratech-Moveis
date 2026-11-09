@@ -1,0 +1,14 @@
+.git
+.idea
+.env
+.env.*
+docs/
+db/
+src/
+.mvn/
+target/*
+!target/moveis-0.0.1-SNAPSHOT.jar
+
+# Backups locais de rollback
+.rollback-backups/
+.docker-local/

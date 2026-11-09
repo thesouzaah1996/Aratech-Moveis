@@ -2,77 +2,98 @@
 
 <main class="app-main">
   <div class="container py-5 text-center">
-    <div class="row g-4 justify-content-center">
+    <div class="row g-4 justify-content-center"><div class="col-md-4 col-sm-6" *appPermissao="'PRODUCAO_FURACAO.CONSULTAR'"><a routerLink="/producao/furacao" class="card card-menu"><app-furadeira-icon class="icon-size" /><h5>Furação</h5></a></div><div class="col-md-4 col-sm-6" *appPermissao="'PRODUCAO_MONTAGEM.CONSULTAR'"><a routerLink="/producao/montagem" class="card card-menu"><i class="bi bi-tools icon-size"></i><h5>Montagem</h5></a></div><div class="col-md-4 col-sm-6" *appPermissao="'EMBALAGEM.CONSULTAR'"><a routerLink="/embalagem" class="card card-menu"><i class="bi bi-box-seam icon-size"></i><h5>Embalagem</h5></a></div><div class="col-md-4 col-sm-6" *appPermissao="'CORTE_LOTES.CONSULTAR'"><a routerLink="/corte" class="card card-menu"><app-serra-icon class="icon-size" /><h5>Corte</h5></a></div>
+      @if (acesso.usuario() && !acesso.usuario()!.administrador && !acesso.usuario()!.permissoes.length) { <p class="text-muted">Seu usuário ainda não possui permissões de acesso. Solicite a configuração ao administrador.</p> }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('ALMOXARIFADO.CONSULTAR')) {
+<div *appPermissao="'ALMOXARIFADO.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/almoxarifado" class="card card-menu">
-          <i class="bi bi-box-seam icon-size"></i>
+          <i class="bi bi-boxes icon-size" aria-hidden="true"></i>
           <h5>Almoxarifado</h5>
         </a>
       </div>
+      }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('PORTARIA.CONSULTAR')) {
+<div *appPermissao="'PORTARIA.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/portaria" class="card card-menu">
           <i class="bi bi-key icon-size"></i>
           <h5>Portaria</h5>
         </a>
       </div>
+      }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('MANUTENCAO.CONSULTAR')) {
+<div *appPermissao="'MANUTENCAO.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/manutencao" class="card card-menu">
           <i class="bi bi-gear icon-size"></i>
           <h5>Manutenção</h5>
         </a>
       </div>
+      }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('PCP.CONSULTAR')) {
+<div *appPermissao="'PCP.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/pcp" class="card card-menu">
           <i class="bi bi-pie-chart icon-size"></i>
           <h5>PCP</h5>
         </a>
       </div>
+      }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('ASSISTENCIA.CONSULTAR')) {
+<div *appPermissao="'ASSISTENCIA.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/assistencia" class="card card-menu">
           <i class="bi bi-clipboard-check icon-size"></i>
           <h5>Assistência Técnica</h5>
         </a>
       </div>
+      }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('COMPRAS.CONSULTAR')) {
+<div *appPermissao="'COMPRAS.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/compras" class="card card-menu">
           <i class="bi bi-cart-check icon-size"></i>
           <h5>Compras</h5>
         </a>
       </div>
+      }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('RH.CONSULTAR') || acesso.permite('ACESSOS.GERENCIAR')) {
+<div *appPermissao="'RH.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/recursos-humanos" class="card card-menu">
           <i class="bi bi-people icon-size"></i>
           <h5>Recursos Humanos</h5>
         </a>
       </div>
+      }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('FINANCEIRO.CONSULTAR')) {
+<div *appPermissao="'FINANCEIRO.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/financeiro" class="card card-menu">
           <i class="bi bi-currency-dollar icon-size"></i>
           <h5>Financeiro</h5>
         </a>
       </div>
+      }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('CARREGAMENTO.CONSULTAR')) {
+<div *appPermissao="'CARREGAMENTO.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/carregamento" class="card card-menu">
           <i class="bi bi-truck icon-size"></i>
           <h5>Carregamento</h5>
         </a>
       </div>
+      }
 
-      <div class="col-md-4 col-sm-6">
+      @if (acesso.permite('ADMINISTRACAO.CONSULTAR')) {
+<div *appPermissao="'ADMINISTRACAO.CONSULTAR'" class="col-md-4 col-sm-6">
         <a routerLink="/administracao" class="card card-menu">
           <i class="bi bi-shield-lock icon-size"></i>
           <h5>Administração</h5>
         </a>
       </div>
+      }
 
     </div>
   </div>

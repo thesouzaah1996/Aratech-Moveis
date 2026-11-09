@@ -1,29 +1,57 @@
-import { Component } from '@angular/core';
+import { PermissaoDirective } from '../../../core/permissao.directive';
+import { Component, AfterViewInit, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { criarModal, ModalDaTela } from '../../../core/ui/modal';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
 
-export type StatusLoteAssistencia = 'Aguardando Análise' | 'Em Reparo' | 'Concluído' | 'Devolvido';
-
-export interface LoteAssistencia {
-  id: number;
-  codigo: string;
-  produto: string;
-  quantidade: number;
-  dataEntrada: string;
-  responsavel: string;
-  defeito: string;
-  status: StatusLoteAssistencia;
-}
+import { LoteAssistencia, StatusLoteAssistencia, LoteAssistenciaService } from '../../../core/services/lote-assistencia.service';
+import { HistoricoLotesComponent } from './historico-lotes.component';
+export type { LoteAssistencia, StatusLoteAssistencia } from '../../../core/services/lote-assistencia.service';
 
 @Component({
   selector: 'app-assistencia-lotes',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
+  imports: [PermissaoDirective,DatePipe, FormsModule, NavbarComponent, BreadcrumbComponent, HistoricoLotesComponent],
   templateUrl: './lotes.component.html',
   styleUrl: './lotes.component.scss'
 })
-export class AssistenciaLotesComponent {
+export class AssistenciaLotesComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('viewModal') viewModalEl!: ElementRef<HTMLElement>;
+  @ViewChild('pdfModal') pdfModalEl!: ElementRef<HTMLElement>;
+  private viewModal?: ModalDaTela;
+  private pdfModal?: ModalDaTela;
+  loteDocumento: LoteAssistencia | null = null;
+  loteSelecionado: LoteAssistencia | null = null;
+  readonly statusDisponiveis: StatusLoteAssistencia[] = ['Não iniciado', 'Em andamento', 'Finalizado'];
+  errorMessage = '';
+  carregando = false;
+  processando = false;
+  constructor(private service: LoteAssistenciaService) {}
+  ngOnInit(): void { this.carregar(); }
+  carregar(): void {
+    this.carregando = true;
+    this.service.listar().subscribe({ next: lotes => { this.lotes = lotes; this.carregando = false; this.errorMessage = ''; }, error: () => { this.errorMessage = 'Não foi possível carregar os lotes. Tente novamente.'; this.carregando = false; } });
+  }
+  ngAfterViewInit(): void {
+    this.viewModal = criarModal(this.viewModalEl.nativeElement);
+    this.pdfModal = criarModal(this.pdfModalEl.nativeElement);
+  }
+  ngOnDestroy(): void { this.viewModal?.dispose(); this.pdfModal?.dispose(); }
+  abrirPdf(lote: LoteAssistencia): void { this.loteDocumento = lote; this.pdfModal?.show(); }
+  fecharPdf(): void { this.pdfModal?.hide(); }
+  openView(lote: LoteAssistencia): void { this.loteSelecionado = lote; this.viewModal?.show(); }
+  fecharVisualizacao(): void { this.viewModal?.hide(); }
+  avancar(lote: LoteAssistencia): void {
+    if (this.processando || lote.status === 'Finalizado') return;
+    this.processando = true;
+    this.service.avancar(lote.id, lote.status === 'Não iniciado' ? 'iniciar' : 'finalizar').subscribe({
+      next: atualizado => { this.lotes = this.lotes.map(l => l.id === atualizado.id ? atualizado : l); this.processando = false; this.errorMessage = ''; this.showSuccess('Status do lote atualizado.'); },
+      error: () => { this.processando = false; this.errorMessage = 'Não foi possível alterar o lote. Atualize a lista e tente novamente.'; }
+    });
+  }
+
   breadcrumb: BreadcrumbItem[] = [
     { label: 'Início', route: '/dashboard' },
     { label: 'Assistência Técnica', route: '/assistencia' },
@@ -38,15 +66,14 @@ export class AssistenciaLotesComponent {
   successMessage = '';
 
   get filtrados(): LoteAssistencia[] {
-    let lista = [...this.lotes];
+    let lista = this.lotes.filter(l => !l.carregadoEm);
     if (this.filtroStatus !== 'Todos') lista = lista.filter(l => l.status === this.filtroStatus);
     const term = this.searchTerm.trim().toLowerCase();
     if (term) lista = lista.filter(l =>
       l.codigo.toLowerCase().includes(term) ||
-      l.produto.toLowerCase().includes(term) ||
-      l.defeito.toLowerCase().includes(term)
+      (l.empresa ?? '').toLowerCase().includes(term)
     );
-    return lista;
+    return lista.sort((a, b) => a.dataEntrada.localeCompare(b.dataEntrada) || a.id - b.id);
   }
 
   get paged(): LoteAssistencia[] {
@@ -65,26 +92,11 @@ export class AssistenciaLotesComponent {
   setPage(p: number): void { if (p >= 1 && p <= this.totalPages) this.page = p; }
   setFiltro(s: string): void { this.filtroStatus = s as StatusLoteAssistencia | 'Todos'; this.page = 1; }
 
-  avancarStatus(lote: LoteAssistencia): void {
-    const fluxo: StatusLoteAssistencia[] = ['Aguardando Análise', 'Em Reparo', 'Concluído'];
-    const idx = fluxo.indexOf(lote.status);
-    if (idx < fluxo.length - 1) {
-      lote.status = fluxo[idx + 1];
-      this.showSuccess(`Lote ${lote.codigo} avançado para "${lote.status}".`);
-    }
-  }
-
-  devolver(lote: LoteAssistencia): void {
-    lote.status = 'Devolvido';
-    this.showSuccess(`Lote ${lote.codigo} marcado como devolvido.`);
-  }
-
   badgeClass(status: StatusLoteAssistencia): string {
     const map: Record<StatusLoteAssistencia, string> = {
-      'Aguardando Análise': 'bg-secondary',
-      'Em Reparo':          'bg-warning text-dark',
-      'Concluído':          'bg-success',
-      'Devolvido':          'bg-info text-dark'
+      'Não iniciado': 'bg-secondary',
+      'Finalizado':          'bg-success',
+      'Em andamento':          'bg-info text-dark'
     };
     return map[status] ?? 'bg-secondary';
   }

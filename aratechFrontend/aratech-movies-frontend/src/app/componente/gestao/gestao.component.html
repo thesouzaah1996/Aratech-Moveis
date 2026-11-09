@@ -1,0 +1,74 @@
+<app-navbar />
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  @if (config) {
+    <div class="container py-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div><h1 class="h3 mb-1">{{ config.titulo }}</h1><p class="text-muted mb-0 descricao">{{ config.descricao }}</p></div>
+        @if (config.campos && !config.simples && permitido('CADASTRAR')) { <button type="button" class="btn btn-danger" [disabled]="saving" (click)="abrir('novo')"><i class="bi bi-plus-lg me-1"></i>Novo registro</button> }
+      </div>
+      @if (erro) { <div class="alert alert-danger" role="alert">{{ erro }} @if (!aberto) { <button class="btn btn-sm btn-outline-danger ms-2" type="button" [disabled]="loading" (click)="erro='';carregar()">Tentar novamente</button> }</div> }
+      @if (sucesso) { <div class="alert alert-success" role="status">{{ sucesso }}</div> }
+      @if (!config.somenteCadastro) {
+      <section class="card shadow-sm p-3 p-md-4">
+        <div class="d-flex flex-wrap gap-3 align-items-end mb-3">
+          <div class="busca flex-grow-1"><label for="busca-gestao" class="form-label">Buscar nesta tela</label><input id="busca-gestao" class="form-control" maxlength="150" placeholder="Código, nome ou situação" [(ngModel)]="busca" (ngModelChange)="onSearch()"></div>
+          @if (config.mes) { <div><label for="mes-gestao" class="form-label">Até o mês</label><input id="mes-gestao" class="form-control" type="month" [(ngModel)]="mes" (ngModelChange)="page=1;carregar()"></div> }
+          @if (config.exportar) { <button class="btn btn-outline-secondary" type="button" [disabled]="loading || !itens.length" (click)="exportar()">Exportar página (CSV)</button> }
+        </div>
+        @if (loading) { <p role="status">Carregando registros...</p> }
+        <div class="table-responsive"><table class="table table-hover align-middle"><thead><tr>@for (c of config.colunas; track c.nome) { <th>{{ c.titulo }}</th> }@if (config.editar || config.acoes) { <th>Ações</th> }</tr></thead><tbody>
+          @for (row of itens; track row['id'] || row['chave'] || row['titulo']) {
+            <tr>@for (c of config.colunas; track c.nome) { <td>
+              @if (row[c.nome] === null || row[c.nome] === undefined) { — }
+              @else if (c.formato==='dinheiro') { {{ row[c.nome] | currency:'BRL' }} }
+              @else if (c.formato==='data') { {{ row[c.nome] | date:'dd/MM/yyyy':'UTC' }} }
+              @else if (c.formato==='instante') { {{ row[c.nome] | date:'dd/MM/yyyy HH:mm' }} }
+              @else if (c.formato==='numero') { {{ row[c.nome] | number:'1.0-2' }} }
+              @else if (c.nome==='status') { <span class="badge text-bg-light">{{ rotulo(row[c.nome]) }}</span> }
+              @else { {{ rotulo(row[c.nome]) }} }
+            </td> }
+            @if (config.editar || config.acoes) { <td><div class="d-flex gap-2 flex-wrap acoes">
+              @if (podeEditar(row)) { <button type="button" class="btn btn-sm btn-outline-secondary" (click)="abrir('editar',row)">Editar</button> }
+              @for (a of acoes(row); track a.nome) { <button type="button" class="btn btn-sm btn-outline-danger" (click)="abrir('acao',row,a)">{{ a.titulo }}</button> }
+            </div></td> }
+            </tr>
+          } @empty { @if (!loading) { <tr><td [attr.colspan]="config.colunas.length+1" class="text-center text-muted py-4">Nenhum registro encontrado.</td></tr> } }
+        </tbody></table></div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-3"><span class="text-muted small">{{ total }} registro(s) · Página {{ total ? page : 0 }} de {{ totalPages }}</span><div class="d-flex gap-2"><button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="page<=1 || loading" (click)="setPage(page-1)">Anterior</button><button type="button" class="btn btn-sm btn-outline-secondary" [disabled]="page>=totalPages || loading" (click)="setPage(page+1)">Próxima</button></div></div>
+      </section>
+      } @else { <section class="card p-4"><h2 class="h5">Entrada para assistência</h2><p class="text-muted mb-0">Cada referência identifica um único recebimento. Após cadastrar, a equipe de Assistência acompanha o lote e o Carregamento registra a saída quando o atendimento terminar.</p></section> }
+    </div>
+  }
+</main>
+@if (aberto) {
+  <div class="fundo-dialogo"></div>
+  <div class="modal d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="gestao-dialogo-titulo" (keydown)="tecla($event)">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable"><div #dialogo class="modal-content">
+      <div class="modal-header bg-danger text-white"><h2 id="gestao-dialogo-titulo" class="modal-title h5">{{ modo==='acao' ? acao?.titulo : modo==='editar' ? 'Editar registro' : 'Novo registro' }}</h2></div>
+      <form (ngSubmit)="salvar()">
+        <div class="modal-body p-4">
+          @if (selecionado) { <p class="small text-muted">Registro {{ selecionado['id'] || selecionado['chave'] }} · {{ rotulo(selecionado['produto'] || selecionado['descricao'] || selecionado['funcionario'] || selecionado['cliente']) }}</p> }
+          @if (erroDialogo) { <div class="alert alert-danger" role="alert">{{ erroDialogo }}</div> }
+          @if (opcoesLoading) { <p role="status">Carregando opções...</p> }
+          <fieldset class="row g-3" [disabled]="saving || emConfirmacao || opcoesLoading">
+            @for (campo of campos; track campo.nome) {
+              <div [class]="campo.tipo==='textarea' ? 'col-12' : 'col-md-6'">
+                <label class="form-label" [for]="'gestao-'+campo.nome">{{ campo.titulo }} @if (campo.obrigatorio) { <span class="text-danger">*</span> }</label>
+                @if (campo.tipo==='select') {
+                  <select class="form-select" [id]="'gestao-'+campo.nome" [name]="campo.nome" [required]="!!campo.obrigatorio" [(ngModel)]="form[campo.nome]"><option [ngValue]="null">Selecione</option>@for (opcao of campo.opcoes || opcoes[campo.nome] || []; track opcao.id) { <option [ngValue]="opcao.id">{{ opcao.nome }}</option> }</select>
+                } @else if (campo.tipo==='textarea') {
+                  <textarea class="form-control" rows="3" [id]="'gestao-'+campo.nome" [name]="campo.nome" [required]="!!campo.obrigatorio" minlength="3" [maxlength]="campo.limite || 1000" [(ngModel)]="form[campo.nome]"></textarea>
+                } @else {
+                  <input class="form-control" [id]="'gestao-'+campo.nome" [name]="campo.nome" [type]="campo.tipo || 'text'" [required]="!!campo.obrigatorio" [attr.min]="campo.min" [attr.max]="campo.max" [attr.step]="campo.step" [attr.maxlength]="campo.limite" [(ngModel)]="form[campo.nome]">
+                }
+              </div>
+            }
+          </fieldset>
+          @if (emConfirmacao && !saving) { <p class="text-warning mt-3">O servidor ainda não confirmou o resultado. Tente novamente para conferir o mesmo envio sem duplicar registros.</p> }
+        </div>
+        <div class="modal-footer bg-light"><button class="btn btn-secondary" type="button" [disabled]="saving || emConfirmacao" (click)="fechar()">Cancelar</button><button class="btn btn-danger" type="submit" [disabled]="saving || opcoesLoading">{{ saving ? 'Confirmando...' : emConfirmacao ? 'Conferir envio novamente' : 'Confirmar' }}</button></div>
+      </form>
+    </div></div>
+  </div>
+}

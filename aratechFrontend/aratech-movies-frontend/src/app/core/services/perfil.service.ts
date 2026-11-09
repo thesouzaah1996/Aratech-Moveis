@@ -1,45 +1,27 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { Perfil } from '../models/perfil.model';
-import { environment } from '../../../environments/environment';
-
-interface ApiResponse {
-  status: number;
-  mensagem: string;
-  perfil?: Perfil;
-  perfis?: Perfil[];
-}
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Perfil, Pagina, UsuarioPerfil } from '../models/perfil.model';
 
 @Injectable({ providedIn: 'root' })
 export class PerfilService {
-  private readonly api = `${environment.apiUrl}/recursoshumanos/perfil`;
-
+  private readonly url = '/aratech/rh/perfis';
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Perfil[]> {
-    return this.http
-      .get<ApiResponse>(`${this.api}/todos`)
-      .pipe(map(res => res.perfis ?? []));
+  listar(pagina = 0, tamanho = 8, busca = ''): Observable<Pagina<Perfil>> {
+    const params = new HttpParams().set('pagina', pagina).set('tamanho', tamanho).set('busca', busca.trim());
+    return this.http.get<Pagina<Perfil>>(this.url, { params });
   }
-
-  add(nome: string): Observable<Perfil> {
-    return this.http
-      .post<ApiResponse>(`${this.api}/adicionar`, { nome })
-      .pipe(map(res => res.perfil!));
+  add(nome: string): Observable<Perfil> { return this.http.post<Perfil>(this.url, { nome }); }
+  update(id: number, nome: string): Observable<Perfil> { return this.http.put<Perfil>(`${this.url}/${id}`, { nome }); }
+  buscarUsuarios(busca: string, pagina = 0, tamanho = 8): Observable<Pagina<UsuarioPerfil>> {
+    return this.http.get<Pagina<UsuarioPerfil>>(`${this.url}/usuarios`, { params: new HttpParams().set('busca', busca.trim()).set('pagina', pagina).set('tamanho', tamanho) });
   }
-
-  update(id: number, nome: string): Observable<Perfil> {
-    return this.http
-      .put<ApiResponse>(`${this.api}/atualizar/${id}`, { nome })
-      .pipe(map(res => res.perfil!));
+  atribuir(usuarioId: number, nome: string): Observable<UsuarioPerfil> {
+    return this.http.post<UsuarioPerfil>(`${this.url}/usuarios/${usuarioId}/atribuicoes`, { nome: nome.trim() });
   }
-
-  ativar(id: number): Observable<void> {
-    return this.http.patch<void>(`${this.api}/ativar/${id}`, {});
-  }
-
-  desativar(id: number): Observable<void> {
-    return this.http.patch<void>(`${this.api}/desativar/${id}`, {});
-  }
+  catalogoPermissoes(): Observable<string[]> { return this.http.get<string[]>('/aratech/auth/usuarios/permissoes'); }
+  permissoes(id: number): Observable<string[]> { return this.http.get<string[]>(`/aratech/auth/usuarios/perfis/${id}/permissoes`); }
+  salvarPermissoes(id: number, permissoes: string[]): Observable<string[]> { return this.http.put<string[]>(`/aratech/auth/usuarios/perfis/${id}/permissoes`, permissoes); }
+  criarAcesso(id: number): Observable<{ senhaTemporaria: string }> { return this.http.post<{ senhaTemporaria: string }>(`/aratech/auth/usuarios/${id}/acesso`, {}); }
 }

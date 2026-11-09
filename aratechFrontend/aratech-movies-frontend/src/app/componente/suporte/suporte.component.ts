@@ -1,3 +1,4 @@
+import { PermissaoDirective } from '../../core/permissao.directive';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NavbarComponent } from '../navbar/navbar.component';
@@ -6,7 +7,7 @@ import { BreadcrumbComponent, BreadcrumbItem } from '../breadcrumb/breadcrumb.co
 @Component({
   selector: 'app-suporte',
   standalone: true,
-  imports: [RouterLink, NavbarComponent, BreadcrumbComponent],
+  imports: [PermissaoDirective,RouterLink, NavbarComponent, BreadcrumbComponent],
   templateUrl: './suporte.component.html',
   styleUrl: './suporte.component.scss'
 })

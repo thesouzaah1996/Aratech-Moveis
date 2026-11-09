@@ -25,11 +25,11 @@
         </span>
         <input type="text" class="form-control border-start-0 ps-0"
           placeholder="Buscar por nome, SKU ou descrição…"
-          [(ngModel)]="searchQuery"
-          (ngModelChange)="page = 1">
+          maxlength="150" [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearch()">
       </div>
 
-      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+      <button *appPermissao="'ALMOXARIFADO_ESTOQUE.CADASTRAR'" class="btn btn-danger flex-shrink-0" (click)="openAdd()">
         <i class="bi bi-plus-circle me-2"></i>Novo Produto
       </button>
     </div>
@@ -49,15 +49,16 @@
                   <th>Nome</th>
                   <th>SKU</th>
                   <th>Quantidade</th>
+                  <th class="text-nowrap">Qtd. mínima</th>
                   <th>Categoria</th>
                   <th>Local de Armazenamento</th>
                   <th class="text-end" style="width: 1%">Ações</th>
                 </tr>
               </thead>
               <tbody>
-                @if (paged.length === 0) {
+                @if (produtos.length === 0) {
                   <tr>
-                    <td colspan="6">
+                    <td colspan="7">
                       <div class="empty-state">
                         <i class="bi bi-box-seam"></i>
                         <p>{{ searchQuery ? 'Nenhum resultado encontrado.' : 'Nenhum produto cadastrado.' }}</p>
@@ -65,25 +66,33 @@
                     </td>
                   </tr>
                 } @else {
-                  @for (produto of paged; track produto.id) {
+                  @for (produto of produtos; track produto.id) {
                     <tr>
                       <td class="fw-semibold">{{ produto.nome }}</td>
                       <td><code>{{ produto.sku }}</code></td>
                       <td>{{ produto.quantidade }}</td>
-                      <td>{{ categoriaNome(produto.categoriaID) }}</td>
+                      <td class="text-nowrap quantidade-minima" [class.quantidade-minima-editando]="minimoId === produto.id" (dblclick)="editarMinimo(produto)">
+                        @if (minimoId === produto.id) {
+                          <div class="d-flex align-items-center gap-1"><input type="number" class="form-control form-control-sm" style="width:110px" aria-label="Quantidade mínima" min="0" step="1" [(ngModel)]="minimoValor" [disabled]="minimoSalvando" (keydown.enter)="salvarMinimo(produto)" (keydown.escape)="cancelarMinimo()"><button *appPermissao="'ALMOXARIFADO_ESTOQUE.ALTERAR'" type="button" class="btn-action btn-action-edit" title="Salvar mínimo" [disabled]="minimoSalvando" (click)="salvarMinimo(produto)"><i class="bi bi-check-lg"></i></button><button type="button" class="btn-action btn-action-delete" title="Cancelar" [disabled]="minimoSalvando" (click)="cancelarMinimo()"><i class="bi bi-x-lg"></i></button></div>
+                        } @else {
+                          <span tabindex="0" title="Dê dois cliques para editar o mínimo" (keydown.enter)="editarMinimo(produto)">{{ produto.quantidadeMinima ?? 'Não definido' }}</span>
+                        }
+                      </td>
+                      <td>{{ produto.categoriaNome }}</td>
                       <td>{{ produto.localArmazenamento }}</td>
                       <td>
                         <div class="d-flex justify-content-end align-items-center gap-1">
-                          <button class="btn-action btn-action-entrada" title="Entrada de Estoque" (click)="openEntrada(produto)">
+                          <button type="button" class="btn-action" title="Historico de movimentacoes" (click)="openHistorico(produto)"><i class="bi bi-clock-history"></i></button>
+                          <button *appPermissao="'ALMOXARIFADO_ESTOQUE.ALTERAR'" class="btn-action btn-action-entrada" title="Entrada de Estoque" (click)="openEntrada(produto)">
                             <i class="bi bi-plus-circle"></i>
                           </button>
-                          <button class="btn-action btn-action-saida" title="Saída de Estoque" (click)="openSaida(produto)">
+                          <button *appPermissao="'ALMOXARIFADO_ESTOQUE.ALTERAR'" class="btn-action btn-action-saida" title="Saída de Estoque" (click)="openSaida(produto)">
                             <i class="bi bi-dash-circle"></i>
                           </button>
-                          <button class="btn-action btn-action-edit" title="Editar" (click)="openEdit(produto)">
+                          <button *appPermissao="'ALMOXARIFADO_ESTOQUE.ALTERAR'" class="btn-action btn-action-edit" title="Editar" (click)="openEdit(produto)">
                             <i class="bi bi-pencil"></i>
                           </button>
-                          <button class="btn-action btn-action-delete" title="Excluir" (click)="openDelete(produto)">
+                          <button *appPermissao="'ALMOXARIFADO_ESTOQUE.ALTERAR'" class="btn-action btn-action-delete" title="Arquivar" (click)="openDelete(produto)">
                             <i class="bi bi-trash"></i>
                           </button>
                         </div>
@@ -98,8 +107,7 @@
           @if (totalPages > 1) {
             <div class="pagination-container">
               <span class="pagination-info">
-                Mostrando {{ (page - 1) * pageSize + 1 }}–{{ page * pageSize > filtered.length ? filtered.length : page * pageSize }}
-                de {{ filtered.length }}
+                Mostrando {{ inicio }}–{{ fim }} de {{ total }}
               </span>
               <nav>
                 <ul class="pagination">
@@ -152,11 +160,14 @@
         <h5 class="modal-title fw-bold">{{ isEditing ? 'Editar Produto' : 'Novo Produto' }}</h5>
       </div>
       <div class="modal-body p-4">
+        @if (modalError) { <div class="alert alert-danger" role="alert">{{ modalError }}</div> }
+        @if (lookupError) { <div class="alert alert-danger" role="alert">{{ lookupError }} <button type="button" class="btn btn-sm btn-outline-danger" (click)="carregarLookups()">Tentar novamente</button></div> }
+        @if (lookupLoading) { <p role="status">Carregando categorias e fornecedores...</p> }
         <div class="row g-3">
 
           <div class="col-md-6">
             <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.nome"
+            <input type="text" class="form-control" maxlength="150" [(ngModel)]="form.nome"
               placeholder="Nome do produto"
               [class.is-invalid]="submitted && !form.nome.trim()">
             <div class="invalid-feedback">Nome é obrigatório.</div>
@@ -168,7 +179,7 @@
               <input type="text" class="form-control" [value]="form.sku" disabled>
               <div class="form-text text-muted">O SKU não pode ser alterado após o cadastro.</div>
             } @else {
-              <input type="text" class="form-control" [(ngModel)]="form.sku"
+              <input type="text" class="form-control" maxlength="64" [(ngModel)]="form.sku"
                 placeholder="Ex: PRD-0001"
                 [class.is-invalid]="submitted && isSkuInvalid()">
               <div class="invalid-feedback">
@@ -190,9 +201,9 @@
           </div>
 
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Fornecedor</label>
+            <label class="form-label fw-semibold">Fornecedor <span class="text-danger">*</span></label>
             <select class="form-select" [(ngModel)]="form.fornecedorID">
-              <option [ngValue]="null">Nenhum</option>
+              <option [ngValue]="null" disabled>Selecione um fornecedor ativo</option>
               @for (forn of fornecedores; track forn.id) {
                 <option [ngValue] ="forn.id">{{ forn.nome }}</option>
               }
@@ -201,14 +212,15 @@
 
           <div class="col-md-6">
             <label class="form-label fw-semibold">Quantidade <span class="text-danger">*</span></label>
-            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="0"
+            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="0" max="1000000000" step="1" [readonly]="isEditing"
               [class.is-invalid]="submitted && (form.quantidade === null || form.quantidade === undefined)">
-            <div class="invalid-feedback">Quantidade é obrigatória.</div>
+            <div class="invalid-feedback">Informe uma quantidade inteira e nao negativa.</div>
+            @if (isEditing) { <div class="form-text">Use Entrada ou Saída para alterar o saldo.</div> }
           </div>
 
           <div class="col-md-6">
             <label class="form-label fw-semibold">Local de Armazenamento <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" [(ngModel)]="form.localArmazenamento"
+            <input type="text" class="form-control" maxlength="100" [(ngModel)]="form.localArmazenamento"
               placeholder="Ex: prateleira-a1"
               [class.is-invalid]="submitted && !form.localArmazenamento.trim()">
             <div class="invalid-feedback">Local de armazenamento é obrigatório.</div>
@@ -221,15 +233,15 @@
 
           <div class="col-12">
             <label class="form-label fw-semibold">Descrição</label>
-            <textarea class="form-control" [(ngModel)]="form.descricao" rows="3"
+            <textarea class="form-control" maxlength="2000" [(ngModel)]="form.descricao" rows="3"
               placeholder="Descrição opcional"></textarea>
           </div>
 
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="save()">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="saving || movimentando || arquivando">Cancelar</button>
+        <button *appPermissao="isEditing ? 'ALMOXARIFADO_ESTOQUE.ALTERAR' : 'ALMOXARIFADO_ESTOQUE.CADASTRAR'" type="button" class="btn btn-danger" (click)="save()" [disabled]="saving || lookupLoading || !!lookupError">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>
@@ -242,13 +254,14 @@
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title fw-bold">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Exclusão
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar Arquivamento
         </h5>
       </div>
       <div class="modal-body text-center p-4">
+        @if (deleteError) { <div class="alert alert-danger" role="alert">{{ deleteError }}</div> }
         <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
-        <h5 class="mt-3">Deseja realmente excluir este produto?</h5>
-        <p class="text-muted">Esta ação não poderá ser desfeita.</p>
+        <h5 class="mt-3">Deseja arquivar este produto?</h5>
+        <p class="text-muted">O saldo deve estar zerado. O histórico e o SKU serão preservados.</p>
         @if (produtoParaExcluir) {
           <div class="delete-warning">
             <p class="mb-1"><strong>Produto:</strong> {{ produtoParaExcluir.nome }}</p>
@@ -257,9 +270,9 @@
         }
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
-          <i class="bi bi-trash me-1"></i>Excluir
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="saving || movimentando || arquivando">Cancelar</button>
+        <button *appPermissao="'ALMOXARIFADO_ESTOQUE.ALTERAR'" type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="arquivando">
+          <i class="bi bi-trash me-1"></i>Arquivar
         </button>
       </div>
     </div>
@@ -280,16 +293,18 @@
           <p class="mb-3 text-muted">Quantidade atual: {{ produtoMovimentacao.quantidade }}</p>
         }
         <label class="form-label fw-semibold">Quantidade recebida <span class="text-danger">*</span></label>
-        <input type="number" class="form-control" min="1" [(ngModel)]="quantidadeMovimentacao"
+        <input type="number" class="form-control" min="1" max="1000000000" step="1" [disabled]="movimentando || quantidadeEnviada !== null" [(ngModel)]="quantidadeMovimentacao"
           [class.is-invalid]="!!movimentacaoError"
           (input)="movimentacaoError = ''">
+        <label class="form-label mt-3">Motivo da movimentação *</label>
+        <textarea class="form-control" rows="2" maxlength="500" [(ngModel)]="motivoMovimentacao" [disabled]="movimentando || quantidadeEnviada !== null" placeholder="Ex.: recebimento de compra ou retirada para producao"></textarea>
         @if (movimentacaoError) {
           <div class="invalid-feedback d-block">{{ movimentacaoError }}</div>
         }
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirmEntrada()">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="saving || movimentando || arquivando">Cancelar</button>
+        <button *appPermissao="'ALMOXARIFADO_ESTOQUE.ALTERAR'" type="button" class="btn btn-danger" (click)="confirmEntrada()" [disabled]="movimentando">
           <i class="bi bi-check-circle me-1"></i>Confirmar Entrada
         </button>
       </div>
@@ -311,19 +326,30 @@
           <p class="mb-3 text-muted">Quantidade atual: {{ produtoMovimentacao.quantidade }}</p>
         }
         <label class="form-label fw-semibold">Quantidade retirada <span class="text-danger">*</span></label>
-        <input type="number" class="form-control" min="1" [(ngModel)]="quantidadeMovimentacao"
+        <input type="number" class="form-control" min="1" max="1000000000" step="1" [disabled]="movimentando || quantidadeEnviada !== null" [(ngModel)]="quantidadeMovimentacao"
           [class.is-invalid]="!!movimentacaoError"
           (input)="movimentacaoError = ''">
+        <label class="form-label mt-3">Motivo da movimentação *</label>
+        <textarea class="form-control" rows="2" maxlength="500" [(ngModel)]="motivoMovimentacao" [disabled]="movimentando || quantidadeEnviada !== null" placeholder="Ex.: recebimento de compra ou retirada para producao"></textarea>
         @if (movimentacaoError) {
           <div class="invalid-feedback d-block">{{ movimentacaoError }}</div>
         }
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirmSaida()">
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="saving || movimentando || arquivando">Cancelar</button>
+        <button *appPermissao="'ALMOXARIFADO_ESTOQUE.ALTERAR'" type="button" class="btn btn-danger" (click)="confirmSaida()" [disabled]="movimentando">
           <i class="bi bi-check-circle me-1"></i>Confirmar Saída
         </button>
       </div>
     </div>
   </div>
 </div>
+
+<div class="modal fade" #historicoModal tabindex="-1" data-bs-backdrop="static"><div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5>Histórico de movimentações · {{historicoProduto?.nome}}</h5></div><div class="modal-body">
+@if(historicoError){<div class="alert alert-danger" role="alert">{{historicoError}} <button class="btn btn-sm btn-outline-danger" (click)="carregarHistorico()">Tentar novamente</button></div>}
+@if(historicoLoading){<p role="status">Carregando movimentações...</p>}@else{<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Data e hora</th><th>Tipo</th><th>Quantidade</th>
+                  <th class="text-nowrap">Qtd. mínima</th><th>Saldo anterior</th><th>Saldo posterior</th><th>Responsável</th><th>Motivo</th></tr></thead><tbody>
+@for(m of historico;track m.id){<tr><td class="text-nowrap">{{m.criadoEm|date:'dd/MM/yyyy HH:mm'}}</td><td><span class="badge" [class.bg-success]="m.tipo==='ENTRADA'" [class.bg-danger]="m.tipo==='SAIDA'" [class.bg-secondary]="m.tipo==='INICIAL'">{{m.tipo==='INICIAL'?'Saldo inicial':m.tipo==='ENTRADA'?'Entrada':'Saída'}}</span></td><td>{{m.quantidade}}</td><td>{{m.saldoAnterior}}</td><td>{{m.saldoPosterior}}</td><td>{{m.responsavelNome}}</td><td style="white-space:pre-wrap;min-width:180px">{{m.motivo}}</td></tr>}
+@empty{<tr><td colspan="7">Nenhuma movimentação registrada.</td></tr>}
+</tbody></table></div><div class="d-flex justify-content-between align-items-center"><span>{{historicoTotal}} movimentações · Página {{historicoPage}} de {{historicoPages||1}}</span><div><button class="btn btn-sm btn-outline-secondary me-2" [disabled]="historicoPage===1" (click)="paginaHistorico(historicoPage-1)">Anterior</button><button class="btn btn-sm btn-outline-secondary" [disabled]="historicoPage>=historicoPages" (click)="paginaHistorico(historicoPage+1)">Próxima</button></div></div>}
+</div><div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button></div></div></div></div>

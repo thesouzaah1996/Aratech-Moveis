@@ -1,31 +1,24 @@
-import { Component, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { PermissaoDirective } from '../../../core/permissao.directive';
+import { Component, ElementRef, AfterViewInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
+import { ChamadoTiService } from '../../../core/services/chamado-ti.service';
+import { ChamadoTi, ChamadoTiForm } from '../../../core/models/chamado-ti.model';
 
-declare const bootstrap: any;
-
-interface FormChamadoTi {
-  tipo: string;
-  prioridade: string;
-  moduloAfetado: string;
-  titulo: string;
-  solicitante: string;
-  setor: string;
-  contato: string;
-  descricao: string;
-  tentativasSolucao: string;
-}
+import { Subscription } from 'rxjs';
+import { criarModal, ModalDaTela } from '../../../core/ui/modal';
+import { validarChamadoTi, normalizarChamadoTi } from '../../../core/models/chamado-ti-form';
 
 @Component({
   selector: 'app-chamado-ti',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
+  imports: [PermissaoDirective,FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './chamado-ti.component.html',
   styleUrl: './chamado-ti.component.scss'
 })
-export class ChamadoTiComponent implements AfterViewInit {
+export class ChamadoTiComponent implements AfterViewInit, OnDestroy {
   @ViewChild('resultModal') resultModalEl!: ElementRef;
 
   breadcrumb: BreadcrumbItem[] = [
@@ -34,85 +27,86 @@ export class ChamadoTiComponent implements AfterViewInit {
     { label: 'Abrir Chamado' }
   ];
 
-  form: FormChamadoTi = this.emptyForm();
+  form: ChamadoTiForm = this.emptyForm();
   submitted = false;
   resultadoSucesso = false;
-  numeroChamado = '';
+  chamadoCriado: ChamadoTi | null = null;
+  errorMessage = '';
 
-  private resultModal?: any;
+  salvando = false;
+  validacaoError = '';
+  cadastroPendente: ChamadoTiForm | null = null;
+  private chaveOperacao = crypto.randomUUID();
+  private mutation?: Subscription;
+  private resultModal?: ModalDaTela;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private chamadoTiService: ChamadoTiService) {}
 
   ngAfterViewInit(): void {
-    this.resultModal = new bootstrap.Modal(this.resultModalEl.nativeElement);
+    this.resultModal = criarModal(this.resultModalEl.nativeElement);
   }
 
-  submit(): void {
-    this.submitted = true;
-    if (!this.isFormValid()) return;
+  ngOnDestroy(): void { this.mutation?.unsubscribe(); this.resultModal?.dispose(); }
 
-    this.numeroChamado = this.gerarNumeroChamado();
-    this.resultadoSucesso = true;
-    this.resultModal.show();
+  submit(): void {
+    if (this.salvando || this.chamadoCriado) return;
+    this.submitted = true;
+    if (!this.cadastroPendente) {
+      this.validacaoError = validarChamadoTi(this.form);
+      if (this.validacaoError) return;
+      this.cadastroPendente = normalizarChamadoTi(this.form);
+    }
+    this.salvando = true; this.errorMessage = ''; this.validacaoError = '';
+    this.mutation = this.chamadoTiService.abrir(this.cadastroPendente, this.chaveOperacao).subscribe({
+      next: chamado => {
+        this.salvando = false;
+        this.cadastroPendente = null;
+        this.chamadoCriado = chamado;
+        this.resultadoSucesso = true;
+        this.resultModal?.show();
+      },
+      error: err => {
+        this.salvando = false;
+        if (err.status >= 400 && err.status < 500 && err.status !== 409) {
+          this.cadastroPendente = null;
+          this.chaveOperacao = crypto.randomUUID();
+        }
+        this.errorMessage = err.error?.mensagem || err.error?.message || 'Nao foi possivel enviar a solicitacao.';
+        if (this.cadastroPendente) this.errorMessage += ' Tente enviar novamente: os mesmos dados serao reenviados para evitar duplicidade.';
+        this.resultadoSucesso = false;
+        this.resultModal?.show();
+      }
+    });
   }
 
   fecharResultado(): void {
-    this.resultModal.hide();
+    this.resultModal?.hide();
     if (this.resultadoSucesso) {
       this.resetForm();
     }
   }
 
-  voltar(): void {
-    this.router.navigate(['/dashboard']);
-  }
-
   resetForm(): void {
+    if (this.salvando || this.cadastroPendente) return;
+    this.chaveOperacao = crypto.randomUUID();
+    this.validacaoError = '';
     this.submitted = false;
+    this.chamadoCriado = null;
+    this.errorMessage = '';
     this.form = this.emptyForm();
   }
 
+  get numeroChamado(): string { return this.chamadoCriado?.numero ?? ''; }
+  voltar(): void { if (!this.salvando) this.router.navigate(['/dashboard']); }
   applyPhoneMask(event: Event): void {
     const input = event.target as HTMLInputElement;
-    let digits = input.value.replace(/\D/g, '').slice(0, 11);
-    if (digits.length > 7) {
-      input.value = digits.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
-    } else if (digits.length > 2) {
-      input.value = digits.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-    } else if (digits.length > 0) {
-      input.value = '(' + digits;
-    }
+    const digits = input.value.replace(/[^0-9]/g,'').slice(0,11);
+    if (digits.length <= 6) input.value = digits;
+    else { const corte = digits.length > 10 ? 7 : 6; input.value = '('+digits.slice(0,2)+') '+digits.slice(2,corte)+'-'+digits.slice(corte); }
     this.form.contato = input.value;
   }
 
-  private isFormValid(): boolean {
-    return !!(
-      this.form.tipo &&
-      this.form.prioridade &&
-      this.form.titulo.trim() &&
-      this.form.solicitante.trim() &&
-      this.form.setor.trim() &&
-      this.form.descricao.trim()
-    );
-  }
-
-  private gerarNumeroChamado(): string {
-    const ano = new Date().getFullYear();
-    const seq = Math.floor(Math.random() * 9000) + 1000;
-    return `TI-${ano}-${seq}`;
-  }
-
-  private emptyForm(): FormChamadoTi {
-    return {
-      tipo: '',
-      prioridade: '',
-      moduloAfetado: '',
-      titulo: '',
-      solicitante: '',
-      setor: '',
-      contato: '',
-      descricao: '',
-      tentativasSolucao: ''
-    };
+  private emptyForm(): ChamadoTiForm {
+    return { tipo:'', prioridade:'', moduloAfetado:'', titulo:'', solicitante:'', setor:'', contato:'', descricao:'', tentativasSolucao:'' };
   }
 }

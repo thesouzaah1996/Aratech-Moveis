@@ -1,0 +1,28 @@
+services:
+  aramoveis-homolog:
+    container_name: aratechmoveis-database-homolog
+    image: postgres:16
+    networks:
+      - aratechmoveis
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB_HOMOLOG}
+      POSTGRES_USER: ${POSTGRES_USER_HOMOLOG}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_HOMOLOG}
+    ports:
+      - "${DB_PUBLISHED_PORT_HOMOLOG:-5433}:5432"
+    volumes:
+      - homolog_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  homolog_data:
+    name: moveis_homolog_data
+
+networks:
+  aratechmoveis:
+    name: aratechmoveis
+    driver: bridge

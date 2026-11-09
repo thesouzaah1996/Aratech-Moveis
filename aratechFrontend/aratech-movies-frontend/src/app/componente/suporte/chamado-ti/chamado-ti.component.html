@@ -10,6 +10,7 @@
           <p class="text-muted mb-0 small">Preencha as informações abaixo para registrar um chamado com a equipe de TI</p>
         </div>
 
+        @if (validacaoError) { <div class="alert alert-danger" role="alert">{{ validacaoError }}</div> }
         <div class="card shadow-sm">
           <div class="card-body p-4">
 
@@ -17,7 +18,7 @@
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Tipo de Problema <span class="text-danger">*</span></label>
-                <select class="form-select form-select-lg" [(ngModel)]="form.tipo"
+                <select [disabled]="salvando || cadastroPendente !== null" class="form-select form-select-lg" [(ngModel)]="form.tipo"
                   [class.is-invalid]="submitted && !form.tipo">
                   <option value="">Selecione o tipo...</option>
                   <option value="Acesso / Permissão">Acesso / Permissão — login, bloqueio, permissões</option>
@@ -32,7 +33,7 @@
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Prioridade <span class="text-danger">*</span></label>
-                <select class="form-select form-select-lg" [(ngModel)]="form.prioridade"
+                <select [disabled]="salvando || cadastroPendente !== null" class="form-select form-select-lg" [(ngModel)]="form.prioridade"
                   [class.is-invalid]="submitted && !form.prioridade">
                   <option value="">Selecione a prioridade...</option>
                   <option value="Baixa">Baixa — não impede o trabalho</option>
@@ -44,7 +45,7 @@
               </div>
               <div class="col-12">
                 <label class="form-label fw-semibold">Módulo do Sistema Afetado</label>
-                <select class="form-select form-select-lg" [(ngModel)]="form.moduloAfetado">
+                <select [disabled]="salvando || cadastroPendente !== null" class="form-select form-select-lg" [(ngModel)]="form.moduloAfetado">
                   <option value="">Não se aplica / Não sei informar</option>
                   <option value="Login / Autenticação">Login / Autenticação</option>
                   <option value="Dashboard">Dashboard</option>
@@ -62,7 +63,7 @@
               </div>
               <div class="col-12">
                 <label class="form-label fw-semibold">Título / Assunto <span class="text-danger">*</span></label>
-                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.titulo"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg" [(ngModel)]="form.titulo" maxlength="150"
                   placeholder="Ex: Não consigo acessar o sistema, Impressora não imprime..."
                   [class.is-invalid]="submitted && !form.titulo.trim()">
                 <div class="invalid-feedback">Título é obrigatório.</div>
@@ -74,22 +75,22 @@
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
-                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.solicitante"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg" [(ngModel)]="form.solicitante" maxlength="150"
                   placeholder="Seu nome completo"
                   [class.is-invalid]="submitted && !form.solicitante.trim()">
                 <div class="invalid-feedback">Nome é obrigatório.</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Setor / Departamento <span class="text-danger">*</span></label>
-                <input type="text" class="form-control form-control-lg" [(ngModel)]="form.setor"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg" [(ngModel)]="form.setor" maxlength="100"
                   placeholder="Ex: Produção, RH, Financeiro..."
                   [class.is-invalid]="submitted && !form.setor.trim()">
                 <div class="invalid-feedback">Setor é obrigatório.</div>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Ramal / Telefone para Contato</label>
-                <input type="text" class="form-control form-control-lg"
-                  [value]="form.contato"
+                <input [disabled]="salvando || cadastroPendente !== null" type="text" class="form-control form-control-lg"
+                  [value]="form.contato" maxlength="15" inputmode="tel"
                   (input)="applyPhoneMask($event)"
                   placeholder="(XX) XXXXX-XXXX ou ramal">
               </div>
@@ -100,14 +101,14 @@
             <div class="row g-3">
               <div class="col-12">
                 <label class="form-label fw-semibold">Descrição detalhada <span class="text-danger">*</span></label>
-                <textarea class="form-control" [(ngModel)]="form.descricao" rows="5"
+                <textarea [disabled]="salvando || cadastroPendente !== null" class="form-control" [(ngModel)]="form.descricao" maxlength="3000" rows="5"
                   placeholder="Descreva o problema com o máximo de detalhes: o que estava fazendo quando ocorreu, qual mensagem de erro apareceu, desde quando acontece, quantas pessoas são afetadas..."
                   [class.is-invalid]="submitted && !form.descricao.trim()"></textarea>
                 <div class="invalid-feedback">Descrição é obrigatória.</div>
               </div>
               <div class="col-12">
                 <label class="form-label fw-semibold">O que já foi tentado para resolver? <span class="text-muted fw-normal">(opcional)</span></label>
-                <textarea class="form-control" [(ngModel)]="form.tentativasSolucao" rows="3"
+                <textarea [disabled]="salvando || cadastroPendente !== null" class="form-control" [(ngModel)]="form.tentativasSolucao" maxlength="2000" rows="3"
                   placeholder="Ex: Reiniciei o computador, tentei em outro navegador, verifiquei o cabo de rede..."></textarea>
                 <div class="form-text">Informar isso ajuda a TI a agilizar o atendimento.</div>
               </div>
@@ -116,15 +117,16 @@
           </div>
           <div class="card-footer border-0 bg-light px-4 py-3">
             <div class="d-flex justify-content-between align-items-center">
-              <button type="button" class="btn btn-cancelar" (click)="voltar()">
+              <button type="button" class="btn btn-cancelar" (click)="voltar()" [disabled]="salvando">
                 <i class="bi bi-arrow-left me-1"></i>Voltar
               </button>
               <div class="d-flex gap-2">
-                <button type="button" class="btn btn-cancelar" (click)="resetForm()">
+                <button type="button" class="btn btn-cancelar" (click)="resetForm()" [disabled]="salvando || cadastroPendente !== null">
                   <i class="bi bi-arrow-counterclockwise me-1"></i>Limpar
                 </button>
-                <button type="button" class="btn btn-danger btn-lg px-4" (click)="submit()">
-                  <i class="bi bi-send me-2"></i>Abrir Chamado
+                <button *appPermissao="'SUPORTE_CHAMADOS.CADASTRAR'" type="button" class="btn btn-danger btn-lg px-4" (click)="submit()" [disabled]="salvando || chamadoCriado !== null" [attr.aria-busy]="salvando">
+                  @if (salvando) { <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Registrando... }
+                  @else { <i class="bi bi-send me-2"></i>Abrir Chamado }
                 </button>
               </div>
             </div>
@@ -149,7 +151,7 @@
         @if (resultadoSucesso) {
           <i class="bi bi-headset text-success" style="font-size: 3rem;"></i>
           <h5 class="mt-3 fw-bold">Chamado aberto com sucesso!</h5>
-          <p class="text-muted mb-3">A equipe de TI foi notificada e entrará em contato em breve.</p>
+          <p class="text-muted mb-3">Seu chamado está registrado e disponível para acompanhamento pela equipe de TI.</p>
           <div class="delete-warning">
             <p class="mb-1 small text-muted">Número do chamado</p>
             <p class="fw-bold fs-4 mb-0 text-danger">{{ numeroChamado }}</p>
@@ -158,7 +160,7 @@
         } @else {
           <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 3rem;"></i>
           <h5 class="mt-3 fw-bold">Não foi possível registrar</h5>
-          <p class="text-muted mb-0">Tente novamente ou entre em contato diretamente com a TI.</p>
+          <p class="text-muted mb-0">{{ errorMessage || 'Tente novamente ou entre em contato diretamente com a TI.' }}</p>
         }
       </div>
       <div class="modal-footer border-0 bg-light">

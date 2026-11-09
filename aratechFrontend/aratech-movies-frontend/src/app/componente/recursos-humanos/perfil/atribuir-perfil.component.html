@@ -1,0 +1,63 @@
+<app-navbar />
+<main class="app-main">
+  <app-breadcrumb [items]="breadcrumb" />
+  <div class="container py-4">
+    @if (successMessage) { <div class="alert alert-success" role="status">{{ successMessage }}<button type="button" class="btn-close float-end" aria-label="Fechar" (click)="successMessage = ''"></button></div> }
+    @if (errorMessage) { <div class="alert alert-danger" role="alert">{{ errorMessage }}<button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="carregar()">Tentar novamente</button></div> }
+    <div class="access-toolbar d-flex align-items-center gap-3 mb-4">
+      <div class="input-group access-search">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="search" class="form-control" aria-label="Buscar usuário por nome ou ID" maxlength="150" placeholder="Digite o nome ou ID do usuário..." [(ngModel)]="searchQuery" (ngModelChange)="onSearch()">
+      </div>
+    </div>
+    @if (searchQuery.trim()) {
+    <div class="access-search" aria-live="polite">
+      @if (loading) {
+        <div class="text-center py-5 text-muted" role="status"><span class="spinner-border spinner-border-sm me-2"></span>Buscando usuários...</div>
+      } @else {
+        <ul class="list-group" aria-label="Usuários encontrados">
+            @for (usuario of usuarios; track usuario.id) {
+              <li class="list-group-item d-flex justify-content-between align-items-center gap-3 py-3">
+                <div class="text-break"><div class="fw-semibold">{{ usuario.nome }}</div><small class="text-muted d-block">ID: {{ usuario.id }}</small><small class="text-muted">{{ usuario.email }}</small></div>
+                <button type="button" class="btn-action btn-action-edit flex-shrink-0" title="Atribuir perfil" [attr.aria-label]="'Atribuir perfil a ' + usuario.nome" [disabled]="salvando || criandoAcesso" (click)="abrirAtribuicao(usuario)"><i class="bi bi-person-plus"></i></button>
+              </li>
+            } @empty {
+              <li class="list-group-item text-muted py-3">{{ errorMessage ? 'Lista indisponível.' : 'Nenhum usuário encontrado.' }}</li>
+            }
+        </ul>
+        @if (total) {
+          <div class="pagination-container flex-column align-items-start gap-2"><span class="pagination-info">Mostrando {{ inicio }}–{{ fim }} de {{ total }}</span>
+            @if (totalPages > 1) {
+              <nav aria-label="Páginas de usuários"><ul class="pagination mb-0">
+                <li class="page-item" [class.disabled]="page === 1"><button type="button" class="page-link" aria-label="Página anterior" [disabled]="page === 1" (click)="setPage(page - 1)">&lsaquo;</button></li>
+                @for (p of pages; track p) { <li class="page-item" [class.active]="page === p"><button type="button" class="page-link" [attr.aria-current]="p === page ? 'page' : null" (click)="setPage(p)">{{ p }}</button></li> }
+                <li class="page-item" [class.disabled]="page >= totalPages"><button type="button" class="page-link" aria-label="Próxima página" [disabled]="page >= totalPages" (click)="setPage(page + 1)">&rsaquo;</button></li>
+              </ul></nav>
+            }
+          </div>
+        }
+      }
+    </div>
+    }
+  </div>
+</main>
+<div class="modal fade" #atribuirModal tabindex="-1" aria-labelledby="atribuir-perfil-titulo" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-md modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header bg-danger text-white"><h5 id="atribuir-perfil-titulo" class="modal-title fw-bold mb-0"><i class="bi bi-person-plus me-2"></i>Atribuir Perfil</h5></div>
+    <div class="modal-body p-4">
+      @if (modalError) { <div class="alert alert-danger" role="alert">{{ modalError }}</div> }
+      <p class="mb-1 fw-semibold">{{ selecionado?.nome }}</p><p class="text-muted mb-4">{{ selecionado?.email }}</p>
+      <label class="form-label fw-semibold" for="atribuir-perfil-nome">Nome do perfil</label>
+      <input id="atribuir-perfil-nome" type="text" class="form-control" maxlength="100" placeholder="Digite o nome do perfil" [(ngModel)]="nomePerfil" [disabled]="salvando || criandoAcesso" (keydown.enter)="confirmar()">
+      <small class="text-muted">Informe o nome de um perfil já cadastrado.</small>
+      <hr>
+      <button type="button" class="btn btn-outline-secondary btn-sm" [disabled]="criandoAcesso || salvando" (click)="criarAcesso()">{{ criandoAcesso ? 'Criando...' : 'Criar acesso com senha temporária' }}</button>
+      @if (erroAcesso) { <div class="alert alert-danger mt-3" role="alert">{{ erroAcesso }}</div> }
+      @if (senhaTemporaria) { <label class="form-label mt-3" for="senha-temporaria">Senha temporária</label><input id="senha-temporaria" type="text" class="form-control" readonly [value]="senhaTemporaria" (focus)="$any($event.target).select()"><small class="text-muted">Entregue esta senha somente ao usuário selecionado. Ele entra com o e-mail cadastrado e deve trocá-la no primeiro login.</small> }
+    </div>
+    <div class="modal-footer border-0 bg-light">
+      <button type="button" class="btn btn-cancelar" [disabled]="salvando || criandoAcesso" (click)="fechar()">Cancelar</button>
+      <button type="button" class="btn btn-danger" [disabled]="salvando || criandoAcesso" (click)="confirmar()">@if (salvando) { <span class="spinner-border spinner-border-sm me-2"></span> } @else { <i class="bi bi-check-circle me-2"></i> }{{ salvando ? 'Atribuindo...' : 'Confirmar' }}</button>
+    </div>
+  </div></div>
+</div>

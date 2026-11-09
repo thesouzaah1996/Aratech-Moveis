@@ -7,7 +7,7 @@
     @if (errorMessage) {
       <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <i class="bi bi-exclamation-circle-fill me-2"></i>{{ errorMessage }}
-        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" [disabled]="loading" (click)="carregar()">Tentar novamente</button>
       </div>
     }
 
@@ -22,16 +22,19 @@
           (ngModelChange)="page = 1">
       </div>
 
-      <div class="filtro-status flex-shrink-0">
-        <button type="button" [class.ativo]="filtroStatus === 'Todos'"         (click)="setFiltro('Todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'ABERTA'"        (click)="setFiltro('ABERTA')">Abertas</button>
-        <button type="button" [class.ativo]="filtroStatus === 'EM_MANUTENCAO'" (click)="setFiltro('EM_MANUTENCAO')">Em Manutenção</button>
-        <button type="button" [class.ativo]="filtroStatus === 'CONCLUIDA'"     (click)="setFiltro('CONCLUIDA')">Concluídas</button>
+      <div class="filtro-status" role="group" aria-label="Filtrar por status">
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'" [attr.aria-pressed]="filtroStatus === 'Todos'"         (click)="setFiltro('Todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ABERTA'" [attr.aria-pressed]="filtroStatus === 'ABERTA'"        (click)="setFiltro('ABERTA')">Abertas</button>
+        <button type="button" [class.ativo]="filtroStatus === 'EM_MANUTENCAO'" [attr.aria-pressed]="filtroStatus === 'EM_MANUTENCAO'" (click)="setFiltro('EM_MANUTENCAO')">Em Manutenção</button>
+        <button type="button" [class.ativo]="filtroStatus === 'CONCLUIDA'" [attr.aria-pressed]="filtroStatus === 'CONCLUIDA'"     (click)="setFiltro('CONCLUIDA')">Concluídas</button>
       </div>
     </div>
 
     <div class="card shadow-sm">
       <div class="card-body">
+        @if (loading) {
+          <p role="status">{{ carregado ? 'Atualizando ordens...' : 'Carregando ordens...' }}</p>
+        }
         <div class="table-responsive">
           <table class="table table-hover align-middle">
             <thead>
@@ -47,7 +50,7 @@
               </tr>
             </thead>
             <tbody>
-              @if (paged.length === 0) {
+              @if (paged.length === 0 && carregado) {
                 <tr>
                   <td colspan="8">
                     <div class="empty-state">
@@ -67,7 +70,7 @@
                       <span class="fw-semibold">{{ ordem.solicitante }}</span>
                       <br><span class="text-muted small">{{ ordem.setor }}</span>
                     </td>
-                    <td>{{ ordem.mecanico || '—' }}</td>
+                    <td>{{ ordem.mecanico?.nome || '—' }}</td>
                     <td><span class="badge" [class]="statusBadge(ordem.status)">{{ statusLabels[ordem.status] }}</span></td>
                     <td class="text-muted small">{{ ordem.dataAbertura | date:'dd/MM/yyyy HH:mm' }}</td>
                   </tr>

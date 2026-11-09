@@ -1,4 +1,4 @@
-import { PrioridadeChamado } from './chamado.model';
+import { PrioridadeChamado, StatusChamado } from './chamado.model';
 
 export type FinalidadePeca = 'CORRETIVA' | 'PREVENTIVA' | 'MELHORIA' | 'ESTOQUE';
 
@@ -16,6 +16,7 @@ export interface SolicitacaoPeca {
   telefone?: string;
   observacoes: string;
   criadoEm: string;
+  status: StatusChamado;
 }
 
 export interface SolicitacaoPecaForm {
@@ -31,3 +32,9 @@ export interface SolicitacaoPecaForm {
   telefone: string;
   observacoes: string;
 }
+
+export interface SolicitacaoPecaResponse { status: number; mensagem?: string; solicitacao: SolicitacaoPeca; }
+
+export const FINALIDADE_PECA_LABELS: Record<FinalidadePeca, string> = {
+  CORRETIVA: 'Corretiva', PREVENTIVA: 'Preventiva', MELHORIA: 'Melhoria', ESTOQUE: 'Reposição de estoque'
+};

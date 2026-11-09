@@ -11,6 +11,7 @@
       </div>
     }
 
+    @if (errorMessage) { <div class="alert alert-danger" role="alert">{{ errorMessage }} <button type="button" class="btn btn-sm btn-outline-danger" [disabled]="pending" (click)="carregar()">Tentar novamente</button></div> }
     <div class="d-flex justify-content-between align-items-center gap-3 mb-4 flex-wrap">
       <div class="input-group" style="max-width: 300px;">
         <span class="input-group-text bg-white border-end-0">
@@ -21,17 +22,20 @@
                [(ngModel)]="searchTerm" (ngModelChange)="page = 1">
       </div>
 
-      <div class="filtro-status flex-shrink-0">
-        <button type="button" [class.ativo]="filtroStatus === 'Todos'" (click)="setFiltro('Todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Rascunho'" (click)="setFiltro('Rascunho')">Rascunho</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Aguardando Aprovação'" (click)="setFiltro('Aguardando Aprovação')">Ag. Aprovação</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Aprovado'" (click)="setFiltro('Aprovado')">Aprovado</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Recebido'" (click)="setFiltro('Recebido')">Recebido</button>
+      <div class="filtro-status" role="group" aria-label="Filtrar por status">
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'" [attr.aria-pressed]="filtroStatus === 'Todos'" (click)="setFiltro('Todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Rascunho'" [attr.aria-pressed]="filtroStatus === 'Rascunho'" (click)="setFiltro('Rascunho')">Rascunho</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Aguardando Aprovação'" [attr.aria-pressed]="filtroStatus === 'Aguardando Aprovação'" (click)="setFiltro('Aguardando Aprovação')">Ag. Aprovação</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Aprovado'" [attr.aria-pressed]="filtroStatus === 'Aprovado'" (click)="setFiltro('Aprovado')">Aprovado</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Recebido'" [attr.aria-pressed]="filtroStatus === 'Recebido'" (click)="setFiltro('Recebido')">Recebido</button>
+        <button type="button" [class.ativo]="filtroStatus === 'Reprovado'" (click)="setFiltro('Reprovado')">Reprovado</button>
       </div>
 
-      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+      @if (!origem && sessao.permite('COMPRAS_PEDIDOS.CADASTRAR')) {
+      <button *appPermissao="'COMPRAS_PEDIDOS.CADASTRAR'" class="btn btn-danger flex-shrink-0" (click)="openAdd()" [disabled]="pending">
         <i class="bi bi-plus-circle me-2"></i>Novo Pedido
       </button>
+      }
     </div>
 
     <div class="card shadow-sm">
@@ -41,6 +45,7 @@
             <thead>
               <tr>
                 <th>Nº Pedido</th>
+                <th>Origem</th>
                 <th>Fornecedor</th>
                 <th>Item</th>
                 <th>Qtd</th>
@@ -55,35 +60,32 @@
               @for (p of paged; track p.id) {
                 <tr>
                   <td><span class="badge-id">{{ p.numero }}</span></td>
-                  <td>{{ p.fornecedor }}</td>
-                  <td>{{ p.item }}</td>
-                  <td>{{ p.quantidade }}</td>
-                  <td>{{ p.valorUnitario | currency:'BRL':'symbol':'1.2-2' }}</td>
-                  <td>{{ p.quantidade * p.valorUnitario | currency:'BRL':'symbol':'1.2-2' }}</td>
-                  <td>{{ p.dataEntrega }}</td>
-                  <td><span class="badge {{ badgeClass(p.status) }}">{{ p.status }}</span></td>
+                  <td>{{ nomeOrigem(p.origem) }}</td>
+                  <td>{{ p.fornecedor || 'A definir' }}</td>
+                  <td>{{ p.item }}<small class="d-block text-muted">{{ p.codigo }}</small></td>
+                  <td>{{ p.quantidade }} {{ p.unidade }}</td>
+                  <td>{{ p.valorUnitario !== null ? (p.valorUnitario | currency:'BRL':'symbol':'1.2-2') : '—' }}</td>
+                  <td>{{ p.valorUnitario !== null ? (p.quantidade * p.valorUnitario | currency:'BRL':'symbol':'1.2-2') : '—' }}</td>
+                  <td>{{ p.dataEntrega ? (p.dataEntrega | date:'dd/MM/yyyy') : 'A definir' }}</td>
+                  <td><span class="badge {{ badgeClass(p.status) }}">{{ p.status }}</span>@if(p.motivo){<small class="d-block mt-1 text-danger motivo-pedido">{{ p.motivo }}</small>}</td>
                   <td class="text-end">
-                    @if (p.status === 'Rascunho') {
-                      <button class="btn-action btn-action-edit" title="Enviar para aprovação" (click)="enviarAprovacao(p)">
-                        <i class="bi bi-send"></i>
-                      </button>
-                      <button class="btn-action btn-action-edit ms-1" title="Editar" (click)="openEdit(p)">
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                      <button class="btn-action btn-action-delete ms-1" title="Excluir" (click)="openDelete(p)">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    } @else {
-                      <span class="text-muted small">—</span>
-                    }
+                    <div class="d-flex justify-content-end align-items-center gap-1">
+                      <button type="button" class="btn-action" title="Visualizar pedido" (click)="ver(p)"><i class="bi bi-eye"></i></button>
+                      @if(!origem){
+                        @if(p.status === 'Rascunho' && sessao.permite('COMPRAS_PEDIDOS.ALTERAR')){<button *appPermissao="'COMPRAS_PEDIDOS.ALTERAR'" type="button" class="btn-action btn-action-edit" title="Enviar para aprovação" [disabled]="pending" (click)="enviarAprovacao(p)"><i class="bi bi-send"></i></button><button *appPermissao="'COMPRAS_PEDIDOS.ALTERAR'" type="button" class="btn-action btn-action-delete" title="Remover rascunho" [disabled]="pending" (click)="openDelete(p)"><i class="bi bi-trash"></i></button>}
+                        @if((p.status === 'Rascunho' || p.status === 'Aguardando Aprovação') && sessao.permite('COMPRAS_PEDIDOS.ALTERAR')){<button *appPermissao="'COMPRAS_PEDIDOS.ALTERAR'" type="button" class="btn-action btn-action-edit" title="Editar pedido" [disabled]="pending" (click)="openEdit(p)"><i class="bi bi-pencil"></i></button>}
+                        @if(p.status === 'Aguardando Aprovação' && sessao.permite('COMPRAS_PEDIDOS.FINALIZAR')){<button *appPermissao="'COMPRAS_PEDIDOS.FINALIZAR'" type="button" class="btn-action btn-action-edit" title="Aprovar" [disabled]="pending" (click)="aprovar(p)"><i class="bi bi-check-lg"></i></button><button *appPermissao="'COMPRAS_PEDIDOS.FINALIZAR'" type="button" class="btn-action btn-action-delete" title="Reprovar" [disabled]="pending" (click)="reprovar(p)"><i class="bi bi-x-lg"></i></button>}
+                        @if(p.status === 'Aprovado' && sessao.permite('COMPRAS_PEDIDOS.FINALIZAR')){<button *appPermissao="'COMPRAS_PEDIDOS.FINALIZAR'" type="button" class="btn-action btn-action-edit" title="Registrar recebimento" [disabled]="pending" (click)="receber(p)"><i class="bi bi-box-seam"></i></button>}
+                      }
+                    </div>
                   </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="9">
+                  <td colspan="10">
                     <div class="empty-state">
                       <i class="bi bi-cart3"></i>
-                      <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum pedido de compra cadastrado.' }}</p>
+                      <p>{{ loading ? 'Carregando pedidos...' : searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum pedido de compra cadastrado.' }}</p>
                     </div>
                   </td>
                 </tr>
@@ -124,6 +126,7 @@
         <h5 class="modal-title fw-bold">{{ isEditing ? 'Editar Pedido' : 'Novo Pedido de Compra' }}</h5>
       </div>
       <div class="modal-body p-4">
+        @if(modalError){<div class="alert alert-danger" role="alert">{{ modalError }}</div>}
         <div class="mb-3">
           <label class="form-label fw-semibold">Fornecedor <span class="text-danger">*</span></label>
           <input type="text" class="form-control" [(ngModel)]="form.fornecedor"
@@ -132,15 +135,15 @@
         </div>
         <div class="mb-3">
           <label class="form-label fw-semibold">Item / Descrição <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" [(ngModel)]="form.item"
+          <input type="text" class="form-control" [(ngModel)]="form.item" [disabled]="isEditing && form.tipo !== 'MANUAL'"
                  [class.is-invalid]="submitted && !form.item?.trim()">
           <div class="invalid-feedback">Obrigatório.</div>
         </div>
         <div class="row g-3 mb-3">
           <div class="col">
             <label class="form-label fw-semibold">Quantidade <span class="text-danger">*</span></label>
-            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="1"
-                   [class.is-invalid]="submitted && (!form.quantidade || form.quantidade < 1)">
+            <input type="number" class="form-control" [(ngModel)]="form.quantidade" min="0.001" step="0.001"
+                   [class.is-invalid]="submitted && (!form.quantidade || form.quantidade <= 0)">
             <div class="invalid-feedback">Deve ser maior que 0.</div>
           </div>
           <div class="col">
@@ -166,11 +169,12 @@
                    [class.is-invalid]="submitted && !form.dataEntrega">
             <div class="invalid-feedback">Obrigatório.</div>
           </div>
+          <div class="col"><label class="form-label fw-semibold">Vencimento negociado <span class="text-danger">*</span></label><input type="date" class="form-control" [(ngModel)]="form.dataVencimento" [class.is-invalid]="submitted && !form.dataVencimento"><small class="text-muted">Usado na conta a pagar; pode ser diferente da entrega.</small></div>
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="save()">
+        <button type="button" class="btn btn-cancelar" [disabled]="pending" (click)="fecharCadastro()">Cancelar</button>
+        <button *appPermissao="isEditing ? 'COMPRAS_PEDIDOS.ALTERAR' : 'COMPRAS_PEDIDOS.CADASTRAR'" type="button" class="btn btn-danger" [disabled]="pending" (click)="save()">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>
@@ -187,6 +191,7 @@
         </h5>
       </div>
       <div class="modal-body text-center p-4">
+        @if(modalError){<div class="alert alert-danger" role="alert">{{ modalError }}</div>}
         <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
         <h5 class="mt-3">Deseja remover este pedido?</h5>
         @if (pedidoParaExcluir) {
@@ -194,8 +199,8 @@
         }
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+        <button type="button" class="btn btn-cancelar" [disabled]="pending" (click)="fecharDelete()">Cancelar</button>
+        <button *appPermissao="'COMPRAS_PEDIDOS.ALTERAR'" type="button" class="btn btn-danger" [disabled]="pending" (click)="confirmDelete()">
           <i class="bi bi-trash me-1"></i>Remover
         </button>
       </div>
@@ -203,3 +208,6 @@
   </div>
 </div>
 
+
+<div class="modal fade" #reprovarModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="reprovar-titulo"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 id="reprovar-titulo" class="modal-title fw-bold">Reprovar pedido {{ pedidoReprovar?.numero }}</h5></div><div class="modal-body p-4">@if(reprovarErro){<div class="alert alert-danger" role="alert">{{ reprovarErro }}</div>}<label for="motivo-reprovacao" class="form-label fw-semibold">Por que este pedido não foi aprovado?</label><textarea id="motivo-reprovacao" class="form-control" rows="4" minlength="5" maxlength="1000" [(ngModel)]="motivo" [disabled]="pending"></textarea><small class="text-muted">O motivo ficará disponível no módulo de origem.</small></div><div class="modal-footer border-0 bg-light"><button type="button" class="btn btn-cancelar" [disabled]="pending" (click)="fecharReprovacao()">Cancelar</button><button type="button" class="btn btn-danger" [disabled]="pending" (click)="confirmarReprovacao()">{{ pending ? 'Salvando...' : 'Confirmar reprovação' }}</button></div></div></div></div>
+<div class="modal fade" #detalheModal tabindex="-1" aria-labelledby="detalhe-pedido-titulo"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 id="detalhe-pedido-titulo" class="modal-title fw-bold">Pedido {{ detalhe?.numero }}</h5></div><div class="modal-body p-4">@if(detalhe;as p){<dl class="row mb-0"><dt class="col-4">Origem</dt><dd class="col-8">{{ nomeOrigem(p.origem) }}</dd><dt class="col-4">Item</dt><dd class="col-8">{{ p.item }}</dd><dt class="col-4">Quantidade</dt><dd class="col-8">{{ p.quantidade }} {{ p.unidade }}</dd><dt class="col-4">Solicitante</dt><dd class="col-8">{{ p.solicitante || '—' }}</dd><dt class="col-4">Data do pedido</dt><dd class="col-8">{{ p.dataPedido | date:'dd/MM/yyyy' }}</dd><dt class="col-4">Status</dt><dd class="col-8">{{ p.status }}</dd>@if(p.decididoNome){<dt class="col-4">Responsável</dt><dd class="col-8">{{ p.decididoNome }}<small class="d-block text-muted">{{ p.decididoEm | date:'dd/MM/yyyy HH:mm' }}</small></dd>}</dl>@if(p.motivo){<div class="alert mt-3 mb-0" [class.alert-danger]="p.status==='Reprovado'" [class.alert-secondary]="p.status!=='Reprovado'"><strong>Motivo</strong><p class="mb-0 motivo-pedido">{{ p.motivo }}</p></div>}}</div><div class="modal-footer border-0 bg-light"><button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Fechar</button></div></div></div></div>

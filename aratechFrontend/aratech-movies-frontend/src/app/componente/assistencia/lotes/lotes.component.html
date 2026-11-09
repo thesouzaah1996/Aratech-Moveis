@@ -4,6 +4,10 @@
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-4">
 
+    @if (errorMessage) { <div class="alert alert-danger" role="alert">{{ errorMessage }}</div> }
+    <div class="d-flex justify-content-end gap-2 mb-4">
+      <button type="button" class="btn btn-danger px-4" (click)="historico.abrir()"><i class="bi bi-clock-history me-2"></i>Histórico de Lotes</button>
+    </div>
     @if (successMessage) {
       <div class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
@@ -17,15 +21,15 @@
           <i class="bi bi-search text-muted"></i>
         </span>
         <input type="text" class="form-control border-start-0 ps-0"
-               placeholder="Buscar por código, produto ou defeito…"
+               placeholder="Buscar por código ou empresa…"
                [(ngModel)]="searchTerm" (ngModelChange)="page = 1">
       </div>
 
-      <div class="filtro-status flex-shrink-0">
-        <button type="button" [class.ativo]="filtroStatus === 'Todos'" (click)="setFiltro('Todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Aguardando Análise'" (click)="setFiltro('Aguardando Análise')">Aguardando</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Em Reparo'" (click)="setFiltro('Em Reparo')">Em Reparo</button>
-        <button type="button" [class.ativo]="filtroStatus === 'Concluído'" (click)="setFiltro('Concluído')">Concluído</button>
+      <div class="filtro-status" role="group" aria-label="Filtrar lotes por status">
+        <button type="button" [class.ativo]="filtroStatus === 'Todos'" [attr.aria-pressed]="filtroStatus === 'Todos'" (click)="setFiltro('Todos')">Todos</button>
+        @for (status of statusDisponiveis; track status) {
+          <button type="button" [class.ativo]="filtroStatus === status" [attr.aria-pressed]="filtroStatus === status" (click)="setFiltro(status)">{{ status }}</button>
+        }
       </div>
     </div>
 
@@ -36,11 +40,9 @@
             <thead>
               <tr>
                 <th>Código</th>
-                <th>Produto</th>
-                <th>Qtd</th>
-                <th>Data Entrada</th>
-                <th>Responsável</th>
-                <th>Defeito</th>
+                <th>Lote</th>
+                <th>Data de Saída</th>
+                <th>Empresa</th>
                 <th>Status</th>
                 <th class="text-end">Ações</th>
               </tr>
@@ -48,7 +50,7 @@
             <tbody>
               @if (paged.length === 0) {
                 <tr>
-                  <td colspan="8">
+                  <td colspan="6">
                     <div class="empty-state">
                       <i class="bi bi-tools"></i>
                       <p>{{ searchTerm ? 'Nenhum resultado encontrado.' : 'Nenhum lote em assistência. Lotes são enviados aqui pela página de Lotes.' }}</p>
@@ -58,24 +60,16 @@
               } @else {
                 @for (lote of paged; track lote.id) {
                   <tr>
-                    <td><span class="badge-id">{{ lote.codigo }}</span></td>
-                    <td class="fw-semibold">{{ lote.produto }}</td>
-                    <td>{{ lote.quantidade }}</td>
-                    <td>{{ lote.dataEntrada }}</td>
-                    <td>{{ lote.responsavel }}</td>
-                    <td><small>{{ lote.defeito }}</small></td>
+                    <td class="text-nowrap"><span class="badge-id">{{ lote.codigo }}</span></td>
+                    <td><button type="button" class="btn-action" [title]="'Abrir PDF do lote ' + lote.codigo" [attr.aria-label]="'Abrir PDF do lote ' + lote.codigo" (click)="abrirPdf(lote)"><i class="bi bi-file-earmark-pdf"></i></button></td>
+                    <td class="text-nowrap">{{ lote.dataEntrada | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ lote.empresa || '—' }}</td>
                     <td><span class="badge {{ badgeClass(lote.status) }}">{{ lote.status }}</span></td>
-                    <td class="text-end">
-                      @if (lote.status !== 'Concluído' && lote.status !== 'Devolvido') {
-                        <button class="btn-action btn-action-edit" title="Avançar status" (click)="avancarStatus(lote)">
-                          <i class="bi bi-arrow-right-circle"></i>
-                        </button>
-                        <button class="btn-action btn-action-delete ms-1" title="Devolver" (click)="devolver(lote)">
-                          <i class="bi bi-arrow-return-left"></i>
-                        </button>
-                      } @else {
-                        <span class="text-muted small">—</span>
-                      }
+                    <td class="text-end text-nowrap action-buttons">
+                        <button type="button" class="btn-action" title="Visualizar" aria-label="Visualizar lote" (click)="openView(lote)"><i class="bi bi-eye"></i></button>
+                        @if (lote.status !== 'Finalizado') {
+                          <button *appPermissao="lote.status === 'Não iniciado' ? 'ASSISTENCIA_LOTES.ALTERAR' : 'ASSISTENCIA_LOTES.FINALIZAR'" type="button" class="btn-action btn-action-edit ms-1" [title]="lote.status === 'Não iniciado' ? 'Iniciar lote' : 'Finalizar lote'" [attr.aria-label]="lote.status === 'Não iniciado' ? 'Iniciar lote' : 'Finalizar lote'" [disabled]="processando" (click)="avancar(lote)"><i [class]="lote.status === 'Não iniciado' ? 'bi bi-play-circle' : 'bi bi-check2-circle'"></i></button>
+                        }
                     </td>
                   </tr>
                 }
@@ -109,3 +103,38 @@
   </div>
 </main>
 
+
+<div class="modal fade" #viewModal tabindex="-1" data-bs-backdrop="static" aria-labelledby="lote-view-title">
+  <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
+    <div class="modal-header bg-danger text-white"><h5 id="lote-view-title" class="modal-title fw-bold"><i class="bi bi-eye me-2"></i>Detalhes do Lote</h5></div>
+    <div class="modal-body p-4">
+      @if (loteSelecionado; as lote) {
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Código</dt><dd class="col-sm-8">{{ lote.codigo }}</dd>
+          <dt class="col-sm-4">Data de Saída</dt><dd class="col-sm-8">{{ lote.dataEntrada | date:'dd/MM/yyyy' }}</dd>
+          <dt class="col-sm-4">Empresa</dt><dd class="col-sm-8">{{ lote.empresa || '—' }}</dd>
+          <dt class="col-sm-4">Status</dt><dd class="col-sm-8"><span class="badge {{ badgeClass(lote.status) }}">{{ lote.status }}</span></dd>
+        </dl>
+      }
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-cancelar" (click)="fecharVisualizacao()">Fechar</button></div>
+  </div></div>
+</div>
+
+<app-historico-lotes #historico [lotes]="lotes" />
+
+<div class="modal fade" #pdfModal tabindex="-1" data-bs-backdrop="static" aria-labelledby="lote-pdf-title">
+  <div class="modal-dialog modal-xl modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header bg-danger text-white"><h5 id="lote-pdf-title" class="modal-title fw-bold"><i class="bi bi-file-earmark-pdf me-2"></i>Lote {{ loteDocumento?.codigo }}</h5></div>
+    <div class="modal-body p-0">
+      @if (loteDocumento) {
+        <!-- Documento provisório: substituir pelo PDF definitivo do lote. -->
+        <iframe src="/documentos/lote-exemplo.pdf" title="PDF do lote — documento de exemplo" class="d-block w-100 border-0" style="height: 70vh;"></iframe>
+      }
+    </div>
+    <div class="modal-footer border-0 bg-light">
+      <a class="btn btn-outline-secondary" href="/documentos/lote-exemplo.pdf" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right me-2"></i>Abrir em nova aba</a>
+      <button type="button" class="btn btn-cancelar" (click)="fecharPdf()">Fechar</button>
+    </div>
+  </div></div>
+</div>

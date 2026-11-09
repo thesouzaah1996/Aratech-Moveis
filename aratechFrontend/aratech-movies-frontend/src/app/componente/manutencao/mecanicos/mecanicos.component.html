@@ -18,7 +18,7 @@
       </div>
     }
 
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4 flex-wrap">
       <div class="input-group" style="max-width: 340px;">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
@@ -29,13 +29,13 @@
           (ngModelChange)="onSearch()">
       </div>
 
-      <div class="filtro-status flex-shrink-0">
-        <button type="button" [class.ativo]="filtroStatus === 'todos'" (click)="setFiltroStatus('todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'ativos'" (click)="setFiltroStatus('ativos')">Ativos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'inativos'" (click)="setFiltroStatus('inativos')">Inativos</button>
+      <div class="filtro-status" role="group" aria-label="Filtrar por status">
+        <button type="button" [class.ativo]="filtroStatus === 'todos'" [attr.aria-pressed]="filtroStatus === 'todos'" (click)="setFiltroStatus('todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ativos'" [attr.aria-pressed]="filtroStatus === 'ativos'" (click)="setFiltroStatus('ativos')">Ativos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'inativos'" [attr.aria-pressed]="filtroStatus === 'inativos'" (click)="setFiltroStatus('inativos')">Inativos</button>
       </div>
 
-      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+      <button *appPermissao="'MANUTENCAO_MECANICOS.CADASTRAR'" class="btn btn-danger flex-shrink-0" (click)="openAdd()" [disabled]="salvando">
         <i class="bi bi-plus-circle me-2"></i>Novo Mecânico
       </button>
     </div>
@@ -74,17 +74,23 @@
                       <td><span class="badge-id">#{{ m.id }}</span></td>
                       <td class="fw-semibold">{{ m.nome }}</td>
                       <td>
-                        <div class="form-check form-switch mb-0">
-                          <input class="form-check-input" type="checkbox" role="switch"
-                            [checked]="m.ativo"
-                            [title]="m.ativo ? 'Clique para desativar' : 'Clique para ativar'"
-                            (click)="onSwitchClick($event, m)">
-                        </div>
+                        <span class="badge" [class.bg-success]="m.ativo" [class.bg-secondary]="!m.ativo">{{ m.ativo ? 'Ativo' : 'Inativo' }}</span>
                       </td>
-                      <td class="text-end action-buttons">
-                        <button class="btn-action btn-action-edit" title="Editar" (click)="openEditModal(m)">
-                          <i class="bi bi-pencil"></i>
-                        </button>
+                      <td class="text-end text-nowrap action-buttons">
+                        <div class="d-flex justify-content-end align-items-center gap-1">
+                          <button *appPermissao="'MANUTENCAO_MECANICOS.ALTERAR'" type="button" class="btn-action btn-action-edit" title="Editar" (click)="openEditModal(m)" [disabled]="salvando">
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          @if (m.ativo) {
+                            <button *appPermissao="'MANUTENCAO_MECANICOS.ALTERAR'" type="button" class="btn-action btn-action-delete" title="Desativar" [attr.aria-label]="'Desativar mecanico ' + m.nome" (click)="openDesativar(m)" [disabled]="salvando">
+                              <i class="bi bi-slash-circle"></i>
+                            </button>
+                          } @else {
+                            <button *appPermissao="'MANUTENCAO_MECANICOS.ALTERAR'" type="button" class="btn-action btn-action-edit" title="Ativar" [attr.aria-label]="'Ativar mecanico ' + m.nome" (click)="ativarMecanico(m.id)" [disabled]="salvando">
+                              <i class="bi bi-check-circle"></i>
+                            </button>
+                          }
+                        </div>
                       </td>
                     </tr>
                   }
@@ -149,16 +155,17 @@
         <h5 class="modal-title fw-bold">Novo Mecânico</h5>
       </div>
       <div class="modal-body p-4">
+        @if (modalError) { <div class="alert alert-danger" role="alert">{{ modalError }}</div> }
         <div class="mb-3">
           <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" [(ngModel)]="form.nome" placeholder="Nome completo"
+          <input [disabled]="salvando" type="text" class="form-control" [(ngModel)]="form.nome" minlength="3" maxlength="150" placeholder="Nome completo"
             [class.is-invalid]="submitted && !form.nome.trim()">
           <div class="invalid-feedback">Nome é obrigatório.</div>
         </div>
 
         <div class="mb-3">
           <label class="form-label fw-semibold">Turno <span class="text-danger">*</span></label>
-          <select class="form-select" [(ngModel)]="form.turno"
+          <select [disabled]="salvando" class="form-select" [(ngModel)]="form.turno"
             [class.is-invalid]="submitted && !form.turno">
             <option value="" disabled>Selecione o turno</option>
             @for (t of turnosDisponiveis; track t) {
@@ -174,7 +181,7 @@
             @for (esp of especialidadesDisponiveis; track esp) {
               <div class="col-6 col-md-4">
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" [id]="'esp-' + esp"
+                  <input [disabled]="salvando" class="form-check-input" type="checkbox" [id]="'esp-' + esp"
                     [checked]="form.especialidades.includes(esp)"
                     (change)="toggleEspecialidade(form, esp)">
                   <label class="form-check-label" [for]="'esp-' + esp">{{ especialidadeLabels[esp] }}</label>
@@ -188,8 +195,8 @@
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="save()">
+        <button type="button" class="btn btn-cancelar" (click)="cancelarCadastro()" [disabled]="salvando">Cancelar</button>
+        <button *appPermissao="'MANUTENCAO_MECANICOS.CADASTRAR'" type="button" class="btn btn-danger" (click)="save()" [disabled]="salvando">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>
@@ -204,16 +211,17 @@
         <h5 class="modal-title fw-bold">Editar Mecânico</h5>
       </div>
       <div class="modal-body p-4">
+        @if (editError) { <div class="alert alert-danger" role="alert">{{ editError }}</div> }
         <div class="mb-3">
           <label class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" [(ngModel)]="formEdit.nome" placeholder="Nome completo"
+          <input [disabled]="salvando" type="text" class="form-control" [(ngModel)]="formEdit.nome" minlength="3" maxlength="150" placeholder="Nome completo"
             [class.is-invalid]="submittedEdit && !formEdit.nome.trim()">
           <div class="invalid-feedback">Nome é obrigatório.</div>
         </div>
 
         <div class="mb-3">
           <label class="form-label fw-semibold">Turno <span class="text-danger">*</span></label>
-          <select class="form-select" [(ngModel)]="formEdit.turno"
+          <select [disabled]="salvando" class="form-select" [(ngModel)]="formEdit.turno"
             [class.is-invalid]="submittedEdit && !formEdit.turno">
             <option value="" disabled>Selecione o turno</option>
             @for (t of turnosDisponiveis; track t) {
@@ -229,7 +237,7 @@
             @for (esp of especialidadesDisponiveis; track esp) {
               <div class="col-6 col-md-4">
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" [id]="'esp-edit-' + esp"
+                  <input [disabled]="salvando" class="form-check-input" type="checkbox" [id]="'esp-edit-' + esp"
                     [checked]="formEdit.especialidades.includes(esp)"
                     (change)="toggleEspecialidade(formEdit, esp)">
                   <label class="form-check-label" [for]="'esp-edit-' + esp">{{ especialidadeLabels[esp] }}</label>
@@ -243,8 +251,8 @@
         </div>
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="saveEdit()">
+        <button type="button" class="btn btn-cancelar" (click)="cancelarEdicao()" [disabled]="salvando">Cancelar</button>
+        <button *appPermissao="'MANUTENCAO_MECANICOS.ALTERAR'" type="button" class="btn btn-danger" (click)="saveEdit()" [disabled]="salvando">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>
@@ -261,6 +269,7 @@
         </h5>
       </div>
       <div class="modal-body text-center p-4">
+        @if (statusError) { <div class="alert alert-danger" role="alert">{{ statusError }}</div> }
         <i class="bi bi-exclamation-triangle-fill warning-icon"></i>
         <h5 class="mt-3">Tem certeza que deseja desativar?</h5>
         @if (mecanicoParaDesativar) {
@@ -275,8 +284,8 @@
         }
       </div>
       <div class="modal-footer border-0 bg-light">
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="confirmDesativar()">
+        <button type="button" class="btn btn-cancelar" (click)="cancelarDesativacao()" [disabled]="salvando">Cancelar</button>
+        <button *appPermissao="'MANUTENCAO_MECANICOS.ALTERAR'" type="button" class="btn btn-danger" (click)="confirmDesativar()" [disabled]="salvando">
           <i class="bi bi-slash-circle me-1"></i>Desativar Mecânico
         </button>
       </div>

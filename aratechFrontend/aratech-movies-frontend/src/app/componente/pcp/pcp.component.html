@@ -3,9 +3,11 @@
 <main class="app-main">
   <app-breadcrumb [items]="breadcrumb" />
   <div class="container py-5">
-    <div class="row g-4 justify-content-center">
+    <div class="row g-4 justify-content-center"><div class="col-md-6 col-lg-5" *appPermissao="'PCP_REQUISICOES.CONSULTAR'"><a routerLink="/pcp/requisicoes" class="card card-menu h-100"><div class="d-flex flex-column align-items-center justify-content-center h-100"><i class="bi bi-box-arrow-in-right icon-size"></i><h4 class="fw-bold mb-2">Materiais para produção</h4><p class="text-muted text-center mb-0">Solicitar e acompanhar materiais junto ao Almoxarifado</p></div></a></div><div class="col-md-6 col-lg-5" *appPermissao="'PCP_CAPACIDADE.CONSULTAR'"><a routerLink="/pcp/linhas" class="card card-menu h-100"><div class="d-flex flex-column align-items-center justify-content-center h-100"><i class="bi bi-diagram-3 icon-size"></i><h4 class="fw-bold mb-2">Linhas de produção</h4><p class="text-muted text-center mb-0">Cadastre linhas e horas disponíveis por dia</p></div></a></div>
 
-      <div class="col-md-6 col-lg-5">
+      <div class="col-md-6 col-lg-5" *appPermissao="'PCP_LOTES.CONSULTAR'"><a routerLink="/pcp/lotes" class="card card-menu h-100"><div class="d-flex flex-column align-items-center justify-content-center h-100"><i class="bi bi-boxes icon-size"></i><h4 class="fw-bold mb-2">Lotes</h4><p class="text-muted text-center mb-0">Planejar lotes e liberar ordens por setor</p></div></a></div>
+
+      <div *appPermissao="'PCP_ORDENS.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/pcp/ordens" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-clipboard2-data icon-size"></i>
@@ -15,7 +17,7 @@
         </a>
       </div>
 
-      <div class="col-md-6 col-lg-5">
+      <div *appPermissao="'PCP_PROGRAMACAO.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/pcp/programacao" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-calendar3 icon-size"></i>
@@ -25,7 +27,7 @@
         </a>
       </div>
 
-      <div class="col-md-6 col-lg-5">
+      <div *appPermissao="'PCP_CAPACIDADE.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/pcp/capacidade" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-speedometer2 icon-size"></i>
@@ -35,12 +37,12 @@
         </a>
       </div>
 
-      <div class="col-md-6 col-lg-5">
+      <div *appPermissao="'PCP_INDICADORES.CONSULTAR'" class="col-md-6 col-lg-5">
         <a routerLink="/pcp/kpis" class="card card-menu h-100">
           <div class="d-flex flex-column align-items-center justify-content-center h-100">
             <i class="bi bi-pie-chart icon-size"></i>
             <h4 class="fw-bold mb-2">KPIs de Produção</h4>
-            <p class="text-muted text-center mb-0">OEE, eficiência, rejeições e indicadores de desempenho</p>
+            <p class="text-muted text-center mb-0">Ordens, atrasos e unidades produzidas calculados dos registros</p>
           </div>
         </a>
       </div>

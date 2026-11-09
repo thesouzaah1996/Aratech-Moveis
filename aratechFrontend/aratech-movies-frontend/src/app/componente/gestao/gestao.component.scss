@@ -1,0 +1,11 @@
+.card,.modal-content { border-radius: 18px; border: 1px solid #e5e7eb; }
+.descricao { max-width: 780px; }
+.busca { max-width: 400px; }
+.table th { white-space: nowrap; color: #5b6470; font-size: .85rem; }
+.table td { padding-top: .9rem; padding-bottom: .9rem; max-width: 300px; overflow-wrap: anywhere; }
+.acoes { min-width: 120px; }
+.fundo-dialogo { position: fixed; inset: 0; background: #0008; z-index: 1040; }
+.modal { z-index: 1050; }
+.modal-body { max-height: 65vh; overflow-y: auto; }
+.modal-header { border-radius: 17px 17px 0 0; }
+@media(max-width:575px) { .busca { max-width: none; width:100%; } }

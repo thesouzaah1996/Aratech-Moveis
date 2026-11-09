@@ -1,4 +1,6 @@
-import { Component, ElementRef, AfterViewInit, OnInit, ViewChild } from '@angular/core';
+import { PermissaoDirective } from '../../../core/permissao.directive';
+import { Component, ElementRef, AfterViewInit, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../navbar/navbar.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../breadcrumb/breadcrumb.component';
@@ -10,11 +12,11 @@ declare const bootstrap: any;
 @Component({
   selector: 'app-fornecedores',
   standalone: true,
-  imports: [FormsModule, NavbarComponent, BreadcrumbComponent],
+  imports: [PermissaoDirective,FormsModule, NavbarComponent, BreadcrumbComponent],
   templateUrl: './fornecedores.component.html',
   styleUrl: './fornecedores.component.scss'
 })
-export class FornecedoresComponent implements OnInit, AfterViewInit {
+export class FornecedoresComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('supplierModal') supplierModalEl!: ElementRef;
   @ViewChild('deleteModal')   deleteModalEl!: ElementRef;
   @ViewChild('viewModal')     viewModalEl!: ElementRef;
@@ -29,6 +31,17 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
   fornecedores: Fornecedor[] = [];
   page = 1;
   pageSize = 8;
+  total = 0;
+  saving = false;
+  changingStatus = false;
+  modalError = '';
+  editError = '';
+  statusError = '';
+  private request?: Subscription;
+  private detailRequest?: Subscription;
+  private mutation?: Subscription;
+  private search = new Subject<void>();
+  private searchSubscription?: Subscription;
   loading = false;
   successMessage = '';
   errorMessage = '';
@@ -52,6 +65,7 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
   constructor(private fornecedorService: FornecedorService) {}
 
   ngOnInit(): void {
+    this.searchSubscription = this.search.pipe(debounceTime(300)).subscribe(() => this.loadFornecedores());
     this.loadFornecedores();
   }
 
@@ -62,107 +76,115 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
     this.editModal     = new bootstrap.Modal(this.editModalEl.nativeElement);
   }
 
+  ngOnDestroy(): void {
+    this.request?.unsubscribe();
+    this.detailRequest?.unsubscribe();
+    this.mutation?.unsubscribe();
+    this.searchSubscription?.unsubscribe();
+    this.search.complete();
+    this.supplierModal?.dispose();
+    this.deleteModal?.dispose();
+    this.editModal?.dispose();
+    this.viewModal?.dispose();
+  }
+
   loadFornecedores(): void {
+    this.request?.unsubscribe();
     this.loading = true;
-    this.fornecedorService.getAll().subscribe({
-      next: (lista) => {
-        this.fornecedores = lista;
+    this.errorMessage = '';
+    const ativo = this.filtroStatus === 'todos' ? undefined : this.filtroStatus === 'ativos';
+    this.request = this.fornecedorService.getAll(this.page - 1, this.pageSize, this.searchTerm, ativo).subscribe({
+      next: data => {
+        this.total = data.total;
+        const ultima = Math.max(1, Math.ceil(data.total / data.tamanho));
+        if (this.page > ultima) {
+          this.page = ultima;
+          this.loadFornecedores();
+          return;
+        }
+        this.fornecedores = data.fornecedores;
+        this.page = data.pagina + 1;
+        this.pageSize = data.tamanho;
         this.loading = false;
       },
-      error: () => {
-        this.showError('Erro ao carregar fornecedores.');
+      error: err => {
+        this.total = 0;
+        this.fornecedores = [];
+        this.showError(this.mensagemErro(err, 'Erro ao carregar fornecedores.'));
         this.loading = false;
       }
     });
   }
 
-
-  get filtrados(): Fornecedor[] {
-    let lista = this.fornecedores;
-
-    if (this.filtroStatus === 'ativos') {
-      lista = lista.filter(f => f.ativo);
-    } else if (this.filtroStatus === 'inativos') {
-      lista = lista.filter(f => !f.ativo);
-    }
-
-    const term = this.searchTerm.trim().toLowerCase();
-    if (!term) return lista;
-    return lista.filter(f =>
-      f.nome.toLowerCase().includes(term) ||
-      f.id.toString().includes(term)
-    );
-  }
-
   onSearch(): void {
+    this.request?.unsubscribe();
     this.page = 1;
+    this.loading = true;
+    this.search.next();
   }
 
   setFiltroStatus(status: 'todos' | 'ativos' | 'inativos'): void {
     this.filtroStatus = status;
     this.page = 1;
+    this.loadFornecedores();
   }
 
-
-  get paged(): Fornecedor[] {
-    const start = (this.page - 1) * this.pageSize;
-    return this.filtrados.slice(start, start + this.pageSize);
-  }
-
-  get totalPages(): number {
-    return Math.ceil(this.filtrados.length / this.pageSize);
-  }
-
+  get totalPages(): number { return Math.ceil(this.total / this.pageSize); }
   get visiblePages(): number[] {
-    const half = 5;
-    const start = Math.max(1, Math.min(this.page - half, this.totalPages - 7));
-    const end = Math.min(this.totalPages, start + 7);
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    const inicio = Math.max(1, Math.min(this.page - 2, this.totalPages - 4));
+    return Array.from({length: Math.max(0, Math.min(5, this.totalPages))}, (_, i) => inicio + i);
   }
+  get paginationStart(): number { return this.total === 0 ? 0 : (this.page - 1) * this.pageSize + 1; }
+  get paginationEnd(): number { return Math.min(this.page * this.pageSize, this.total); }
 
-  get paginationStart(): number {
-    return this.filtrados.length === 0 ? 0 : (this.page - 1) * this.pageSize + 1;
+  setPage(page: number): void {
+    if (this.loading || page < 1 || page > this.totalPages || page === this.page) return;
+    this.page = page;
+    this.loadFornecedores();
   }
-
-  get paginationEnd(): number {
-    return Math.min(this.page * this.pageSize, this.filtrados.length);
-  }
-
-  setPage(p: number): void {
-    if (p < 1 || p > this.totalPages) return;
-    this.page = p;
-  }
-
 
   openAdd(): void {
+    this.modalError = '';
     this.submitted = false;
     this.form = this.emptyForm();
     this.supplierModal.show();
   }
 
   save(): void {
+    if (this.saving) return;
     this.submitted = true;
-    if (!this.isFormValid(this.form)) return;
-    this.fornecedorService.add(this.cleanedPayload(this.form)).subscribe({
+    this.modalError = '';
+    if (!this.isFormValid(this.form)) {
+      this.modalError = 'Preencha nome (2 a 150 caracteres), e-mail e telefone (10 ou 11 digitos) do fornecedor e do representante.';
+      return;
+    }
+    this.saving = true;
+    this.mutation = this.fornecedorService.add(this.cleanedPayload(this.form)).subscribe({
       next: () => {
+        this.saving = false;
         this.supplierModal.hide();
         this.loadFornecedores();
         this.showSuccess('Fornecedor adicionado com sucesso!');
       },
       error: (err) => {
-        this.showError(err.error?.message ?? 'Erro ao salvar fornecedor.');
+        this.saving = false;
+        this.modalError = this.mensagemErro(err, 'Erro ao salvar fornecedor.');
       }
     });
   }
 
 
   openView(f: Fornecedor): void {
-    this.fornecedorEmVisualizacao = f;
-    this.viewModal.show();
+    this.detailRequest?.unsubscribe();
+    this.detailRequest = this.fornecedorService.getById(f.id).subscribe({
+      next: atual => { this.fornecedorEmVisualizacao = atual; this.viewModal.show(); },
+      error: err => this.showError(this.mensagemErro(err, 'Erro ao consultar fornecedor.'))
+    });
   }
 
 
   openEditModal(f: Fornecedor): void {
+    this.editError = '';
     this.submittedEdit = false;
     this.fornecedorEditandoId = f.id;
     this.formEdit = {
@@ -179,17 +201,25 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
   }
 
   saveEdit(): void {
+    if (this.saving) return;
     this.submittedEdit = true;
-    if (!this.fornecedorEditandoId || !this.isFormValid(this.formEdit)) return;
-    this.fornecedorService.update(this.fornecedorEditandoId, this.cleanedPayload(this.formEdit)).subscribe({
+    this.editError = '';
+    if (!this.fornecedorEditandoId || !this.isFormValid(this.formEdit)) {
+      this.editError = 'Confira os dados do fornecedor e todos os campos do representante.';
+      return;
+    }
+    this.saving = true;
+    this.mutation = this.fornecedorService.update(this.fornecedorEditandoId, this.cleanedPayload(this.formEdit)).subscribe({
       next: () => {
+        this.saving = false;
         this.editModal.hide();
         this.fornecedorEditandoId = null;
         this.loadFornecedores();
         this.showSuccess('Fornecedor atualizado com sucesso!');
       },
       error: (err) => {
-        this.showError(err.error?.message ?? 'Erro ao atualizar fornecedor.');
+        this.saving = false;
+        this.editError = this.mensagemErro(err, 'Erro ao atualizar fornecedor.');
       }
     });
   }
@@ -197,6 +227,7 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
 
   onSwitchClick(event: Event, f: Fornecedor): void {
     event.preventDefault();
+    if (this.changingStatus) return;
     if (f.ativo) {
       this.openDesativar(f);
     } else {
@@ -205,34 +236,41 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
   }
 
   ativarFornecedor(id: number): void {
-    this.fornecedorService.enable(id).subscribe({
+    if (this.changingStatus) return;
+    this.changingStatus = true;
+    this.mutation = this.fornecedorService.enable(id).subscribe({
       next: () => {
         this.loadFornecedores();
+        this.changingStatus = false;
         this.showSuccess('Fornecedor ativado com sucesso!');
       },
       error: (err) => {
-        this.showError(err.error?.message ?? 'Erro ao ativar fornecedor.');
+        this.changingStatus = false;
+        this.showError(this.mensagemErro(err, 'Erro ao ativar fornecedor.'));
       }
     });
   }
 
   openDesativar(f: Fornecedor): void {
+    this.statusError = '';
     this.fornecedorParaDesativar = f;
     this.deleteModal.show();
   }
 
   confirmDesativar(): void {
-    if (!this.fornecedorParaDesativar) return;
-
-    this.fornecedorService.disable(this.fornecedorParaDesativar.id).subscribe({
+    if (!this.fornecedorParaDesativar || this.changingStatus) return;
+    this.changingStatus = true;
+    this.mutation = this.fornecedorService.disable(this.fornecedorParaDesativar.id).subscribe({
       next: () => {
+        this.changingStatus = false;
         this.deleteModal.hide();
         this.fornecedorParaDesativar = null;
         this.loadFornecedores();
         this.showSuccess('Fornecedor desativado com sucesso!');
       },
       error: (err) => {
-        this.showError(err.error?.message ?? 'Erro ao desativar fornecedor.');
+        this.changingStatus = false;
+        this.statusError = this.mensagemErro(err, 'Erro ao desativar fornecedor.');
       }
     });
   }
@@ -241,17 +279,9 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
   applyPhoneMask(event: Event, maxDigits: number, isEdit = false): void {
     const targetForm = isEdit ? this.formEdit : this.form;
     const input = event.target as HTMLInputElement;
-    let digits = input.value.replace(/\D/g, '').slice(0, maxDigits);
-    const isMobile = maxDigits === 11;
-
-    if (digits.length > (isMobile ? 7 : 6)) {
-      const mid = isMobile ? 5 : 4;
-      input.value = digits.replace(new RegExp(`^(\\d{2})(\\d{${mid}})(\\d{0,4})`), '($1) $2-$3');
-    } else if (digits.length > 2) {
-      input.value = digits.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-    } else if (digits.length > 0) {
-      input.value = '(' + digits;
-    }
+    const digits = input.value.replace(/\D/g, '').slice(0, 11);
+    input.value = digits.replace(/^(\d{2})(\d)/, '($1) $2');
+    input.value = input.value.replace(digits.length > 10 ? /(\d{5})(\d)/ : /(\d{4})(\d)/, '$1-$2');
 
     if (maxDigits === 10) {
       targetForm.telefone = input.value;
@@ -277,14 +307,17 @@ export class FornecedoresComponent implements OnInit, AfterViewInit {
   }
 
   private isFormValid(form: FornecedorForm): boolean {
-    return !!(
-      form.nome.trim() &&
-      form.email.trim() && this.isValidEmail(form.email) &&
-      form.telefone.trim() &&
-      form.representante.nomeRepresentante.trim() &&
-      form.representante.telefoneRepresentante.trim() &&
-      form.representante.emailRepresentante.trim() && this.isValidEmail(form.representante.emailRepresentante)
-    );
+    const nome = (v: string) => v.trim().length >= 2 && v.trim().length <= 150 && !/[\p{Cc}\p{Cf}]/u.test(v);
+    const email = (v: string) => v.trim().length <= 150 && this.isValidEmail(v);
+    const telefone = (v: string) => /^\d{10,11}$/.test(v.replace(/\D/g, ''));
+    return nome(form.nome) && email(form.email) && telefone(form.telefone)
+      && nome(form.representante.nomeRepresentante) && telefone(form.representante.telefoneRepresentante)
+      && email(form.representante.emailRepresentante);
+  }
+
+  private mensagemErro(err: any, fallback: string): string {
+    return Object.values(err.error?.erros ?? {}).join(' ') || err.error?.mensagem
+      || (err.status === 0 ? 'Não foi possível conectar ao servidor.' : fallback);
   }
 
   private cleanedPayload(form: FornecedorForm): FornecedorForm {

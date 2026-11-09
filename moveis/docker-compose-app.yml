@@ -1,0 +1,34 @@
+# Complementa docker-compose-prod.yml. A porta HTTP local deve ficar atrás de HTTPS.
+services:
+  backend:
+    container_name: aratechmoveis-backend
+    build: .
+    restart: unless-stopped
+    depends_on:
+      aramoveis-prod:
+        condition: service_healthy
+    networks: [aratechmoveis]
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST_PROD: aramoveis-prod
+      DB_PORT_PROD: 5432
+      POSTGRES_DB_PROD: ${POSTGRES_DB_PROD:?Defina o banco de produção}
+      APP_USER_PROD: ${APP_USER_PROD:?Defina a conta restrita da aplicação}
+      APP_PASSWORD_PROD: ${APP_PASSWORD_PROD:?Defina a senha da conta restrita}
+      MINIO_URL_PROD: ${MINIO_URL_PROD:?Defina o armazenamento de documentos}
+      MINIO_ACCESS_KEY_PROD: ${MINIO_ACCESS_KEY_PROD:?Defina a credencial do armazenamento}
+      MINIO_SECRET_KEY_PROD: ${MINIO_SECRET_KEY_PROD:?Defina a senha do armazenamento}
+      MINIO_BUCKET_PROD: ${MINIO_BUCKET_PROD:-aratechmoveis}
+      ARATECH_DOCS_ENABLED: "false"
+    expose: ["8080"]
+  frontend:
+    container_name: aratechmoveis-frontend
+    build:
+      context: ../aratechFrontend/aratech-movies-frontend
+      args:
+        BUILD_CONFIG: production
+        NGINX_CONF: nginx.prod.conf
+    restart: unless-stopped
+    depends_on: [backend]
+    networks: [aratechmoveis]
+    ports: ["127.0.0.1:8088:80"]

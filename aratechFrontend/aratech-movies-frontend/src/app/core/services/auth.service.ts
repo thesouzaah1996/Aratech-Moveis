@@ -1,74 +1,33 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-
-interface ApiResponse {
-  status: number;
-  mensagem: string;
-}
-
-interface LoginResponse extends ApiResponse {
-  dados: {
-    token: string;
-    perfis: string[];
-  };
-}
+﻿import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, catchError, tap, throwError } from 'rxjs';
+import { SessaoState, SessaoUsuario } from './sessao-state.service';
+import { CsrfService } from './csrf.service';
+interface ApiResponse { mensagem: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly api = `${environment.apiUrl}/login/auth`;
-
-  constructor(private http: HttpClient) {}
-
-  login(emailCorporativo: string, senha: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.api}/entrar`, { emailCorporativo, senha });
+  private readonly api = '/aratech/auth';
+  constructor(private http: HttpClient, private state: SessaoState, private csrf: CsrfService) {
+    localStorage.removeItem('token'); localStorage.removeItem('perfis');
   }
-
-  solicitarRedefinicaoSenha(email: string): Observable<ApiResponse> {
-    return this.http.put<ApiResponse>(`${this.api}/redefinir-senha`, null, { params: { email } });
+  login(emailCorporativo: string, senha: string): Observable<SessaoUsuario> {
+    const body = new HttpParams().set('emailCorporativo', emailCorporativo.trim().toLowerCase()).set('senha', senha);
+    return this.http.post<SessaoUsuario>(`${this.api}/entrar`, body).pipe(tap(usuario => {
+      this.state.usuario.set(usuario); this.csrf.limpar();
+    }));
   }
-
-  confirmarRedefinicaoSenha(codigo: string, senha: string, confirmarSenha: string): Observable<ApiResponse> {
-    return this.http.put<ApiResponse>(`${this.api}/alterar-senha`, { codigo, senha, confirmarSenha });
+  verificarSessao(): Observable<SessaoUsuario> {
+    return this.http.get<SessaoUsuario>(`${this.api}/sessao`).pipe(tap(usuario => this.state.usuario.set(usuario)), catchError(erro => { if (erro.status === 401) { this.state.usuario.set(null); this.csrf.limpar(); } return throwError(() => erro); }));
   }
-
-  solicitarPrimeiroAcesso(emailPessoal: string): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.api}/primeiro-acesso/solicitar`, { emailPessoal });
+  logout(): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.api}/sair`, {}).pipe(tap(() => { this.state.usuario.set(null); this.csrf.limpar(); }));
   }
-
-  confirmarPrimeiroAcesso(emailCorporativo: string, codigo: string, novaSenha: string): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.api}/primeiro-acesso/confirmar`, { emailCorporativo, codigo, novaSenha });
+  alterarSenha(senhaAtual: string, novaSenha: string): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.api}/senha`, { senhaAtual, novaSenha }).pipe(tap(() => { this.state.usuario.set(null); this.csrf.limpar(); }));
   }
-
-  salvarSessao(token: string, perfis: string[]): void {
-    localStorage.setItem('token', token);
-    localStorage.setItem('perfis', JSON.stringify(perfis));
-  }
-
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('perfis');
-  }
-
-  getToken(): string | null {
-    return localStorage.getItem('token');
-  }
-
-  getPerfis(): string[] {
-    try {
-      return JSON.parse(localStorage.getItem('perfis') ?? '[]');
-    } catch {
-      return [];
-    }
-  }
-
-  isAuthenticated(): boolean {
-    return !!this.getToken();
-  }
-
-  hasAnyRole(roles: string[]): boolean {
-    const perfis = this.getPerfis();
-    return roles.some(role => perfis.includes(role));
-  }
+  getPerfis(): string[] { return this.state.usuario()?.perfis ?? []; }
+  isAuthenticated(): boolean { return !!this.state.usuario(); }
+  hasAnyRole(roles: string[]): boolean { return roles.some(role => this.getPerfis().includes(role)); }
+  temPermissao(permissao: string): boolean { return this.state.permite(permissao); }
 }

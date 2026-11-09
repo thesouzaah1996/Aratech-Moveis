@@ -1,0 +1,11 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST_HOMOLOG:localhost}:${DB_PORT_HOMOLOG:5433}/${POSTGRES_DB_HOMOLOG}
+    username: ${APP_USER_HOMOLOG}
+    password: ${APP_PASSWORD_HOMOLOG}
+
+minio:
+  bucket-name: ${MINIO_BUCKET_HOMOLOG:aratechmoveis-homolog}

@@ -1,55 +1,59 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { Fornecedor, FornecedorForm } from '../models/fornecedor.model';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { EMPTY, Observable, expand, map, reduce } from 'rxjs';
+import { Fornecedor, FornecedorForm, FornecedorResponse, FornecedoresPagina } from '../models/fornecedor.model';
 import { LookupItem } from '../models/lookup.model';
-import { environment } from '../../../environments/environment';
-
-interface ApiResponse {
-  status: number;
-  message: string;
-  fornecedores?: Fornecedor[];
-  fornecedorDTO?: Fornecedor;
-  fornecedorLookup?: LookupItem[];
-}
 
 @Injectable({ providedIn: 'root' })
 export class FornecedorService {
-  private readonly api = `${environment.apiUrl}/almoxarifado/fornecedor`;
-
+  private readonly url = '/aratech/almoxarifado/fornecedores';
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<Fornecedor[]> {
-    return this.http
-      .get<ApiResponse>(`${this.api}/todos`)
-      .pipe(map(res => res.fornecedores ?? []));
+  getAll(pagina = 0, tamanho = 8, busca = '', ativo?: boolean): Observable<FornecedoresPagina> {
+    let params = new HttpParams().set('pagina', pagina).set('tamanho', tamanho);
+    if (busca.trim()) params = params.set('busca', busca.trim());
+    if (ativo !== undefined) params = params.set('ativo', ativo);
+    return this.http.get<FornecedoresPagina>(this.url, {params});
+  }
+
+  getById(id: number): Observable<Fornecedor> {
+    return this.http.get<FornecedorResponse>(`${this.url}/${id}`).pipe(map(r => r.fornecedor));
   }
 
   lookup(): Observable<LookupItem[]> {
-    return this.http
-      .get<ApiResponse>(`${this.api}/opcoes-fornecedor`)
-      .pipe(map(res => res.fornecedorLookup ?? []));
+    return this.getAll(0, 100, '', true).pipe(
+      expand(p => p.fornecedores.length > 0 && (p.pagina + 1) * p.tamanho < p.total
+        ? this.getAll(p.pagina + 1, 100, '', true) : EMPTY),
+      reduce((todos, p) => [...todos, ...p.fornecedores.map(f => ({id: f.id, nome: f.nome}))], [] as LookupItem[])
+    );
   }
 
   add(form: FornecedorForm): Observable<Fornecedor> {
-    return this.http
-      .post<ApiResponse>(`${this.api}/adicionar`, form)
-      .pipe(map(res => res.fornecedorDTO!));
+    return this.http.post<FornecedorResponse>(this.url, this.payload(form)).pipe(map(r => r.fornecedor));
   }
 
   update(id: number, form: FornecedorForm): Observable<Fornecedor> {
-    return this.http
-      .put<ApiResponse>(`${this.api}/atualizar/${id}`, form)
-      .pipe(map(res => res.fornecedorDTO!));
+    return this.http.put<FornecedorResponse>(`${this.url}/${id}`, this.payload(form)).pipe(map(r => r.fornecedor));
   }
 
-  enable(id: number): Observable<void> {
-    return this.http
-      .patch<void>(`${this.api}/ativar/${id}`, {});
+  enable(id: number): Observable<Fornecedor> {
+    return this.http.patch<FornecedorResponse>(`${this.url}/${id}/ativar`, {}).pipe(map(r => r.fornecedor));
   }
 
-  disable(id: number): Observable<void> {
-    return this.http
-      .patch<void>(`${this.api}/desativar/${id}`, {});
+  disable(id: number): Observable<Fornecedor> {
+    return this.http.patch<FornecedorResponse>(`${this.url}/${id}/desativar`, {}).pipe(map(r => r.fornecedor));
+  }
+
+  private payload(form: FornecedorForm): FornecedorForm {
+    // Lista explicita: nunca encaminhar ID ou status recebidos da tela.
+    return {
+      nome: form.nome.trim().replace(/ +/g, ' '), email: form.email.trim().toLowerCase(),
+      telefone: form.telefone.replace(/\D/g, ''),
+      representante: {
+        nomeRepresentante: form.representante.nomeRepresentante.trim().replace(/ +/g, ' '),
+        telefoneRepresentante: form.representante.telefoneRepresentante.replace(/\D/g, ''),
+        emailRepresentante: form.representante.emailRepresentante.trim().toLowerCase()
+      }
+    };
   }
 }

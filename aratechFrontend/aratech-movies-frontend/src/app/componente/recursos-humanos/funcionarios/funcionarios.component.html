@@ -18,7 +18,7 @@
     </div>
     }
 
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4 flex-wrap">
       <div class="input-group" style="max-width: 320px;">
         <span class="input-group-text bg-white border-end-0">
           <i class="bi bi-search text-muted"></i>
@@ -27,15 +27,15 @@
           [(ngModel)]="searchTerm" (ngModelChange)="onSearch()">
       </div>
 
-      <div class="filtro-status flex-shrink-0">
-        <button type="button" [class.ativo]="filtroStatus === 'todos'" (click)="setFiltroStatus('todos')">Todos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'ativos'"
+      <div class="filtro-status" role="group" aria-label="Filtrar por status">
+        <button type="button" [class.ativo]="filtroStatus === 'todos'" [attr.aria-pressed]="filtroStatus === 'todos'" (click)="setFiltroStatus('todos')">Todos</button>
+        <button type="button" [class.ativo]="filtroStatus === 'ativos'" [attr.aria-pressed]="filtroStatus === 'ativos'"
           (click)="setFiltroStatus('ativos')">Ativos</button>
-        <button type="button" [class.ativo]="filtroStatus === 'inativos'"
+        <button type="button" [class.ativo]="filtroStatus === 'inativos'" [attr.aria-pressed]="filtroStatus === 'inativos'"
           (click)="setFiltroStatus('inativos')">Inativos</button>
       </div>
 
-      <button class="btn btn-danger flex-shrink-0" (click)="openAdd()">
+      <button *appPermissao="'RH_FUNCIONARIOS.CADASTRAR'" class="btn btn-danger flex-shrink-0" (click)="openAdd()">
         <i class="bi bi-plus-circle me-2"></i>Novo Funcionário
       </button>
     </div>
@@ -71,17 +71,20 @@
                 <td>{{ f.setor }}</td>
                 <td>
                   <div class="form-check form-switch mb-0">
-                    <input class="form-check-input" type="checkbox" role="switch" [checked]="f.ativo"
-                      (click)="toggleAtivo(f)" [title]="f.ativo ? 'Clique para desativar' : 'Clique para ativar'">
+                    <input *appPermissao="'RH_FUNCIONARIOS.ALTERAR'" class="form-check-input" type="checkbox" role="switch" [checked]="f.ativo"
+                      (click)="$event.preventDefault(); toggleAtivo(f)" [disabled]="alterandoStatus" [attr.aria-label]="(f.ativo ? 'Desativar ' : 'Ativar ') + f.nome" [title]="f.ativo ? 'Clique para desativar' : 'Clique para ativar'">
                   </div>
                 </td>
                 <td class="text-end action-buttons">
                   <button class="btn-action" title="Visualizar" (click)="openView(f)">
                     <i class="bi bi-eye"></i>
                   </button>
-                  <button class="btn-action ms-1" title="Editar" (click)="openEdit(f)">
+                  <button *appPermissao="'RH_FUNCIONARIOS.ALTERAR'" class="btn-action ms-1" title="Editar" (click)="openEdit(f)">
                     <i class="bi bi-pencil"></i>
                   </button>
+                  @if (sessao.permite('ACESSOS.GERENCIAR')) {
+                  <button *appPermissao="'ACESSOS.GERENCIAR'" type="button" class="btn-action ms-1" title="Criar e-mail corporativo" [attr.aria-label]="'Criar e-mail corporativo para ' + f.nome" [disabled]="!f.ativo || criandoEmail" (click)="abrirEmail(f)"><i class="bi bi-envelope"></i></button>
+                  }
                 </td>
               </tr>
               }
@@ -157,6 +160,9 @@
       </div>
 
       <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+        @if (erroCadastro) {
+          <div class="alert alert-danger" role="alert">{{ erroCadastro }}</div>
+        }
 
         @if (activeTab === 0) {
         <div class="p-3">
@@ -165,49 +171,52 @@
             <div class="col-md-12">
               <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
               <input type="text" class="form-control" [(ngModel)]="form.nome"
-                [class.is-invalid]="inv(0, !form.nome.trim())" placeholder="Nome completo do colaborador">
-              <div class="invalid-feedback">Obrigatório.</div>
+                [class.is-invalid]="inv(0, !!errosIdentificacao.nome)" placeholder="Nome completo do colaborador">
+              <div class="invalid-feedback">{{ errosIdentificacao.nome }}</div>
             </div>
             <div class="col-md-4">
               <label class="form-label fw-semibold">CPF <span class="text-danger">*</span></label>
               <input type="text" class="form-control" [value]="form.cpf" (input)="applyCpfMask($event)"
-                [class.is-invalid]="inv(0, !form.cpf.trim())" placeholder="000.000.000-00">
-              <div class="invalid-feedback">Obrigatório.</div>
+                [class.is-invalid]="inv(0, !!errosIdentificacao.cpf)" placeholder="000.000.000-00">
+              <div class="invalid-feedback">{{ errosIdentificacao.cpf }}</div>
             </div>
             <div class="col-md-4">
               <label class="form-label fw-semibold">RG</label>
               <input type="text" class="form-control" [value]="form.rg" (input)="applyRgMask($event)"
-                placeholder="00.000.000-0">
+                placeholder="00.000.000-0" [class.is-invalid]="inv(0, !!errosIdentificacao.rg)">
+              <div class="invalid-feedback">{{ errosIdentificacao.rg }}</div>
             </div>
             <div class="col-md-4">
               <label class="form-label fw-semibold">PIS / NIT / NIS</label>
               <input type="text" class="form-control" [value]="form.pis" (input)="applyPisMask($event)"
-                placeholder="000.00000.00-0">
+                placeholder="000.00000.00-0" [class.is-invalid]="inv(0, !!errosIdentificacao.pis)">
+              <div class="invalid-feedback">{{ errosIdentificacao.pis }}</div>
             </div>
             <div class="col-md-3">
               <label class="form-label fw-semibold">Data de Nascimento <span class="text-danger">*</span></label>
               <input type="date" class="form-control" [(ngModel)]="form.dataNascimento"
-                [class.is-invalid]="inv(0, !form.dataNascimento)">
-              <div class="invalid-feedback">Obrigatório.</div>
+                [class.is-invalid]="inv(0, !!errosIdentificacao.dataNascimento)">
+              <div class="invalid-feedback">{{ errosIdentificacao.dataNascimento }}</div>
             </div>
             <div class="col-md-3">
               <label class="form-label fw-semibold">Sexo <span class="text-danger">*</span></label>
-              <select class="form-select" [(ngModel)]="form.sexo" [class.is-invalid]="inv(0, !form.sexo)">
+              <select class="form-select" [(ngModel)]="form.sexo" [class.is-invalid]="inv(0, !!errosIdentificacao.sexo)">
                 <option value="">Selecione...</option>
-                <option value="M">Masculino</option>
-                <option value="F">Feminino</option>
-                <option value="O">Outro</option>
+                <option value="MASCULINO">Masculino</option>
+                <option value="FEMININO">Feminino</option>
+                <option value="NAO_INFORMADO">Não informado</option>
               </select>
-              <div class="invalid-feedback">Obrigatório.</div>
+              <div class="invalid-feedback">{{ errosIdentificacao.sexo }}</div>
             </div>
             <div class="col-md-3">
               <label class="form-label fw-semibold">Estado Civil</label>
-              <select class="form-select" [(ngModel)]="form.estadoCivil">
+              <select class="form-select" [(ngModel)]="form.estadoCivil" [class.is-invalid]="inv(0, !!errosIdentificacao.estadoCivil)">
                 <option value="">Selecione...</option>
-                @for (ec of estadosCivis; track ec) {
-                <option [value]="ec">{{ ec }}</option>
+                @for (ec of estadosCivis; track ec.value) {
+                <option [value]="ec.value">{{ ec.label }}</option>
                 }
               </select>
+              <div class="invalid-feedback">{{ errosIdentificacao.estadoCivil }}</div>
             </div>
           </div>
 
@@ -216,13 +225,14 @@
             <div class="col-md-6">
               <label class="form-label fw-semibold">Nome da Mãe <span class="text-danger">*</span></label>
               <input type="text" class="form-control" [(ngModel)]="form.nomeMae"
-                [class.is-invalid]="inv(0, !form.nomeMae.trim())" placeholder="Nome completo da mãe">
-              <div class="invalid-feedback">Obrigatório.</div>
+                [class.is-invalid]="inv(0, !!errosIdentificacao.nomeMae)" placeholder="Nome completo da mãe">
+              <div class="invalid-feedback">{{ errosIdentificacao.nomeMae }}</div>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Nome do Pai</label>
               <input type="text" class="form-control" [(ngModel)]="form.nomePai"
-                placeholder="Nome completo do pai (opcional)">
+                placeholder="Nome completo do pai (opcional)" [class.is-invalid]="inv(0, !!errosIdentificacao.nomePai)">
+              <div class="invalid-feedback">{{ errosIdentificacao.nomePai }}</div>
             </div>
           </div>
         </div>
@@ -280,6 +290,13 @@
 
           <p class="section-title mt-4">Contato</p>
           <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" [(ngModel)]="form.email"
+                [class.is-invalid]="inv(1, !form.email.trim() || !isValidEmail(form.email))"
+                placeholder="emailcolaborador@empresa.com">
+              <div class="invalid-feedback">Informe um e-mail válido.</div>
+            </div>
             <div class="col-md-4">
               <label class="form-label fw-semibold">Telefone Fixo</label>
               <input type="text" class="form-control" [value]="form.telefone"
@@ -309,8 +326,8 @@
               <select class="form-select" [(ngModel)]="form.tipoContrato"
                 [class.is-invalid]="inv(2, !form.tipoContrato)">
                 <option value="">Selecione...</option>
-                @for (t of tiposContrato; track t) {
-                <option [value]="t">{{ t }}</option>
+                @for (t of tiposContrato; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
                 }
               </select>
               <div class="invalid-feedback">Obrigatório.</div>
@@ -318,7 +335,7 @@
             <div class="col-md-3">
               <label class="form-label fw-semibold">Jornada Semanal (h)</label>
               <input type="number" class="form-control" [(ngModel)]="form.jornadaHoras" placeholder="Ex: 44" min="1"
-                max="60">
+                max="44" step="1">
             </div>
             <div class="col-md-5">
               <label class="form-label fw-semibold">Cargo <span class="text-danger">*</span></label>
@@ -348,13 +365,6 @@
               <input type="text" class="form-control" [value]="form.salario" (input)="applySalarioMask($event)"
                 [class.is-invalid]="inv(2, !form.salario.trim())" placeholder="0,00">
               <div class="invalid-feedback">Obrigatório.</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">E-mail <span class="text-danger">*</span></label>
-              <input type="email" class="form-control" [(ngModel)]="form.email"
-                [class.is-invalid]="inv(2, !form.email.trim() || !isValidEmail(form.email))"
-                placeholder="emailcolaborador@empresa.com">
-              <div class="invalid-feedback">Informe um e-mail válido.</div>
             </div>
           </div>
         </div>
@@ -390,8 +400,8 @@
               <label class="form-label fw-semibold">Tipo de Conta <span class="text-danger">*</span></label>
               <select class="form-select" [(ngModel)]="form.tipoConta" [class.is-invalid]="inv(3, !form.tipoConta)">
                 <option value="">Selecione...</option>
-                <option value="corrente">Corrente</option>
-                <option value="poupanca">Poupança</option>
+                <option value="CORRENTE">Corrente</option>
+                <option value="POUPANCA">Poupança</option>
               </select>
               <div class="invalid-feedback">Obrigatório.</div>
             </div>
@@ -407,6 +417,7 @@
         @if (activeTab === 4) {
         <div class="p-3">
           <p class="section-title">Documentos Obrigatórios</p>
+          <p class="small text-muted">PDF, JPG ou PNG. Até 5 MB por arquivo e 20 MB no total. Use nomes sem acentos e com apenas um ponto, como documento_1.pdf.</p>
           <div class="row g-3 mb-4">
             <div class="col-md-6">
               <label class="form-label fw-semibold">
@@ -472,14 +483,6 @@
           <p class="section-title">Documentos Opcionais</p>
           <div class="row g-2">
             <div class="col-md-4">
-              <label class="form-label fw-semibold small">Foto 3×4</label>
-              <div class="doc-upload-area doc-upload-sm" [class.preenchido]="!!arquivos.foto">
-                <i class="bi" [class.bi-file-earmark-check]="arquivos.foto" [class.bi-camera]="!arquivos.foto"></i>
-                <span>{{ arquivos.foto ? nomeArquivo('foto') : 'Foto 3×4' }}</span>
-                <input type="file" accept=".jpg,.jpeg,.png" (change)="onFileChange($event, 'foto')">
-              </div>
-            </div>
-            <div class="col-md-4">
               <label class="form-label fw-semibold small">Título de Eleitor</label>
               <div class="doc-upload-area doc-upload-sm" [class.preenchido]="!!arquivos.tituloEleitor">
                 <i class="bi" [class.bi-file-earmark-check]="arquivos.tituloEleitor"
@@ -516,6 +519,16 @@
                 <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'certidaoCasamento')">
               </div>
             </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold small">Certidão de Nascimento</label>
+              <div class="doc-upload-area doc-upload-sm" [class.preenchido]="!!arquivos.certidaoNascimento">
+                <i class="bi" [class.bi-file-earmark-check]="arquivos.certidaoNascimento"
+                  [class.bi-file-earmark-arrow-up]="!arquivos.certidaoNascimento"></i>
+                <span>{{ arquivos.certidaoNascimento ? nomeArquivo('certidaoNascimento') : 'Certidão de Nascimento'
+                  }}</span>
+                <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileChange($event, 'certidaoNascimento')">
+              </div>
+            </div>
           </div>
         </div>
         }
@@ -528,12 +541,12 @@
           <i class="bi bi-arrow-left me-1"></i>Anterior
         </button>
         }
-        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal" [disabled]="salvandoCadastro">Cancelar</button>
         @if (activeTab < 4) { <button type="button" class="btn btn-danger" (click)="nextTab()">
           Próximo <i class="bi bi-arrow-right ms-1"></i>
           </button>
           } @else {
-          <button type="button" class="btn btn-danger" (click)="save()" [disabled]="salvandoCadastro">
+          <button *appPermissao="'RH_FUNCIONARIOS.CADASTRAR'" type="button" class="btn btn-danger" (click)="save()" [disabled]="salvandoCadastro">
             @if (salvandoCadastro) {
               <span class="spinner-border spinner-border-sm me-1"></span>
             } @else {
@@ -593,6 +606,20 @@
   </div>
 </div>
 
+<div class="modal fade" #statusModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="funcionario-status-titulo">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header bg-danger text-white"><h5 id="funcionario-status-titulo" class="modal-title fw-bold"><i class="bi bi-exclamation-circle me-2"></i>{{ ativarStatus ? 'Ativar Funcionário' : 'Desativar Funcionário' }}</h5></div>
+    <div class="modal-body p-4">
+      @if (erroStatus) { <div class="alert alert-danger" role="alert">{{ erroStatus }}</div> }
+      <p class="mb-0">Tem certeza de que deseja {{ ativarStatus ? 'ativar' : 'desativar' }} o funcionário <strong>{{ funcionarioStatus?.nome }}</strong>?</p>
+    </div>
+    <div class="modal-footer border-0 bg-light">
+      <button type="button" class="btn btn-cancelar" [disabled]="alterandoStatus" (click)="cancelarStatus()">Cancelar</button>
+      <button *appPermissao="'RH_FUNCIONARIOS.ALTERAR'" type="button" class="btn btn-danger" [disabled]="alterandoStatus" (click)="confirmarStatus()">@if (alterandoStatus) { <span class="spinner-border spinner-border-sm me-2"></span> }{{ alterandoStatus ? 'Salvando...' : 'Confirmar' }}</button>
+    </div>
+  </div></div>
+</div>
+
 <div class="modal fade" #editModal tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
@@ -635,10 +662,32 @@
       </div>
       <div class="modal-footer border-0 bg-light">
         <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" (click)="saveEdit()">
+        <button *appPermissao="'RH_FUNCIONARIOS.ALTERAR'" type="button" class="btn btn-danger" (click)="saveEdit()">
           <i class="bi bi-check-circle me-1"></i>Salvar
         </button>
       </div>
     </div>
   </div>
+</div>
+
+<div class="modal fade" #emailModal tabindex="-1" aria-labelledby="email-corporativo-titulo" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header bg-danger text-white"><h5 class="modal-title fw-bold" id="email-corporativo-titulo"><i class="bi bi-envelope me-2"></i>Criar e-mail corporativo</h5></div>
+    <div class="modal-body p-4">
+      <p class="fw-semibold">{{ funcionarioEmail?.nome }}</p>
+      @if (erroEmail) { <div class="alert alert-danger" role="alert">{{ erroEmail }}</div> }
+      <label class="form-label" for="email-corporativo">E-mail corporativo</label>
+      <input id="email-corporativo" type="email" class="form-control" maxlength="150" placeholder="nome@aratechmoveis" [(ngModel)]="emailCorporativo" [disabled]="criandoEmail || !!senhaTemporaria">
+      @if (senhaTemporaria) {
+        <div class="alert alert-success mt-3" role="status">Acesso criado. A senha deve ser trocada no primeiro login.</div>
+        <label class="form-label" for="senha-corporativa">Senha temporária</label>
+        <input id="senha-corporativa" type="text" class="form-control" readonly autocomplete="off" [value]="senhaTemporaria" (focus)="$any($event.target).select()">
+        <small class="text-muted">Entregue o e-mail e a senha somente ao funcionário. A senha não será exibida novamente.</small>
+      } @else { <small class="text-muted">Este e-mail será o login na aplicação. Uma senha temporária será gerada ao confirmar.</small> }
+    </div>
+    <div class="modal-footer border-0 bg-light">
+      <button type="button" class="btn btn-cancelar" [disabled]="criandoEmail" (click)="fecharEmail()">{{ senhaTemporaria ? 'Fechar' : 'Cancelar' }}</button>
+      @if (!senhaTemporaria) { <button *appPermissao="'ACESSOS.GERENCIAR'" type="button" class="btn btn-danger" [disabled]="criandoEmail" (click)="criarEmailCorporativo()">{{ criandoEmail ? 'Criando...' : 'Criar acesso' }}</button> }
+    </div>
+  </div></div>
 </div>

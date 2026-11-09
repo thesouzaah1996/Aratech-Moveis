@@ -7,6 +7,7 @@ ARG BUILD_CONFIG=production
 RUN npm run build -- --configuration ${BUILD_CONFIG}
 
 FROM nginx:alpine
+ARG NGINX_CONF=nginx.conf
 COPY --from=build /app/dist/aratech-movies-frontend/browser /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY ${NGINX_CONF} /etc/nginx/conf.d/default.conf
 EXPOSE 80

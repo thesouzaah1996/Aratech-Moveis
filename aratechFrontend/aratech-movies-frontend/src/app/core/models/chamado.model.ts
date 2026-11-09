@@ -20,7 +20,9 @@ export interface Chamado {
   setor: string;
   telefone?: string;
   descricao: string;
-  mecanico?: ChamadoMecanico;
+  mecanico?: ChamadoMecanico | null;
+  dataInicio?: string | null;
+  dataConclusao?: string | null;
   status: StatusChamado;
   dataAbertura: string;
 }
@@ -51,3 +53,16 @@ export const STATUS_CHAMADO_LABELS: Record<StatusChamado, string> = {
   EM_MANUTENCAO: 'Em Manutenção',
   CONCLUIDA: 'Concluída'
 };
+
+export interface ChamadoResponse {
+  status: number;
+  mensagem?: string;
+  chamado: Chamado;
+}
+export interface ChamadosPagina {
+  status: number;
+  chamados: Chamado[];
+  pagina: number;
+  tamanho: number;
+  total: number;
+}
